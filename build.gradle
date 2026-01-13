@@ -16,14 +16,14 @@ java {
 configurations {
     // dependencies to document
     doc {
-        transitive false
+        transitive = false
         canBeResolved = false
         canBeConsumed = false
         canBeDeclared = true
     }
     docSources {
-        extendsFrom doc
-        transitive false
+        extendsFrom(doc)
+        transitive = false
         canBeResolved = true
         canBeConsumed = false
         canBeDeclared = false
@@ -35,7 +35,7 @@ configurations {
         canBeDeclared = true
     }
     compileDocClasspath {
-        extendsFrom compileDoc
+        extendsFrom(compileDoc)
         canBeResolved = true
         canBeConsumed = false
         canBeDeclared = false

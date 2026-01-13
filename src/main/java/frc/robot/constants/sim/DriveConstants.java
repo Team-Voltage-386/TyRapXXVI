@@ -15,13 +15,13 @@ public final class DriveConstants {
       frc.robot.constants.jr.DriveConstants.driveCurrentLimit;
   public static final int turnCurrentLimit = frc.robot.constants.jr.DriveConstants.turnCurrentLimit;
 
-  public static final double driveKp = frc.robot.constants.jr.DriveConstants.driveKp;
-  public static final double driveKd = frc.robot.constants.jr.DriveConstants.driveKd;
-  public static final double driveKs = frc.robot.constants.jr.DriveConstants.driveKs;
-  public static final double driveKv = frc.robot.constants.jr.DriveConstants.driveKv;
+  public static final double driveKp = 0.05;
+  public static final double driveKd = 0.0;
+  public static final double driveKs = 0.0;
+  public static final double driveKv = 0.0789;
 
-  public static final double turnKp = frc.robot.constants.jr.DriveConstants.turnKp;
-  public static final double turnKd = frc.robot.constants.jr.DriveConstants.turnKd;
+  public static final double turnKp = 8.0;
+  public static final double turnKd = 0.0;
 
   public static final Translation2d[] moduleTranslations =
       frc.robot.constants.jr.DriveConstants.moduleTranslations;

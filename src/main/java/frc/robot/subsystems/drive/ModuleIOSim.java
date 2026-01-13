@@ -10,6 +10,8 @@ import frc.robot.util.SparkUtil;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController.GenericMotorController;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Physics sim implementation of module IO. */
 public class ModuleIOSim implements ModuleIO {
@@ -27,11 +29,24 @@ public class ModuleIOSim implements ModuleIO {
   private final GenericMotorController driveMotor;
   private final GenericMotorController turnMotor;
 
+  private final LoggedNetworkNumber loggedkP =
+      new LoggedNetworkNumber("/Tuning/drivekP", DriveConstants.driveKp);
+  private double drivekp = DriveConstants.driveKp;
+  private double drivekd = DriveConstants.driveKd;
+  private final LoggedNetworkNumber loggedkD =
+      new LoggedNetworkNumber("/Tuning/drivekD", DriveConstants.driveKd);
+  private double turnkp = DriveConstants.turnKp;
+  private final LoggedNetworkNumber loggedTurnkP =
+      new LoggedNetworkNumber("/Tuning/turnkP", turnkp);
+  private final LoggedNetworkNumber loggedTurnkD =
+      new LoggedNetworkNumber("/Tuning/turnkD", DriveConstants.turnKd);
+  private double turnkd = DriveConstants.turnKd;
+
   public ModuleIOSim(SwerveModuleSimulation moduleSim) {
     this.moduleSim = moduleSim;
 
-    driveController = new PIDController(DriveConstants.driveKp, 0, DriveConstants.driveKd);
-    turnController = new PIDController(DriveConstants.turnKp, 0, DriveConstants.turnKd);
+    driveController = new PIDController(drivekp, 0, drivekd);
+    turnController = new PIDController(turnkp, 0, turnkd);
 
     // configures a generic motor controller for drive motor
     // set a current limit of 60 amps
@@ -50,6 +65,25 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
+
+    Logger.recordOutput("/Tuning/drivekP", loggedkP.get());
+    if (loggedkP.get() != drivekp) {
+      drivekp = loggedkP.get();
+      driveController.setP(drivekp);
+    }
+    if (loggedkD.get() != drivekd) {
+      drivekd = loggedkD.get();
+      driveController.setD(drivekd);
+    }
+    if (loggedTurnkP.get() != turnkp) {
+      turnkp = loggedTurnkP.get();
+      turnController.setP(turnkp);
+    }
+    if (loggedTurnkD.get() != turnkd) {
+      turnkd = loggedTurnkD.get();
+      turnController.setD(turnkd);
+    }
+
     // Run closed-loop control
     if (driveClosedLoop) {
       driveAppliedVolts =

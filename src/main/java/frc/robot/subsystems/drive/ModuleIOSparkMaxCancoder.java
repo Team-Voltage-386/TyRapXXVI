@@ -125,7 +125,6 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
     // the motor when within tolerance to avoid oscillation.
     turnController.enableContinuousInput(
         DriveConstants.turnPIDMinInput, DriveConstants.turnPIDMaxInput);
-    turnController.setTolerance(0.01); // ~0.57 degrees
     turnEncoder = new CANcoder(DriveConstants.turnCancoderIds[module]);
 
     CANcoderConfiguration turnEncoderConfig = new CANcoderConfiguration();

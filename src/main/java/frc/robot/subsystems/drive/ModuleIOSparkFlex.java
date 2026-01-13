@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.constants.jr.DriveConstants;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * Module IO implementation for Spark Flex drive motor controller, Spark Max turn motor controller,
@@ -33,6 +34,10 @@ public class ModuleIOSparkFlex implements ModuleIO {
   private final SparkBase turnSpark;
   private final RelativeEncoder driveEncoder;
   private final AbsoluteEncoder turnEncoder;
+
+  private final LoggedNetworkNumber loggedkP =
+      new LoggedNetworkNumber("/Tuning/drivekP", DriveConstants.driveKp);
+  private double drivekp = DriveConstants.driveKp;
 
   // Closed loop controllers
   private final SparkClosedLoopController driveController;
