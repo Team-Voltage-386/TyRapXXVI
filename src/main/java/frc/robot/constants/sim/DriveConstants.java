@@ -3,92 +3,42 @@ package frc.robot.constants.sim;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.Constants;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.Module;
-import frc.robot.subsystems.drive.ModuleIOSim;
 
 // ideally all of these constants are the same as their real counterparts,
 // but they can be changed if needed
-public class DriveConstants implements Drive.Constants, Module.Constants, ModuleIOSim.Constants {
+public final class DriveConstants {
 
-  @Override
-  public int driveCurrentLimit() {
-    return Constants.current.drive.driveCurrentLimit();
-  }
+  // prevent instantiation
+  private DriveConstants() {}
 
-  @Override
-  public int turnCurrentLimit() {
-    return Constants.current.drive.turnCurrentLimit();
-  }
+  public static final int driveCurrentLimit =
+      frc.robot.constants.jr.DriveConstants.driveCurrentLimit;
+  public static final int turnCurrentLimit = frc.robot.constants.jr.DriveConstants.turnCurrentLimit;
 
-  @Override
-  public double driveKp() {
-    return Constants.current.drive.driveKp();
-  }
+  public static final double driveKp = frc.robot.constants.jr.DriveConstants.driveKp;
+  public static final double driveKd = frc.robot.constants.jr.DriveConstants.driveKd;
+  public static final double driveKs = frc.robot.constants.jr.DriveConstants.driveKs;
+  public static final double driveKv = frc.robot.constants.jr.DriveConstants.driveKv;
 
-  @Override
-  public double driveKd() {
-    return Constants.current.drive.driveKd();
-  }
+  public static final double turnKp = frc.robot.constants.jr.DriveConstants.turnKp;
+  public static final double turnKd = frc.robot.constants.jr.DriveConstants.turnKd;
 
-  @Override
-  public double driveKs() {
-    return Constants.current.drive.driveKs();
-  }
+  public static final Translation2d[] moduleTranslations =
+      frc.robot.constants.jr.DriveConstants.moduleTranslations;
 
-  @Override
-  public double driveKv() {
-    return Constants.current.drive.driveKv();
-  }
+  public static final double driveBaseRadius =
+      frc.robot.constants.jr.DriveConstants.driveBaseRadius;
+  public static final double maxSpeed = frc.robot.constants.jr.DriveConstants.maxSpeed;
 
-  @Override
-  public double turnKp() {
-    return Constants.current.drive.turnKp();
-  }
+  public static final PIDConstants translationPID =
+      frc.robot.constants.jr.DriveConstants.translationPID;
+  public static final PIDConstants rotationPID = frc.robot.constants.jr.DriveConstants.rotationPID;
 
-  @Override
-  public double turnKd() {
-    return Constants.current.drive.turnKd();
-  }
+  public static final RobotConfig ppRobotConfig =
+      frc.robot.constants.jr.DriveConstants.ppRobotConfig;
 
-  @Override
-  public Translation2d[] moduleTranslations() {
-    return Constants.current.drive.moduleTranslations();
-  }
+  public static final double odometryFrequency = 100.0;
 
-  @Override
-  public double driveBaseRadius() {
-    return Constants.current.drive.driveBaseRadius();
-  }
-
-  @Override
-  public double maxSpeed() {
-    return Constants.current.drive.maxSpeed();
-  }
-
-  @Override
-  public PIDConstants translationPID() {
-    return Constants.current.drive.translationPID();
-  }
-
-  @Override
-  public PIDConstants rotationPID() {
-    return Constants.current.drive.rotationPID();
-  }
-
-  @Override
-  public RobotConfig ppRobotConfig() {
-    return Constants.current.drive.ppRobotConfig();
-  }
-
-  @Override
-  public double odometryFrequency() {
-    return 100.0;
-  }
-
-  @Override
-  public double wheelRadiusMeters() {
-    return Constants.current.drive.wheelRadiusMeters();
-  }
+  public static final double wheelRadiusMeters =
+      frc.robot.constants.jr.DriveConstants.wheelRadiusMeters;
 }

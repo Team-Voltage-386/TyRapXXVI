@@ -1,9 +1,9 @@
 package frc.robot.subsystems.vision;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.constants.jr.VisionConstants;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,11 +12,6 @@ import org.photonvision.PhotonCamera;
 
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
-
-  public interface Constants {
-
-    AprilTagFieldLayout aprilTagLayout();
-  }
 
   public static class CameraConfig {
 
@@ -31,19 +26,13 @@ public class VisionIOPhotonVision implements VisionIO {
     public Transform3d robotToCamera;
   }
 
-  // keeping this as a value instead of storing Constants
-  // since it's just a single value
-  protected final AprilTagFieldLayout aprilTagLayout;
-
   protected final PhotonCamera camera;
   protected final Transform3d robotToCamera;
 
   /**
    * Creates a new VisionIOPhotonVision.
    */
-  public VisionIOPhotonVision(Constants consts, CameraConfig conf) {
-    aprilTagLayout = consts.aprilTagLayout();
-
+  public VisionIOPhotonVision(CameraConfig conf) {
     camera = new PhotonCamera(conf.cameraName);
     this.robotToCamera = conf.robotToCamera;
   }
@@ -98,7 +87,7 @@ public class VisionIOPhotonVision implements VisionIO {
         var target = result.targets.get(0);
 
         // Calculate robot pose
-        var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
+        var tagPose = VisionConstants.aprilTagLayout.getTagPose(target.fiducialId);
         if (tagPose.isPresent()) {
           Transform3d fieldToTarget =
               new Transform3d(tagPose.get().getTranslation(), tagPose.get().getRotation());

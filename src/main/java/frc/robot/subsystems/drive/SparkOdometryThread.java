@@ -4,6 +4,7 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.constants.jr.DriveConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -18,8 +19,6 @@ import java.util.function.DoubleSupplier;
  */
 public class SparkOdometryThread {
 
-  private final double odometryFrequency;
-
   private final List<SparkBase> sparks = new ArrayList<>();
   private final List<DoubleSupplier> sparkSignals = new ArrayList<>();
   private final List<DoubleSupplier> genericSignals = new ArrayList<>();
@@ -30,22 +29,21 @@ public class SparkOdometryThread {
   private static SparkOdometryThread instance = null;
   private final Notifier notifier = new Notifier(this::run);
 
-  public static SparkOdometryThread getInstance(double odometryFrequency) {
+  public static SparkOdometryThread getInstance() {
     if (instance == null) {
-      instance = new SparkOdometryThread(odometryFrequency);
+      instance = new SparkOdometryThread();
     }
     return instance;
   }
 
-  private SparkOdometryThread(double odometryFrequency) {
-    this.odometryFrequency = odometryFrequency;
+  private SparkOdometryThread() {
 
     notifier.setName("OdometryThread");
   }
 
   public void start() {
     if (!timestampQueues.isEmpty()) {
-      notifier.startPeriodic(1.0 / odometryFrequency);
+      notifier.startPeriodic(1.0 / DriveConstants.odometryFrequency);
     }
   }
 

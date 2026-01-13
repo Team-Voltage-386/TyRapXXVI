@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.constants.BuildConstants;
@@ -32,17 +33,13 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
     Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-    switch (BuildConstants.DIRTY) {
-      case 0:
-        Logger.recordMetadata("GitDirty", "All changes committed");
-        break;
-      case 1:
-        Logger.recordMetadata("GitDirty", "Uncommitted changes");
-        break;
-      default:
-        Logger.recordMetadata("GitDirty", "Unknown");
-        break;
-    }
+    Logger.recordMetadata(
+        "GitDirty",
+        switch (BuildConstants.DIRTY) {
+          case 0 -> "All changes committed";
+          case 1 -> "Uncommitted changes";
+          default -> "Unknown";
+        });
 
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
@@ -67,6 +64,8 @@ public class Robot extends LoggedRobot {
         break;
     }
 
+    StatusLogger.disableAutoLogging();
+
     // Initialize URCL
     Logger.registerURCL(URCL.startExternal());
 
@@ -79,7 +78,7 @@ public class Robot extends LoggedRobot {
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
 
-    PathfindingCommand.warmupCommand().schedule();
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   /** This function is called periodically during all modes. */
@@ -116,7 +115,7 @@ public class Robot extends LoggedRobot {
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
-      autonomousCommand.schedule();
+      CommandScheduler.getInstance().schedule(autonomousCommand);
     }
   }
 

@@ -9,19 +9,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.constants.jr.DriveConstants;
 import java.util.Queue;
 
 /** IO implementation for Pigeon 2. */
 public class GyroIOPigeon2 implements GyroIO {
-
-  public interface Constants {
-
-    int pigeonCanId();
-
-    double odometryFrequency();
-  }
-
-  private final Constants consts;
 
   private final Pigeon2 pigeon;
   private final StatusSignal<Angle> yaw;
@@ -29,21 +21,19 @@ public class GyroIOPigeon2 implements GyroIO {
   private final Queue<Double> yawTimestampQueue;
   private final StatusSignal<AngularVelocity> yawVelocity;
 
-  public GyroIOPigeon2(Constants consts) {
-    this.consts = consts;
-
-    pigeon = new Pigeon2(consts.pigeonCanId());
+  public GyroIOPigeon2() {
+    pigeon = new Pigeon2(DriveConstants.pigeonCanId);
 
     yaw = pigeon.getYaw();
     yawVelocity = pigeon.getAngularVelocityZWorld();
 
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0.0);
-    yaw.setUpdateFrequency(consts.odometryFrequency());
+    yaw.setUpdateFrequency(DriveConstants.odometryFrequency);
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
 
-    SparkOdometryThread sparkThread = SparkOdometryThread.getInstance(consts.odometryFrequency());
+    SparkOdometryThread sparkThread = SparkOdometryThread.getInstance();
     yawTimestampQueue = sparkThread.makeTimestampQueue();
     yawPositionQueue = sparkThread.registerSignal(yaw::getValueAsDouble);
   }

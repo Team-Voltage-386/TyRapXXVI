@@ -1,14 +1,16 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Kilograms;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
+import frc.robot.constants.jr.DriveConstants;
 import lombok.Getter;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
 import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.COTS.WHEELS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
@@ -20,17 +22,19 @@ public class SimContainer {
 
   private static final DriveTrainSimulationConfig driveTrainSimulationConfig =
       DriveTrainSimulationConfig.Default()
+          .withRobotMass(Kilograms.of(DriveConstants.robotMassKg))
           // Specify gyro type (for realistic gyro drifting and error simulation)
           .withGyro(COTS.ofPigeon2())
           // Specify swerve module (for realistic swerve dynamics)
+
           .withSwerveModule(
-              COTS.ofMark4(
-                  DCMotor.getKrakenX60(1), // Drive motor is a Kraken X60
-                  DCMotor.getFalcon500(1), // Steer motor is a Falcon 500
-                  COTS.WHEELS.COLSONS.cof, // Use the COF for Colson Wheels
-                  3)) // L3 Gear ratio
+              COTS.ofMark4i(
+                  DriveConstants.driveGearbox,
+                  DriveConstants.turnGearbox,
+                  WHEELS.DEFAULT_NEOPRENE_TREAD.cof,
+                  3))
           // Configures the track length and track width (spacing between swerve modules)
-          .withTrackLengthTrackWidth(Inches.of(24), Inches.of(24))
+          .withCustomModuleTranslations(DriveConstants.moduleTranslations)
           // Configures the bumper size (dimensions of the robot bumper)
           .withBumperSize(Inches.of(30), Inches.of(30));
 

@@ -3,8 +3,6 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -30,32 +28,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
-import frc.robot.util.IOFactory;
+import frc.robot.constants.jr.DriveConstants;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-
-  public interface Constants {
-
-    Translation2d[] moduleTranslations();
-
-    double driveBaseRadius();
-
-    double maxSpeed();
-
-    PIDConstants translationPID();
-
-    PIDConstants rotationPID();
-
-    RobotConfig ppRobotConfig();
-
-    double odometryFrequency();
-  }
-
-  public final Constants consts;
 
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
@@ -76,21 +55,19 @@ public class Drive extends SubsystemBase {
       };
   private final SwerveDrivePoseEstimator poseEstimator;
 
-  public <C extends Constants & Module.Constants> Drive(
-      C consts,
-      IOFactory<C, GyroIO> gyroIO,
-      IOFactory<C, ModuleIO> flModuleIO,
-      IOFactory<C, ModuleIO> frModuleIO,
-      IOFactory<C, ModuleIO> blModuleIO,
-      IOFactory<C, ModuleIO> brModuleIO) {
-    this.consts = consts;
-    this.gyroIO = gyroIO.create(consts);
-    modules[0] = new Module(consts, flModuleIO.create(consts), 0);
-    modules[1] = new Module(consts, frModuleIO.create(consts), 1);
-    modules[2] = new Module(consts, blModuleIO.create(consts), 2);
-    modules[3] = new Module(consts, brModuleIO.create(consts), 3);
+  public Drive(
+      GyroIO gyroIO,
+      ModuleIO flModuleIO,
+      ModuleIO frModuleIO,
+      ModuleIO blModuleIO,
+      ModuleIO brModuleIO) {
+    this.gyroIO = gyroIO;
+    modules[0] = new Module(flModuleIO, 0);
+    modules[1] = new Module(frModuleIO, 1);
+    modules[2] = new Module(blModuleIO, 2);
+    modules[3] = new Module(brModuleIO, 3);
 
-    kinematics = new SwerveDriveKinematics(consts.moduleTranslations());
+    kinematics = new SwerveDriveKinematics(DriveConstants.moduleTranslations);
     poseEstimator =
         new SwerveDrivePoseEstimator(
             kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
@@ -99,7 +76,7 @@ public class Drive extends SubsystemBase {
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
     // Start odometry thread
-    SparkOdometryThread.getInstance(consts.odometryFrequency()).start();
+    SparkOdometryThread.getInstance().start();
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
@@ -107,8 +84,11 @@ public class Drive extends SubsystemBase {
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocity,
-        new PPHolonomicDriveController(consts.translationPID(), consts.rotationPID()),
-        consts.ppRobotConfig(),
+        new PPHolonomicDriveController(DriveConstants.translationPID, DriveConstants.rotationPID),
+        // consts.ppRobotConfig(),
+        // TODO: figure out why gui settings work but the constants doesn't (make sure they're
+        // equal)
+        DriveConstants.ppRobotConfig,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
     PathPlannerLogging.setLogActivePathCallback(
@@ -200,7 +180,7 @@ public class Drive extends SubsystemBase {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, consts.maxSpeed());
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.maxSpeed);
 
     // Log unoptimized setpoints
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -232,7 +212,7 @@ public class Drive extends SubsystemBase {
    * return to their normal orientations the next time a nonzero velocity is requested.
    */
   public void stopWithX() {
-    Translation2d[] moduleTranslations = consts.moduleTranslations();
+    Translation2d[] moduleTranslations = DriveConstants.moduleTranslations;
 
     Rotation2d[] headings = new Rotation2d[4];
     for (int i = 0; i < 4; i++) {
@@ -324,11 +304,11 @@ public class Drive extends SubsystemBase {
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return consts.maxSpeed();
+    return DriveConstants.maxSpeed;
   }
 
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
-    return consts.maxSpeed() / consts.driveBaseRadius();
+    return DriveConstants.maxSpeed / DriveConstants.driveBaseRadius;
   }
 }

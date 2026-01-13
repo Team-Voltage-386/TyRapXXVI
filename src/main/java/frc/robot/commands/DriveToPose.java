@@ -9,17 +9,21 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
+import frc.robot.constants.jr.DriveConstants;
+import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.drive.Drive;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveToPose extends Command {
 
   private final Drive dt;
   private final PathPlannerTrajectoryState goalState;
 
-  private final double tolerance = 0.1;
+  private static final double tolerance = 0.1;
 
   private final PPHolonomicDriveController pid;
+
+  private final Pose2d[] trajectory = new Pose2d[2];
 
   /**
    * Command to drive to a specific pose. Without a specified target speed, the command will end
@@ -32,13 +36,14 @@ public class DriveToPose extends Command {
    * @param goalPose The target pose to drive to.
    */
   public DriveToPose(Drive drivetrain, Pose2d goalPose) {
-    dt = drivetrain;
-    goalState = new PathPlannerTrajectoryState();
-    goalState.pose = goalPose;
+    this(drivetrain, goalStateWithPose(goalPose));
+  }
 
-    pid = new PPHolonomicDriveController(dt.consts.translationPID(), dt.consts.rotationPID());
-
-    addRequirements(dt);
+  // helper function to avoid duplication of constructor logic
+  private static PathPlannerTrajectoryState goalStateWithPose(Pose2d goalPose) {
+    PathPlannerTrajectoryState state = new PathPlannerTrajectoryState();
+    state.pose = goalPose;
+    return state;
   }
 
   /**
@@ -51,14 +56,15 @@ public class DriveToPose extends Command {
     dt = drivetrain;
     this.goalState = goalState;
 
-    pid = new PPHolonomicDriveController(dt.consts.translationPID(), dt.consts.rotationPID());
+    pid = new PPHolonomicDriveController(DriveConstants.translationPID, DriveConstants.rotationPID);
+
+    trajectory[1] = goalState.pose;
 
     addRequirements(dt);
   }
 
   public static Pose2d tagPose(int tagId, Transform2d tagOffset) {
-    Pose2d tagPose =
-        Constants.current.vision.aprilTagLayout().getTagPose(tagId).orElseThrow().toPose2d();
+    Pose2d tagPose = VisionConstants.aprilTagLayout.getTagPose(tagId).orElseThrow().toPose2d();
     return new Pose2d(
         tagPose
             .getTranslation()
@@ -67,6 +73,14 @@ public class DriveToPose extends Command {
                     .times(.4)
                     .plus(tagOffset.getTranslation().rotateBy(tagPose.getRotation()))),
         tagPose.getRotation().rotateBy(Rotation2d.k180deg).rotateBy(tagOffset.getRotation()));
+  }
+
+  @Override
+  public void initialize() {
+    trajectory[0] = dt.getPose();
+    Logger.recordOutput("Odometry/Trajectory", trajectory);
+    Logger.recordOutput("Odometry/TrajectorySetpoint", goalState.pose);
+    pid.reset(dt.getPose(), dt.getChassisSpeeds());
   }
 
   @Override

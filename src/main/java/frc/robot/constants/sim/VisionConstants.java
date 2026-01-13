@@ -2,54 +2,30 @@ package frc.robot.constants.sim;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import frc.robot.Constants;
-import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision.CameraConfig;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
-public class VisionConstants implements Vision.Constants, VisionIOPhotonVisionSim.Constants {
+public final class VisionConstants { // removed implements to expose only static values
 
-  @Override
-  public AprilTagFieldLayout aprilTagLayout() {
-    return AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-  }
+  // prevent instantiation
+  private VisionConstants() {}
 
-  @Override
-  public double maxAmbiguity() {
-    return Constants.current.vision.maxAmbiguity();
-  }
+  // static values replacing previous instance methods (names kept the same)
+  public static final AprilTagFieldLayout aprilTagLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-  @Override
-  public double maxZError() {
-    return Constants.current.vision.maxZError();
-  }
+  public static final double maxAmbiguity = frc.robot.constants.jr.VisionConstants.maxAmbiguity;
+  public static final double maxZError = frc.robot.constants.jr.VisionConstants.maxZError;
+  public static final double linearStdDevBaseline =
+      frc.robot.constants.jr.VisionConstants.linearStdDevBaseline;
+  public static final double angularStdDevBaseline =
+      frc.robot.constants.jr.VisionConstants.angularStdDevBaseline;
+  public static final double linearStdDevMegatag2Factor =
+      frc.robot.constants.jr.VisionConstants.linearStdDevMegatag2Factor;
+  public static final double angularStdDevMegatag2Factor =
+      frc.robot.constants.jr.VisionConstants.angularStdDevMegatag2Factor;
 
-  @Override
-  public double linearStdDevBaseline() {
-    return Constants.current.vision.linearStdDevBaseline();
-  }
+  public static final double[] cameraStdDevFactors = new double[0];
 
-  @Override
-  public double angularStdDevBaseline() {
-    return Constants.current.vision.angularStdDevBaseline();
-  }
-
-  @Override
-  public double linearStdDevMegatag2Factor() {
-    return Constants.current.vision.linearStdDevMegatag2Factor();
-  }
-
-  @Override
-  public double angularStdDevMegatag2Factor() {
-    return Constants.current.vision.angularStdDevMegatag2Factor();
-  }
-
-  @Override
-  public double[] cameraStdDevFactors() {
-    return new double[0];
-  }
-
-  public CameraConfig[] cameraConfigs() {
-    return Constants.current.vision.cameraConfigs();
-  }
+  public static final CameraConfig[] cameraConfigs =
+      frc.robot.constants.jr.VisionConstants.cameraConfigs;
 }

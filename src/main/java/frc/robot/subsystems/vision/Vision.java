@@ -1,6 +1,5 @@
 package frc.robot.subsystems.vision;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -11,45 +10,22 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
-import frc.robot.util.IOFactory;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
 
-  public interface Constants {
-
-    AprilTagFieldLayout aprilTagLayout();
-
-    double maxAmbiguity();
-
-    double maxZError();
-
-    double linearStdDevBaseline();
-
-    double angularStdDevBaseline();
-
-    double linearStdDevMegatag2Factor();
-
-    double angularStdDevMegatag2Factor();
-
-    double[] cameraStdDevFactors();
-  }
-
-  protected final Constants consts;
-
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
-  public <C extends Constants> Vision(
-      C consts, VisionConsumer consumer, IOFactory<C, VisionIO[]> ioFactory) {
-    this.consts = consts;
+  public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
-    this.io = ioFactory.create(consts);
+    this.io = io;
 
     // Initialize inputs
     this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -100,7 +76,7 @@ public class Vision extends SubsystemBase {
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {
-        var tagPose = consts.aprilTagLayout().getTagPose(tagId);
+        var tagPose = VisionConstants.aprilTagLayout.getTagPose(tagId);
         tagPose.ifPresent(tagPoses::add);
       }
 
@@ -110,15 +86,16 @@ public class Vision extends SubsystemBase {
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
-                    && observation.ambiguity() > consts.maxAmbiguity()) // Cannot be high ambiguity
+                    && observation.ambiguity() > VisionConstants.maxAmbiguity)
+                // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
-                    > consts.maxZError() // Must have realistic Z coordinate
+                    > VisionConstants.maxZError // Must have realistic Z coordinate
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
-                || observation.pose().getX() > consts.aprilTagLayout().getFieldLength()
+                || observation.pose().getX() > VisionConstants.aprilTagLayout.getFieldLength()
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > consts.aprilTagLayout().getFieldWidth();
+                || observation.pose().getY() > VisionConstants.aprilTagLayout.getFieldWidth();
 
         // Add pose to log
         robotPoses.add(observation.pose());
@@ -136,13 +113,13 @@ public class Vision extends SubsystemBase {
         // Calculate standard deviations
         double stdDevFactor =
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-        double linearStdDev = consts.linearStdDevBaseline() * stdDevFactor;
-        double angularStdDev = consts.angularStdDevBaseline() * stdDevFactor;
+        double linearStdDev = VisionConstants.linearStdDevBaseline * stdDevFactor;
+        double angularStdDev = VisionConstants.angularStdDevBaseline * stdDevFactor;
         if (observation.type() == PoseObservationType.MEGATAG_2) {
-          linearStdDev *= consts.linearStdDevMegatag2Factor();
-          angularStdDev *= consts.angularStdDevMegatag2Factor();
+          linearStdDev *= VisionConstants.linearStdDevMegatag2Factor;
+          angularStdDev *= VisionConstants.angularStdDevMegatag2Factor;
         }
-        double[] stdDevFactors = consts.cameraStdDevFactors();
+        double[] stdDevFactors = VisionConstants.cameraStdDevFactors;
         if (cameraIndex < stdDevFactors.length) {
           linearStdDev *= stdDevFactors[cameraIndex];
           angularStdDev *= stdDevFactors[cameraIndex];

@@ -7,189 +7,102 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.Module;
-import frc.robot.subsystems.drive.ModuleIOSparkFlex;
 
-public class DriveConstants
-    implements Drive.Constants,
-        Module.Constants,
-        GyroIOPigeon2.Constants,
-        ModuleIOSparkFlex.Constants {
+public final class DriveConstants {
 
-  @Override
-  public int pigeonCanId() {
-    return 13;
-  }
+  // prevent instantiation
+  private DriveConstants() {}
 
-  @Override
-  public Rotation2d[] zeroRotations() {
-    return new Rotation2d[] {
-      new Rotation2d(0), new Rotation2d(0), new Rotation2d(0), new Rotation2d(0)
-    };
-  }
-
-  @Override
-  public int[] driveCanIds() {
-    return new int[] {6, 7, 52, 2};
-  }
-
-  @Override
-  public int[] turnCanIds() {
-    return new int[] {5, 4, 8, 3};
-  }
-
-  @Override
-  public int driveCurrentLimit() {
-    return 60;
-  }
-
-  @Override
-  public int turnCurrentLimit() {
-    return 20;
-  }
-
-  @Override
-  public double driveKp() {
-    return .5;
-  }
-
-  @Override
-  public double driveKd() {
-    return 0.0;
-  }
-
-  @Override
-  public double driveKs() {
-    return 0.0;
-  }
-
-  @Override
-  public double driveKv() {
-    return 0.3;
-  }
-
-  public static final double wheelRadiusMeters = Units.inchesToMeters(4);
+  public static final double wheelRadiusMeters = 0.048;
   public static final double driveMotorReduction =
-      (45.0 * 22.0) / (14.0 * 15.0); // MAXSwerve with 14 pinion teeth and 22 spur teeth
-  public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
-
-  // Rotor Rotations -> Wheel Radians
-  @Override
-  public double driveEncoderPositionFactor() {
-    return 2 * Math.PI / driveMotorReduction;
-  }
-
-  // Rotor RPM -> Wheel Rad/Sec
-  @Override
-  public double driveEncoderVelocityFactor() {
-    return (2 * Math.PI) / 60.0 / driveMotorReduction;
-  }
-
-  @Override
-  public double turnKp() {
-    return 1.5;
-  }
-
-  @Override
-  public double turnKd() {
-    return 0;
-  }
-
-  @Override
-  public double turnPIDMinInput() {
-    // Radians
-    return 0;
-  }
-
-  @Override
-  public double turnPIDMaxInput() {
-    // Radians
-    return 2 * Math.PI;
-  }
-
-  @Override
-  public double turnEncoderPositionFactor() {
-    // Rotations -> Radians
-    return 2 * Math.PI;
-  }
-
-  @Override
-  public double turnEncoderVelocityFactor() {
-    // RPM -> Rad/Sec
-    return (2 * Math.PI) / 60.0;
-  }
-
-  @Override
-  public boolean turnInverted() {
-    return false;
-  }
-
-  @Override
-  public boolean turnEncoderInverted() {
-    return true;
-  }
+      6.12; // MAXSwerve with 14 pinion teeth and 22 spur teeth
+  public static final DCMotor driveGearbox = DCMotor.getNEO(1);
+  public static final DCMotor turnGearbox = DCMotor.getNEO(1);
 
   public static final double trackWidth = Units.inchesToMeters(24.75);
   public static final double wheelBase = Units.inchesToMeters(24.75);
-
-  @Override
-  public Translation2d[] moduleTranslations() {
-    return new Translation2d[] {
-      new Translation2d(trackWidth / 2.0, wheelBase / 2.0),
-      new Translation2d(trackWidth / 2.0, -wheelBase / 2.0),
-      new Translation2d(-trackWidth / 2.0, wheelBase / 2.0),
-      new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
-    };
-  }
-
-  @Override
-  public double driveBaseRadius() {
-    return Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
-  }
-
-  @Override
-  public PIDConstants translationPID() {
-    return new PIDConstants(5.0, 0.0, 0.0);
-  }
-
-  @Override
-  public PIDConstants rotationPID() {
-    return new PIDConstants(5.0, 0.0, 0.0);
-  }
 
   public static final double robotMassKg = 24.088;
   public static final double robotMOI = 6.883;
   public static final double wheelCOF = 1.2;
 
-  @Override
-  public RobotConfig ppRobotConfig() {
-    return new RobotConfig(
-        robotMassKg,
-        robotMOI,
-        new ModuleConfig(
-            wheelRadiusMeters,
-            maxSpeed(),
-            wheelCOF,
-            driveGearbox.withReduction(driveMotorReduction),
-            driveCurrentLimit(),
-            1),
-        moduleTranslations());
-  }
+  public static final int pigeonCanId = 13;
+
+  public static final Rotation2d[] zeroRotations =
+      new Rotation2d[] {
+        new Rotation2d(1.292), new Rotation2d(-2.422), new Rotation2d(1.555), new Rotation2d(-0.468)
+      };
+
+  public static final int[] driveCanIds = new int[] {6, 7, 52, 2};
+
+  public static final int[] turnCanIds = new int[] {5, 4, 8, 3};
+
+  public static final int[] turnCancoderIds = new int[] {11, 12, 9, 10};
+
+  public static final int driveCurrentLimit = 60;
+
+  public static final int turnCurrentLimit = 20;
+
+  public static final double driveKp = 0.5;
+
+  public static final double driveKd = 0.0;
+
+  public static final double driveKs = 0.0;
+
+  public static final double driveKv = 0.3;
+
+  // Rotor Rotations -> Wheel Radians
+  public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction;
+
+  // Rotor RPM -> Wheel Rad/Sec
+  public static final double driveEncoderVelocityFactor =
+      (2 * Math.PI) / 60.0 / driveMotorReduction;
+
+  public static final double turnKp = 0.5;
+
+  public static final double turnKd = 0.0;
+
+  public static final double turnPIDMinInput = 0; // Radians
+
+  public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
+
+  public static final double turnEncoderPositionFactor = 2 * Math.PI; // Rotations -> Radians
+
+  public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
+
+  public static final boolean turnInverted = false;
+
+  public static final boolean turnEncoderInverted = true;
+
+  public static final Translation2d[] moduleTranslations =
+      new Translation2d[] {
+        new Translation2d(trackWidth / 2.0, wheelBase / 2.0),
+        new Translation2d(trackWidth / 2.0, -wheelBase / 2.0),
+        new Translation2d(-trackWidth / 2.0, wheelBase / 2.0),
+        new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
+      };
+
+  public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
+
+  public static final PIDConstants translationPID = new PIDConstants(5.0, 0.0, 0.0);
+
+  public static final PIDConstants rotationPID = new PIDConstants(5.0, 0.0, 0.0);
 
   // Meters/Sec
-  public double maxSpeed() {
-    return 4.0;
-  }
+  public static final double maxSpeed = 5.45;
 
-  @Override
-  public double odometryFrequency() {
-    return 100.0;
-  }
+  public static final double odometryFrequency = 100.0;
 
-  @Override
-  public double wheelRadiusMeters() {
-    return Units.inchesToMeters(4);
-  }
+  public static final RobotConfig ppRobotConfig =
+      new RobotConfig(
+          robotMassKg,
+          robotMOI,
+          new ModuleConfig(
+              wheelRadiusMeters,
+              maxSpeed,
+              wheelCOF,
+              driveGearbox.withReduction(driveMotorReduction),
+              driveCurrentLimit,
+              1),
+          moduleTranslations);
 }

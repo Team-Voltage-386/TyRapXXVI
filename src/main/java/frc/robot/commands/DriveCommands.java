@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.constants.jr.DriveConstants;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -258,7 +259,7 @@ public class DriveCommands {
                         wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
                       }
                       double wheelRadius =
-                          (state.gyroDelta * drive.consts.driveBaseRadius()) / wheelDelta;
+                          (state.gyroDelta * DriveConstants.driveBaseRadius) / wheelDelta;
 
                       NumberFormat formatter = new DecimalFormat("#0.000");
                       System.out.println(

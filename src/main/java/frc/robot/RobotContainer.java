@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.constants.sim.VisionConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -58,20 +59,17 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         drive =
             new Drive(
-                Constants.current.drive,
-                GyroIOPigeon2::new,
-                (c) -> new ModuleIOSparkFlex(c, 0),
-                (c) -> new ModuleIOSparkFlex(c, 1),
-                (c) -> new ModuleIOSparkFlex(c, 2),
-                (c) -> new ModuleIOSparkFlex(c, 3));
+                new GyroIOPigeon2(),
+                new ModuleIOSparkMaxCancoder(0),
+                new ModuleIOSparkMaxCancoder(1),
+                new ModuleIOSparkMaxCancoder(2),
+                new ModuleIOSparkMaxCancoder(3));
         vis =
             new Vision(
-                Constants.current.vision,
                 drive::addVisionMeasurement,
-                (c) ->
-                    Stream.of(c.cameraConfigs())
-                        .map(cam -> new VisionIOPhotonVision(c, cam))
-                        .toArray(VisionIOPhotonVision[]::new));
+                Stream.of(VisionConstants.cameraConfigs)
+                    .map(cam -> new VisionIOPhotonVision(cam))
+                    .toArray(VisionIOPhotonVision[]::new));
         break;
 
       case SIM:
@@ -83,23 +81,19 @@ public class RobotContainer {
         // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
-                Constants.sim.drive,
-                (c) -> new GyroIOSim(driveSim.getGyroSimulation()),
-                (c) -> new ModuleIOSim(c, mods[0]),
-                (c) -> new ModuleIOSim(c, mods[1]),
-                (c) -> new ModuleIOSim(c, mods[2]),
-                (c) -> new ModuleIOSim(c, mods[3]));
+                new GyroIOSim(driveSim.getGyroSimulation()),
+                new ModuleIOSim(mods[0]),
+                new ModuleIOSim(mods[1]),
+                new ModuleIOSim(mods[2]),
+                new ModuleIOSim(mods[3]));
         vis =
             new Vision(
-                Constants.sim.vision,
                 drive::addVisionMeasurement,
-                (c) ->
-                    Stream.of(c.cameraConfigs())
-                        .map(
-                            cam ->
-                                new VisionIOPhotonVisionSim(
-                                    c, cam, driveSim::getSimulatedDriveTrainPose))
-                        .toArray(VisionIOPhotonVision[]::new));
+                Stream.of(VisionConstants.cameraConfigs)
+                    .map(
+                        cam ->
+                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
+                    .toArray(VisionIOPhotonVision[]::new));
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -110,15 +104,12 @@ public class RobotContainer {
         // Replayed robot, disable IO implementations
         drive =
             new Drive(
-                Constants.current.drive,
-                (c) -> new GyroIO() {},
-                (c) -> new ModuleIO() {},
-                (c) -> new ModuleIO() {},
-                (c) -> new ModuleIO() {},
-                (c) -> new ModuleIO() {});
-        vis =
-            new Vision(
-                Constants.current.vision, drive::addVisionMeasurement, (c) -> new VisionIO[] {});
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
+        vis = new Vision(drive::addVisionMeasurement, new VisionIO[] {});
         break;
     }
 

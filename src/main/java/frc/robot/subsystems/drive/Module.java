@@ -5,17 +5,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.constants.jr.DriveConstants;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
 
-  public interface Constants {
-
-    double wheelRadiusMeters();
-  }
-
-  private final Constants consts;
   private final ModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final int index;
@@ -26,8 +21,7 @@ public class Module {
   /** The module positions received this cycle. */
   @Getter private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
-  public Module(Constants consts, ModuleIO io, int index) {
-    this.consts = consts;
+  public Module(ModuleIO io, int index) {
     this.io = io;
     this.index = index;
     driveDisconnectedAlert =
@@ -44,7 +38,8 @@ public class Module {
     int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
     odometryPositions = new SwerveModulePosition[sampleCount];
     for (int i = 0; i < sampleCount; i++) {
-      double positionMeters = inputs.odometryDrivePositionsRad[i] * consts.wheelRadiusMeters();
+      double positionMeters =
+          inputs.odometryDrivePositionsRad[i] * DriveConstants.wheelRadiusMeters;
       Rotation2d angle = inputs.odometryTurnPositions[i];
       odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
     }
@@ -61,7 +56,7 @@ public class Module {
     state.cosineScale(inputs.turnPosition);
 
     // Apply setpoints
-    io.setDriveVelocity(state.speedMetersPerSecond / consts.wheelRadiusMeters());
+    io.setDriveVelocity(state.speedMetersPerSecond / DriveConstants.wheelRadiusMeters);
     io.setTurnPosition(state.angle);
   }
 
@@ -84,12 +79,12 @@ public class Module {
 
   /** Returns the current drive position of the module in meters. */
   public double getPositionMeters() {
-    return inputs.drivePositionRad * consts.wheelRadiusMeters();
+    return inputs.drivePositionRad * DriveConstants.wheelRadiusMeters;
   }
 
   /** Returns the current drive velocity of the module in meters per second. */
   public double getVelocityMetersPerSec() {
-    return inputs.driveVelocityRadPerSec * consts.wheelRadiusMeters();
+    return inputs.driveVelocityRadPerSec * DriveConstants.wheelRadiusMeters;
   }
 
   /** Returns the module position (turn angle and drive position). */

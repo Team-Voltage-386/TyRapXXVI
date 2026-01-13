@@ -4,58 +4,37 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision.CameraConfig;
 
-public class VisionConstants implements Vision.Constants, VisionIOPhotonVision.Constants {
+public final class VisionConstants {
 
-  @Override
-  public AprilTagFieldLayout aprilTagLayout() {
-    return AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-  }
+  // prevent instantiation
+  private VisionConstants() {}
 
-  @Override
-  public double maxAmbiguity() {
-    return 0.3;
-  }
+  public static final AprilTagFieldLayout aprilTagLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-  @Override
-  public double maxZError() {
-    return 0.75;
-  }
+  public static final double maxAmbiguity = 0.3;
 
-  public CameraConfig[] cameraConfigs() {
+  public static final double maxZError = 0.75;
+
+  public static final CameraConfig[] cameraConfigs;
+
+  static {
     CameraConfig camera0 = new CameraConfig();
     camera0.cameraName = "camera_0";
     camera0.robotToCamera = new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
-
-    return new CameraConfig[] {camera0};
+    cameraConfigs = new CameraConfig[] {camera0};
   }
 
-  @Override
-  public double[] cameraStdDevFactors() {
-    return new double[] {1.0};
-  }
+  public static final double[] cameraStdDevFactors = new double[] {1.0};
 
-  @Override
-  public double linearStdDevBaseline() {
-    // Meters
-    return 0.02;
-  }
+  // Meters
+  public static final double linearStdDevBaseline = 0.02;
 
-  @Override
-  public double angularStdDevBaseline() {
-    return 0.06;
-  }
+  public static final double angularStdDevBaseline = 0.06;
 
-  @Override
-  public double linearStdDevMegatag2Factor() {
-    return 0.5;
-  }
+  public static final double linearStdDevMegatag2Factor = 0.5;
 
-  @Override
-  public double angularStdDevMegatag2Factor() {
-    return Double.POSITIVE_INFINITY;
-  }
+  public static final double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY;
 }

@@ -7,14 +7,13 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -25,6 +24,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.constants.jr.DriveConstants;
 import frc.robot.util.PhoenixUtil;
 import java.util.function.DoubleSupplier;
 
@@ -35,51 +35,6 @@ import java.util.function.DoubleSupplier;
  * Does not support high-frequency encoding
  */
 public class ModuleIOSparkMaxCancoder implements ModuleIO {
-
-  public interface Constants {
-
-    Rotation2d[] zeroRotations();
-
-    int[] driveCanIds();
-
-    int[] turnCanIds();
-
-    int driveCurrentLimit();
-
-    int turnCurrentLimit();
-
-    double driveKp();
-
-    double driveKd();
-
-    double driveKs();
-
-    double driveKv();
-
-    double driveEncoderPositionFactor();
-
-    double driveEncoderVelocityFactor();
-
-    double turnKp();
-
-    double turnKd();
-
-    double turnPIDMinInput();
-
-    double turnPIDMaxInput();
-
-    double turnEncoderPositionFactor();
-
-    double turnEncoderVelocityFactor();
-
-    boolean turnInverted();
-
-    boolean turnEncoderInverted();
-
-    double odometryFrequency();
-  }
-
-  private final Constants consts;
 
   private final Rotation2d zeroRotation;
 
@@ -102,12 +57,10 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
-  public ModuleIOSparkMaxCancoder(Constants consts, int module) {
-    this.consts = consts;
-
-    zeroRotation = consts.zeroRotations()[module];
-    driveSpark = new SparkFlex(consts.driveCanIds()[module], MotorType.kBrushless);
-    turnSpark = new SparkMax(consts.turnCanIds()[module], MotorType.kBrushless);
+  public ModuleIOSparkMaxCancoder(int module) {
+    zeroRotation = DriveConstants.zeroRotations[module];
+    driveSpark = new SparkMax(DriveConstants.driveCanIds[module], MotorType.kBrushless);
+    turnSpark = new SparkMax(DriveConstants.turnCanIds[module], MotorType.kBrushless);
     driveEncoder = driveSpark.getEncoder();
     driveController = driveSpark.getClosedLoopController();
 
@@ -115,24 +68,22 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
     var driveConfig = new SparkFlexConfig();
     driveConfig
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(consts.driveCurrentLimit())
+        .smartCurrentLimit(DriveConstants.driveCurrentLimit)
         .voltageCompensation(12.0);
     driveConfig
         .encoder
-        .positionConversionFactor(consts.driveEncoderPositionFactor())
-        .velocityConversionFactor(consts.driveEncoderVelocityFactor())
+        .positionConversionFactor(DriveConstants.driveEncoderPositionFactor)
+        .velocityConversionFactor(DriveConstants.driveEncoderVelocityFactor)
         .uvwMeasurementPeriod(10)
         .uvwAverageDepth(2);
     driveConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pidf(
-            consts.driveKp(), 0.0,
-            consts.driveKd(), 0.0);
+        .pid(DriveConstants.driveKp, 0.0, DriveConstants.driveKd);
     driveConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
-        .primaryEncoderPositionPeriodMs((int) (1000.0 / consts.odometryFrequency()))
+        .primaryEncoderPositionPeriodMs((int) (1000.0 / DriveConstants.odometryFrequency))
         .primaryEncoderVelocityAlwaysOn(true)
         .primaryEncoderVelocityPeriodMs(20)
         .appliedOutputPeriodMs(20)
@@ -148,14 +99,14 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
     // Configure turn motor
     var turnConfig = new SparkMaxConfig();
     turnConfig
-        .inverted(consts.turnInverted())
+        .inverted(DriveConstants.turnInverted)
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(consts.turnCurrentLimit())
+        .smartCurrentLimit(DriveConstants.turnCurrentLimit)
         .voltageCompensation(12.0);
     turnConfig
         .signals
         .absoluteEncoderPositionAlwaysOn(true)
-        .absoluteEncoderPositionPeriodMs((int) (1000.0 / consts.odometryFrequency()))
+        .absoluteEncoderPositionPeriodMs((int) (1000.0 / DriveConstants.odometryFrequency))
         .absoluteEncoderVelocityAlwaysOn(true)
         .absoluteEncoderVelocityPeriodMs(20)
         .appliedOutputPeriodMs(20)
@@ -168,13 +119,19 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
     // configure turn CANcoder and PID controller
-    turnController = new PIDController(consts.turnKp(), 0, consts.turnKd());
-    turnEncoder = new CANcoder(-1);
+    turnController = new PIDController(DriveConstants.turnKp, 0, DriveConstants.turnKd);
+    // Treat the turn angle as continuous (wraps at 0/2pi) so the controller takes the
+    // shortest path around the circle. Also set a small tolerance and stop driving
+    // the motor when within tolerance to avoid oscillation.
+    turnController.enableContinuousInput(
+        DriveConstants.turnPIDMinInput, DriveConstants.turnPIDMaxInput);
+    turnController.setTolerance(0.01); // ~0.57 degrees
+    turnEncoder = new CANcoder(DriveConstants.turnCancoderIds[module]);
 
     CANcoderConfiguration turnEncoderConfig = new CANcoderConfiguration();
     // TODO: ensure this is right.
     turnEncoderConfig.MagnetSensor.SensorDirection =
-        consts.turnEncoderInverted()
+        DriveConstants.turnEncoderInverted
             ? SensorDirectionValue.CounterClockwise_Positive
             : SensorDirectionValue.Clockwise_Positive;
     PhoenixUtil.tryUntilOk(5, () -> turnEncoder.getConfigurator().apply(turnEncoderConfig, 0.25));
@@ -192,19 +149,26 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   public void updateInputs(ModuleIOInputs inputs) {
     BaseStatusSignal.refreshAll(turnPosition, turnVelocity);
 
+    double turnRads = turnPosition.getValueAsDouble() * DriveConstants.turnEncoderPositionFactor;
     if (turnClosedLoop) {
-      turnSpark.setVoltage(
-          turnController.calculate(
-              turnPosition.getValueAsDouble() * consts.turnEncoderPositionFactor()));
+      double turnPos =
+          MathUtil.inputModulus(
+              turnRads, DriveConstants.turnPIDMinInput, DriveConstants.turnPIDMaxInput);
+      double volts = turnController.calculate(turnPos);
+      // If we're within tolerance, don't drive the motor to avoid hunting.
+      if (turnController.atSetpoint()) {
+        volts = 0.0;
+      }
+      // Clamp to safe voltage range
+      volts = MathUtil.clamp(volts, -12.0, 12.0);
+      turnSpark.setVoltage(volts);
     }
 
     // Update turn inputs
     sparkStickyFault = false;
-    inputs.turnPosition =
-        new Rotation2d(turnPosition.getValueAsDouble() * consts.turnEncoderPositionFactor())
-            .minus(zeroRotation);
+    inputs.turnPosition = new Rotation2d(turnRads).minus(zeroRotation);
     inputs.turnVelocityRadPerSec =
-        turnVelocity.getValueAsDouble() * consts.turnEncoderVelocityFactor();
+        turnVelocity.getValueAsDouble() * DriveConstants.turnEncoderVelocityFactor;
     ifOk(
         turnSpark,
         new DoubleSupplier[] {turnSpark::getAppliedOutput, turnSpark::getBusVoltage},
@@ -243,8 +207,9 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double ffVolts =
-        consts.driveKs() * Math.signum(velocityRadPerSec) + consts.driveKv() * velocityRadPerSec;
-    driveController.setReference(
+        DriveConstants.driveKs * Math.signum(velocityRadPerSec)
+            + DriveConstants.driveKv * velocityRadPerSec;
+    driveController.setSetpoint(
         velocityRadPerSec,
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
@@ -258,8 +223,8 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
     double setpoint =
         MathUtil.inputModulus(
             rotation.plus(zeroRotation).getRadians(),
-            consts.turnPIDMinInput(),
-            consts.turnPIDMaxInput());
+            DriveConstants.turnPIDMinInput,
+            DriveConstants.turnPIDMaxInput);
     turnController.setSetpoint(setpoint);
   }
 }

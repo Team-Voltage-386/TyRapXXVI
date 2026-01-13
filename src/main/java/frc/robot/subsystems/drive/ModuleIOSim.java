@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.constants.sim.DriveConstants;
 import frc.robot.util.SparkUtil;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -12,27 +13,6 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController.GenericMotorC
 
 /** Physics sim implementation of module IO. */
 public class ModuleIOSim implements ModuleIO {
-
-  public interface Constants {
-
-    int driveCurrentLimit();
-
-    int turnCurrentLimit();
-
-    double driveKp();
-
-    double driveKd();
-
-    double driveKs();
-
-    double driveKv();
-
-    double turnKp();
-
-    double turnKd();
-  }
-
-  private final Constants consts;
 
   private boolean driveClosedLoop = false;
   private boolean turnClosedLoop = false;
@@ -47,23 +27,22 @@ public class ModuleIOSim implements ModuleIO {
   private final GenericMotorController driveMotor;
   private final GenericMotorController turnMotor;
 
-  public ModuleIOSim(Constants consts, SwerveModuleSimulation moduleSim) {
-    this.consts = consts;
+  public ModuleIOSim(SwerveModuleSimulation moduleSim) {
     this.moduleSim = moduleSim;
 
-    driveController = new PIDController(consts.driveKp(), 0, consts.driveKd());
-    turnController = new PIDController(consts.turnKp(), 0, consts.turnKd());
+    driveController = new PIDController(DriveConstants.driveKp, 0, DriveConstants.driveKd);
+    turnController = new PIDController(DriveConstants.turnKp, 0, DriveConstants.turnKd);
 
     // configures a generic motor controller for drive motor
     // set a current limit of 60 amps
     this.driveMotor =
         moduleSim
             .useGenericMotorControllerForDrive()
-            .withCurrentLimit(Amps.of(consts.driveCurrentLimit()));
+            .withCurrentLimit(Amps.of(DriveConstants.driveCurrentLimit));
     this.turnMotor =
         moduleSim
             .useGenericControllerForSteer()
-            .withCurrentLimit(Amps.of(consts.turnCurrentLimit()));
+            .withCurrentLimit(Amps.of(DriveConstants.turnCurrentLimit));
 
     // Enable wrapping for turn PID
     turnController.enableContinuousInput(-Math.PI, Math.PI);
@@ -127,7 +106,8 @@ public class ModuleIOSim implements ModuleIO {
   public void setDriveVelocity(double velocityRadPerSec) {
     driveClosedLoop = true;
     driveFFVolts =
-        consts.driveKs() * Math.signum(velocityRadPerSec) + consts.driveKv() * velocityRadPerSec;
+        DriveConstants.driveKs * Math.signum(velocityRadPerSec)
+            + DriveConstants.driveKv * velocityRadPerSec;
     driveController.setSetpoint(velocityRadPerSec);
   }
 
