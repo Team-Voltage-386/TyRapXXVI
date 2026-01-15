@@ -43,7 +43,7 @@ public final class DriveConstants {
 
   public static final int turnCurrentLimit = 20;
 
-  public static final double driveKp = 0.5;
+  public static final double driveKp = 0.025;
 
   public static final double driveKd = 0.0;
 
@@ -84,9 +84,9 @@ public final class DriveConstants {
 
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
 
-  public static final PIDConstants translationPID = new PIDConstants(5.0, 0.0, 0.0);
+  public static final PIDConstants translationPID = new PIDConstants(3.0, 0.0, 0.05);
 
-  public static final PIDConstants rotationPID = new PIDConstants(5.0, 0.0, 0.0);
+  public static final PIDConstants rotationPID = new PIDConstants(4.0, 0.0, 0.0);
 
   // Meters/Sec
   public static final double maxSpeed = 5.45;

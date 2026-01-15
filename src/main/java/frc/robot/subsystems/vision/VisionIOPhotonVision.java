@@ -15,6 +15,11 @@ public class VisionIOPhotonVision implements VisionIO {
 
   public static class CameraConfig {
 
+    public CameraConfig(String name, Transform3d robotToCam) {
+      this.cameraName = name;
+      this.robotToCamera = robotToCam;
+    }
+
     /**
      * The configured name of the camera
      */

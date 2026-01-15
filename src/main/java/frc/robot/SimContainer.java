@@ -13,7 +13,6 @@ import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.COTS.WHEELS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
 import org.littletonrobotics.junction.Logger;
 
 public class SimContainer {
@@ -45,7 +44,7 @@ public class SimContainer {
       throw new IllegalStateException("SimContainer can only be instantiated in SIM mode");
     }
 
-    arena = new Arena2025Reefscape();
+    arena = new BlankSimArena();
 
     driveSim =
         new SwerveDriveSimulation(

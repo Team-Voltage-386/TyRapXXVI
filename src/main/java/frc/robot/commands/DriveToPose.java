@@ -19,7 +19,12 @@ public class DriveToPose extends Command {
   private final Drive dt;
   private final PathPlannerTrajectoryState goalState;
 
-  private static final double tolerance = 0.1;
+  // Meters
+  private static final double distanceTolerance = 0.1;
+  // Radians
+  private static final double angleTolerance = Math.toRadians(5);
+  // Meters per second and radians per second
+  private static final double speedTolerance = 0.1;
 
   private final PPHolonomicDriveController pid;
 
@@ -92,18 +97,20 @@ public class DriveToPose extends Command {
   public boolean isFinished() {
     boolean translationDone =
         Math.abs(dt.getPose().getTranslation().getDistance(goalState.pose.getTranslation()))
-            < tolerance;
+            < distanceTolerance;
 
     boolean rotationDone =
         MathUtil.isNear(
-            dt.getRotation().getDegrees(), goalState.pose.getRotation().getDegrees(), tolerance);
+            dt.getRotation().getRadians(),
+            goalState.pose.getRotation().getRadians(),
+            angleTolerance);
 
     ChassisSpeeds speedDiff = dt.getChassisSpeeds().minus(goalState.fieldSpeeds);
 
     boolean speedDone =
-        speedDiff.vxMetersPerSecond < tolerance
-            && speedDiff.vyMetersPerSecond < tolerance
-            && speedDiff.omegaRadiansPerSecond < tolerance;
+        speedDiff.vxMetersPerSecond < speedTolerance
+            && speedDiff.vyMetersPerSecond < speedTolerance
+            && speedDiff.omegaRadiansPerSecond < speedTolerance;
 
     return translationDone && rotationDone && speedDone;
   }

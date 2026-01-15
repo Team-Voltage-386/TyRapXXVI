@@ -18,14 +18,10 @@ public final class VisionConstants {
 
   public static final double maxZError = 0.75;
 
-  public static final CameraConfig[] cameraConfigs;
-
-  static {
-    CameraConfig camera0 = new CameraConfig();
-    camera0.cameraName = "camera_0";
-    camera0.robotToCamera = new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
-    cameraConfigs = new CameraConfig[] {camera0};
-  }
+  public static final CameraConfig[] cameraConfigs =
+      new CameraConfig[] {
+        new CameraConfig("camera_0", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0)))
+      };
 
   public static final double[] cameraStdDevFactors = new double[] {1.0};
 

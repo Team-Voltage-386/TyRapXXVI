@@ -24,6 +24,8 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -174,6 +176,53 @@ public class RobotContainer {
             AutoBuilder.followPath(path),
             Commands.waitSeconds(3),
             new DriveToPose(drive, DriveToPose.tagPose(6, robotScoreOffsetRight))));
+
+    Pose2d[] testPoses =
+        new Pose2d[] {
+          new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
+          new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
+          new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
+        };
+    List<Waypoint> pptestWaypoints1 = PathPlannerPath.waypointsFromPoses(testPoses);
+
+    // Create the path using the waypoints created above
+    PathPlannerPath pptestpath1 =
+        new PathPlannerPath(
+            pptestWaypoints1,
+            constraints,
+            null,
+            // The ideal starting state, this is only relevant for pre-planned paths, so can be null
+            // for on-the-fly paths.
+            new GoalEndState(0.0, Rotation2d.fromDegrees(90))
+            // Goal end state. You can set a holonomic rotation here. If using a differential
+            // drivetrain, the rotation will have no effect.
+            );
+
+    pptestpath1.preventFlipping = true;
+    Collections.reverse(Arrays.asList(testPoses));
+    List<Waypoint> pptestWaypoints2 = PathPlannerPath.waypointsFromPoses(testPoses);
+
+    // Create the path using the waypoints created above
+    PathPlannerPath pptestpath2 =
+        new PathPlannerPath(
+            pptestWaypoints2,
+            constraints,
+            null,
+            // The ideal starting state, this is only relevant for pre-planned paths, so can be null
+            // for on-the-fly paths.
+            new GoalEndState(0.0, Rotation2d.fromDegrees(0))
+            // Goal end state. You can set a holonomic rotation here. If using a differential
+            // drivetrain, the rotation will have no effect.
+            );
+    pptestpath2.preventFlipping = true;
+    autoChooser.addOption(
+        "PP Path Test",
+        Commands.sequence(
+            new DriveToPose(drive, testPoses[0]),
+            Commands.repeatingSequence(
+                AutoBuilder.followPath(pptestpath1),
+                AutoBuilder.followPath(pptestpath2),
+                Commands.waitSeconds(4))));
 
     // Configure the button bindings
     configureButtonBindings();

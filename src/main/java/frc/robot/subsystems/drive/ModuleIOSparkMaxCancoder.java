@@ -26,6 +26,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.util.PhoenixUtil;
+import frc.robot.util.TuningUtil;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -44,6 +45,19 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   private final RelativeEncoder driveEncoder;
   private final CANcoder turnEncoder;
 
+  private final TuningUtil driveKp =
+      new TuningUtil("/Tuning/Drive/DriveKp", DriveConstants.driveKp);
+  private final TuningUtil driveKd =
+      new TuningUtil("/Tuning/Drive/DriveKd", DriveConstants.driveKd);
+
+  private final TuningUtil driveKs =
+      new TuningUtil("/Tuning/Drive/DriveKs", DriveConstants.driveKs);
+  private final TuningUtil driveKv =
+      new TuningUtil("/Tuning/Drive/DriveKv", DriveConstants.driveKv);
+
+  private final TuningUtil turnKp = new TuningUtil("/Tuning/Drive/TurnKp", DriveConstants.turnKp);
+  private final TuningUtil turnKd = new TuningUtil("/Tuning/Drive/TurnKd", DriveConstants.turnKd);
+
   private final StatusSignal<Angle> turnPosition;
   private final StatusSignal<AngularVelocity> turnVelocity;
 
@@ -57,6 +71,9 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
+  private SparkFlexConfig driveConfig;
+  private SparkMaxConfig turnConfig;
+
   public ModuleIOSparkMaxCancoder(int module) {
     zeroRotation = DriveConstants.zeroRotations[module];
     driveSpark = new SparkMax(DriveConstants.driveCanIds[module], MotorType.kBrushless);
@@ -65,7 +82,7 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
     driveController = driveSpark.getClosedLoopController();
 
     // Configure drive motor
-    var driveConfig = new SparkFlexConfig();
+    driveConfig = new SparkFlexConfig();
     driveConfig
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(DriveConstants.driveCurrentLimit)
@@ -97,7 +114,7 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
     tryUntilOk(5, () -> driveEncoder.setPosition(0.0));
 
     // Configure turn motor
-    var turnConfig = new SparkMaxConfig();
+    turnConfig = new SparkMaxConfig();
     turnConfig
         .inverted(DriveConstants.turnInverted)
         .idleMode(IdleMode.kBrake)
@@ -147,6 +164,26 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     BaseStatusSignal.refreshAll(turnPosition, turnVelocity);
+
+    // update PID values if they have changed while tuning
+    driveKp
+        .get()
+        .ifPresent(
+            value -> {
+              driveConfig.closedLoop.pid(value, 0.0, driveKd.getValue());
+              driveSpark.configure(
+                  driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+            });
+    driveKd
+        .get()
+        .ifPresent(
+            value -> {
+              driveConfig.closedLoop.pid(driveKp.getValue(), 0.0, value);
+              driveSpark.configure(
+                  driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+            });
+    turnKp.get().ifPresent(value -> turnController.setP(value));
+    turnKd.get().ifPresent(value -> turnController.setD(value));
 
     double turnRads = turnPosition.getValueAsDouble() * DriveConstants.turnEncoderPositionFactor;
     if (turnClosedLoop) {
@@ -206,8 +243,8 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double ffVolts =
-        DriveConstants.driveKs * Math.signum(velocityRadPerSec)
-            + DriveConstants.driveKv * velocityRadPerSec;
+        driveKs.getValue() * Math.signum(velocityRadPerSec)
+            + driveKv.getValue() * velocityRadPerSec;
     driveController.setSetpoint(
         velocityRadPerSec,
         ControlType.kVelocity,
