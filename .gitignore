@@ -1,10 +1,11 @@
 build/
 /.gradle
 simgui*.json
-/src/main/java/frc/robot/BuildConstants.java
+BuildConstants.java
 .obsidian
 .idea
 hs_*.log
 .DS_Store
 logs/
 bin/
+
