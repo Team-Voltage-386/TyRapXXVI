@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -20,6 +21,8 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.constants.sim.VisionConstants;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -43,6 +46,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vis;
+  private Shooter shooter;
   // private Elevator elevator;
 
   public SimContainer sim;
@@ -72,6 +76,8 @@ public class RobotContainer {
                 Stream.of(VisionConstants.cameraConfigs)
                     .map(cam -> new VisionIOPhotonVision(cam))
                     .toArray(VisionIOPhotonVision[]::new));
+
+        shooter = null;
         break;
 
       case SIM:
@@ -96,6 +102,14 @@ public class RobotContainer {
                         cam ->
                             new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
                     .toArray(VisionIOPhotonVision[]::new));
+
+        ShooterIOSim shooterIo =
+            new ShooterIOSim(
+                driveSim::getSimulatedDriveTrainPose,
+                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
+        sim.registerSimulator(shooterIo);
+
+        shooter = new Shooter(shooterIo, drive::getPose);
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -266,6 +280,29 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller
+        .y()
+        .onTrue(Commands.runOnce(() -> shooter.shoot()))
+        .onFalse(Commands.runOnce(() -> shooter.stop()));
+
+    controller
+        .povUp()
+        .whileTrue(
+            new RepeatCommand(Commands.runOnce(() -> shooter.addPitch(Rotation2d.fromDegrees(5)))));
+    controller
+        .povDown()
+        .whileTrue(
+            new RepeatCommand(
+                Commands.runOnce(() -> shooter.addPitch(Rotation2d.fromDegrees(-5)))));
+    controller
+        .povLeft()
+        .whileTrue(
+            new RepeatCommand(Commands.runOnce(() -> shooter.addYaw(Rotation2d.fromDegrees(-5)))));
+    controller
+        .povRight()
+        .whileTrue(
+            new RepeatCommand(Commands.runOnce(() -> shooter.addYaw(Rotation2d.fromDegrees(5)))));
   }
 
   /**

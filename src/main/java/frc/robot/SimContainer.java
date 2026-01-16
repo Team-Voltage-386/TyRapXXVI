@@ -66,9 +66,7 @@ public class SimContainer {
 
     Logger.recordOutput("FieldSimulation/RobotPosition", driveSim.getSimulatedDriveTrainPose());
     Logger.recordOutput(
-        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-    Logger.recordOutput(
-        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        "FieldSimulation/Note", SimulatedArena.getInstance().getGamePiecesArrayByType("Note"));
   }
 
   @FunctionalInterface
