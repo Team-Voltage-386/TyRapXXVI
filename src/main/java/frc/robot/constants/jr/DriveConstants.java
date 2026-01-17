@@ -43,7 +43,7 @@ public final class DriveConstants {
 
   public static final int turnCurrentLimit = 20;
 
-  public static final double driveKp = 0.025;
+  public static final double driveKp = 0.0;
 
   public static final double driveKd = 0.0;
 
