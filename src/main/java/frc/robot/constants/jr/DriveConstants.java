@@ -47,9 +47,9 @@ public final class DriveConstants {
 
   public static final double driveKd = 0.0;
 
-  public static final double driveKs = 0.145;
+  public static final double driveKs = 0.119;
 
-  public static final double driveKv = 2.66;
+  public static final double driveKv = 0.125;
 
   // Rotor Rotations -> Wheel Radians
   public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction;
@@ -58,7 +58,7 @@ public final class DriveConstants {
   public static final double driveEncoderVelocityFactor =
       (2 * Math.PI) / 60.0 / driveMotorReduction;
 
-  public static final double turnKp = 1.5;
+  public static final double turnKp = 4.5;
 
   public static final double turnKd = 0.0;
 
