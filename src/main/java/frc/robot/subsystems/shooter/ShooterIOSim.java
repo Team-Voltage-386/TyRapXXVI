@@ -74,7 +74,7 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
                       // Specify the translation of the shooter from the robot center (in the
                       // shooter’s
                       // reference frame)
-                      new Translation2d(0.2, 0),
+                      new Translation2d(0.0, 0),
                       // Specify the field-relative speed of the chassis, adding it to the initial
                       // velocity
                       // of the projectile

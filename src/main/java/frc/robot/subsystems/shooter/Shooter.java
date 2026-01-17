@@ -52,9 +52,9 @@ public class Shooter extends SubsystemBase {
         new Pose3d(
             dtPos.plus(
                 new Translation3d(
-                    inputs.turretYaw.getCos() * inputs.turretPitch.getCos(),
-                    inputs.turretYaw.getSin() * inputs.turretPitch.getCos(),
-                    inputs.turretPitch.getSin())),
+                    inputs.turretYaw.getCos() * 0.5,
+                    inputs.turretYaw.getSin() * 0.5,
+                    inputs.turretPitch.getSin() * 0.5)),
             new Rotation3d());
 
     Logger.recordOutput("Shooter/Mechanism", turretVisual);
