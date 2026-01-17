@@ -30,14 +30,14 @@ public final class DriveConstants {
 
   public static final Rotation2d[] zeroRotations =
       new Rotation2d[] {
-        new Rotation2d(1.292), new Rotation2d(-2.422), new Rotation2d(1.555), new Rotation2d(-0.468)
+        new Rotation2d(2.8), new Rotation2d(2.27), new Rotation2d(1.094), new Rotation2d(-0.08)
       };
 
-  public static final int[] driveCanIds = new int[] {6, 7, 52, 2};
+  public static final int[] driveCanIds = new int[] {6, 52, 7, 2};
 
-  public static final int[] turnCanIds = new int[] {5, 4, 8, 3};
+  public static final int[] turnCanIds = new int[] {5, 8, 4, 3};
 
-  public static final int[] turnCancoderIds = new int[] {11, 12, 9, 10};
+  public static final int[] turnCancoderIds = new int[] {11, 12, 10, 9};
 
   public static final int driveCurrentLimit = 60;
 
