@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.CenterOnTag;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.sim.VisionConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.Vision;
@@ -60,19 +61,36 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOSparkMaxCancoder(0),
-                new ModuleIOSparkMaxCancoder(1),
-                new ModuleIOSparkMaxCancoder(2),
-                new ModuleIOSparkMaxCancoder(3));
-        vis =
-            new Vision(
-                drive::addVisionMeasurement,
-                Stream.of(VisionConstants.cameraConfigs)
-                    .map(cam -> new VisionIOPhotonVision(cam))
-                    .toArray(VisionIOPhotonVision[]::new));
+        if (DriveConstants.isReefscape) {
+          drive =
+          // TODO: Front Left and Back Right drive motors need to be inverted on reefscape
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOSparkFlex(0),
+                  new ModuleIOSparkFlex(1),
+                  new ModuleIOSparkFlex(2),
+                  new ModuleIOSparkFlex(3));
+          vis =
+              new Vision(
+                  drive::addVisionMeasurement,
+                  Stream.of(VisionConstants.cameraConfigs)
+                      .map(cam -> new VisionIOPhotonVision(cam))
+                      .toArray(VisionIOPhotonVision[]::new));
+        } else {
+          drive =
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOSparkMaxCancoder(0),
+                  new ModuleIOSparkMaxCancoder(1),
+                  new ModuleIOSparkMaxCancoder(2),
+                  new ModuleIOSparkMaxCancoder(3));
+          vis =
+              new Vision(
+                  drive::addVisionMeasurement,
+                  Stream.of(VisionConstants.cameraConfigs)
+                      .map(cam -> new VisionIOPhotonVision(cam))
+                      .toArray(VisionIOPhotonVision[]::new));
+        }
         break;
 
       case SIM:
@@ -285,6 +303,8 @@ public class RobotContainer {
   }
 
   public void simulationPeriodic() {
+    System.out.println(
+        "odometry freq: " + frc.robot.constants.sim.DriveConstants.odometryFrequency);
     sim.simulationPeriodic();
   }
 }
