@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.DriveAtAngle;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.constants.sim.VisionConstants;
@@ -27,10 +30,12 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -52,6 +57,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private final LoggedNetworkNumber angleToHubLoggedNumber =
+      new LoggedNetworkNumber("/RobotContainer/angleToHubDeg", 0.0);
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -247,11 +255,11 @@ public class RobotContainer {
     controller
         .a()
         .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
+            new DriveAtAngle(
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
-                Rotation2d::new));
+                () -> this.getAngletoHub()));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -283,5 +291,30 @@ public class RobotContainer {
 
   public void simulationPeriodic() {
     sim.simulationPeriodic();
+  }
+
+  public Rotation2d getAngletoHub() {
+    Rotation2d angleToHub = Rotation2d.fromDegrees(0);
+    Pose2d robotPosition = drive.getPose();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      System.out.println("Current Alliance: " + currentAlliance.get().toString());
+      switch (currentAlliance.get()) {
+        case Red:
+          Translation2d hubPositionRed = new Translation2d(11.915, 4.035);
+          angleToHub = hubPositionRed.minus(robotPosition.getTranslation()).getAngle();
+          break;
+        case Blue:
+          Translation2d hubPositionBlue = new Translation2d(4.626, 4.035);
+          angleToHub = hubPositionBlue.minus(robotPosition.getTranslation()).getAngle();
+          break;
+        default:
+          System.out.println("Alliance not recognized, defaulting angle to 0 degrees");
+          angleToHub = Rotation2d.fromDegrees(0);
+          break;
+      }
+    }
+    angleToHubLoggedNumber.set(angleToHub.getDegrees());
+    return angleToHub;
   }
 }
