@@ -15,7 +15,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -71,7 +70,7 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
-  private SparkFlexConfig driveConfig;
+  private SparkMaxConfig driveConfig;
   private SparkMaxConfig turnConfig;
 
   public ModuleIOSparkMaxCancoder(int module) {
@@ -82,7 +81,7 @@ public class ModuleIOSparkMaxCancoder implements ModuleIO {
     driveController = driveSpark.getClosedLoopController();
 
     // Configure drive motor
-    driveConfig = new SparkFlexConfig();
+    driveConfig = new SparkMaxConfig();
     driveConfig
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(DriveConstants.driveCurrentLimit)
