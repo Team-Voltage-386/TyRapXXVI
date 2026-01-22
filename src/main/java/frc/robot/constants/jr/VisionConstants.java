@@ -75,7 +75,13 @@ public final class VisionConstants {
       cameraConfigs =
           new CameraConfig[] {
             new CameraConfig(
-                "camera_0", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0)))
+                "frontleft", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
+            new CameraConfig(
+                "frontright", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
+            new CameraConfig(
+                "backleft", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
+            new CameraConfig(
+                "backright", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
           };
 
       cameraStdDevFactors = new double[] {1.0};

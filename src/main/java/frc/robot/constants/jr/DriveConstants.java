@@ -9,7 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public final class DriveConstants {
-  public static final boolean isReefscape = false;
+  public static final boolean isReefscape = true;
 
   // prevent instantiation
   private DriveConstants() {}
@@ -108,8 +108,8 @@ public final class DriveConstants {
           new Rotation2d[] {
             new Rotation2d(2.8), new Rotation2d(2.27), new Rotation2d(1.094), new Rotation2d(-0.08)
           };
-      
-      driveCanIds = new int[] {2, 4, 6, 8}; //Front Left, Front Right, Back Left, Back Right
+
+      driveCanIds = new int[] {2, 4, 6, 8}; // Front Left, Front Right, Back Left, Back Right
 
       turnCanIds = new int[] {1, 3, 5, 7};
 
@@ -203,7 +203,7 @@ public final class DriveConstants {
             new Rotation2d(2.8), new Rotation2d(2.27), new Rotation2d(1.094), new Rotation2d(-0.08)
           };
 
-      driveCanIds = new int[] {6, 52, 7, 2}; //Front Left, Front Right, Back Left, Back Right
+      driveCanIds = new int[] {6, 52, 7, 2}; // Front Left, Front Right, Back Left, Back Right
 
       turnCanIds = new int[] {5, 8, 4, 3};
 
