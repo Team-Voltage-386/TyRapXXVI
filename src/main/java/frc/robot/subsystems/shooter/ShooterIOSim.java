@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
-import org.ironmaple.simulation.seasonspecific.crescendo2024.NoteOnFly;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
@@ -65,10 +65,9 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
   public void simulationSubTick(int i) {
     if (shooting && i % 4 == 0) {
 
-      // TODO: use rebuilt sim, not crescendo
-      NoteOnFly noteOnFly =
-          (NoteOnFly)
-              new NoteOnFly(
+      RebuiltFuelOnFly fuelOnFly =
+          (RebuiltFuelOnFly)
+              new RebuiltFuelOnFly(
                       // Specify the position of the chassis when the note is launched
                       dtPose.get().getTranslation(),
                       // Specify the translation of the shooter from the robot center (in the
@@ -86,11 +85,11 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
                           // Add the shooter’s rotation
                           .plus(turretYaw),
                       // Initial height of the flying note
-                      Meter.of(0.45),
+                      Meter.of(0.5),
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(6000 / 6000 * 20),
+                      MetersPerSecond.of(12),
                       // The angle at which the note is launched
                       turretPitch.getMeasure())
                   // Set the target center to the Crescendo Speaker of the current alliance
@@ -108,16 +107,16 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
                       // Callback for when the note will eventually hit the target (if configured)
                       (pose3ds) ->
                           Logger.recordOutput(
-                              "Shooter/NoteProjectileSuccessfulShot",
+                              "Shooter/FuelProjectileSuccessfulShot",
                               pose3ds.toArray(Pose3d[]::new)),
                       // Callback for when the note will eventually miss the target, or if no target
                       // is configured
                       (pose3ds) ->
                           Logger.recordOutput(
-                              "Shooter/NoteProjectileUnsuccessfulShot",
+                              "Shooter/FuelProjectileUnsuccessfulShot",
                               pose3ds.toArray(Pose3d[]::new)))
                   .enableBecomesGamePieceOnFieldAfterTouchGround();
-      SimulatedArena.getInstance().addGamePieceProjectile(noteOnFly);
+      SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
     }
   }
 }

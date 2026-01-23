@@ -13,6 +13,7 @@ import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.COTS.WHEELS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
 import org.littletonrobotics.junction.Logger;
 
 public class SimContainer {
@@ -44,7 +45,7 @@ public class SimContainer {
       throw new IllegalStateException("SimContainer can only be instantiated in SIM mode");
     }
 
-    arena = new BlankSimArena();
+    arena = new Arena2026Rebuilt();
 
     driveSim =
         new SwerveDriveSimulation(
@@ -66,7 +67,7 @@ public class SimContainer {
 
     Logger.recordOutput("FieldSimulation/RobotPosition", driveSim.getSimulatedDriveTrainPose());
     Logger.recordOutput(
-        "FieldSimulation/Note", SimulatedArena.getInstance().getGamePiecesArrayByType("Note"));
+        "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
   }
 
   @FunctionalInterface
