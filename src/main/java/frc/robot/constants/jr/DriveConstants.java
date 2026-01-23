@@ -90,6 +90,7 @@ public final class DriveConstants {
 
   static {
     if (isReefscape) {
+      // TODO: port constants from reefscape, most of these are from jr (except ids and offsets)
       wheelRadiusMeters = 0.048;
       driveMotorReduction = 6.12; // MAXSwerve with 14 pinion teeth and 22 spur teeth
       driveGearbox = DCMotor.getNEO(1);
@@ -106,7 +107,10 @@ public final class DriveConstants {
 
       zeroRotations =
           new Rotation2d[] {
-            new Rotation2d(2.8), new Rotation2d(2.27), new Rotation2d(1.094), new Rotation2d(-0.08)
+            new Rotation2d(0.8268 + Math.PI),
+            new Rotation2d(0.158),
+            new Rotation2d(2.269),
+            new Rotation2d(1.101 + Math.PI)
           };
 
       driveCanIds = new int[] {2, 4, 6, 8}; // Front Left, Front Right, Back Left, Back Right
@@ -119,13 +123,13 @@ public final class DriveConstants {
 
       turnCurrentLimit = 20;
 
-      driveKp = 2.0;
+      driveKp = 0.2;
 
       driveKd = 0.0;
 
       driveKs = 0.17;
 
-      driveKv = 2.255;
+      driveKv = 0.0;
 
       // Rotor Rotations -> Wheel Radians
       driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction;

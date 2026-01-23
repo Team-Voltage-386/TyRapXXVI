@@ -63,13 +63,12 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         if (DriveConstants.isReefscape) {
           drive =
-          // TODO: Front Left and Back Right drive motors need to be inverted on reefscape
               new Drive(
                   new GyroIOPigeon2(),
-                  new ModuleIOSparkFlex(0),
-                  new ModuleIOSparkFlex(1),
-                  new ModuleIOSparkFlex(2),
-                  new ModuleIOSparkFlex(3));
+                  new ModuleIOSparkFlexCancoder(0),
+                  new ModuleIOSparkFlexCancoder(1),
+                  new ModuleIOSparkFlexCancoder(2),
+                  new ModuleIOSparkFlexCancoder(3));
           vis =
               new Vision(
                   drive::addVisionMeasurement,
