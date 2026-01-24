@@ -56,6 +56,7 @@ public class ModuleIOSparkFlexCancoder implements ModuleIO {
       new TuningUtil("/Tuning/Drive/DriveKv", DriveConstants.driveKv);
 
   private final TuningUtil turnKp = new TuningUtil("/Tuning/Drive/TurnKp", DriveConstants.turnKp);
+  private final TuningUtil turnKi = new TuningUtil("/Tuning/Drive/TurnKi", DriveConstants.turnKi);
   private final TuningUtil turnKd = new TuningUtil("/Tuning/Drive/TurnKd", DriveConstants.turnKd);
 
   private final StatusSignal<Angle> turnPosition;
@@ -87,7 +88,7 @@ public class ModuleIOSparkFlexCancoder implements ModuleIO {
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(DriveConstants.driveCurrentLimit)
         .voltageCompensation(12.0)
-        .inverted(true);
+        .inverted(false);
     driveConfig
         .encoder
         .positionConversionFactor(DriveConstants.driveEncoderPositionFactor)
@@ -137,7 +138,8 @@ public class ModuleIOSparkFlexCancoder implements ModuleIO {
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
     // configure turn CANcoder and PID controller
-    turnController = new PIDController(DriveConstants.turnKp, 0, DriveConstants.turnKd);
+    turnController =
+        new PIDController(DriveConstants.turnKp, DriveConstants.turnKi, DriveConstants.turnKd);
     // Treat the turn angle as continuous (wraps at 0/2pi) so the controller takes the
     // shortest path around the circle. Also set a small tolerance and stop driving
     // the motor when within tolerance to avoid oscillation.
@@ -184,6 +186,7 @@ public class ModuleIOSparkFlexCancoder implements ModuleIO {
                   driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
             });
     turnKp.get().ifPresent(value -> turnController.setP(value));
+    turnKi.get().ifPresent(value -> turnController.setI(value));
     turnKd.get().ifPresent(value -> turnController.setD(value));
 
     double turnRads = turnPosition.getValueAsDouble() * DriveConstants.turnEncoderPositionFactor;

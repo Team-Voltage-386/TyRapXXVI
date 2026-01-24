@@ -4,6 +4,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.vision.VisionIOPhotonVision.CameraConfig;
 
 public final class VisionConstants {
@@ -71,17 +72,26 @@ public final class VisionConstants {
       maxAmbiguity = 0.3;
 
       maxZError = 0.75;
+      // 0.7366 front to back meters 0.6096 side to side
 
       cameraConfigs =
           new CameraConfig[] {
             new CameraConfig(
-                "frontleft", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
+                "frontleft",
+                new Transform3d(
+                    0.7366 / 2, 0.6096 / 2, 0.2, new Rotation3d(0.0, 0.0, Units.degreesToRadians(45)))),
             new CameraConfig(
-                "frontright", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
+                "frontright",
+                new Transform3d(
+                    0.7366 / 2, -0.6096 / 2, 0.3, new Rotation3d(0.0, 0.0, Units.degreesToRadians(315)))),
             new CameraConfig(
-                "backleft", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
+                "backleft",
+                new Transform3d(
+                    -0.7366 / 2, 0.6096 / 2, 0.2, new Rotation3d(0.0, 0.0, Units.degreesToRadians(135)))),
             new CameraConfig(
-                "backright", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0))),
+                "backright",
+                new Transform3d(
+                    -0.7366 / 2, -0.6096 / 2, 0.2, new Rotation3d(0.0, 0.0, Units.degreesToRadians(225)))),
           };
 
       cameraStdDevFactors = new double[] {1.0};
