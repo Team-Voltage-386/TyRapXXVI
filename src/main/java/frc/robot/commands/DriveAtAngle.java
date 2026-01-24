@@ -21,16 +21,16 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class DriveAtAngle extends Command {
   private static final double ANGLE_KP = 12.0;
   private static final double ANGLE_KD = 0.0;
-  private static final double ANGLE_MAX_VELOCITY = 300; // degrees per second
-  private static final double ANGLE_MAX_ACCELERATION = 400; // degrees per second squared
+  private static final double ANGLE_MAX_VELOCITY = 4 * Math.PI; // radians per second
+  private static final double ANGLE_MAX_ACCELERATION = 6 * Math.PI; // radians per second squared
 
   private final LoggedNetworkNumber driveAtAngleKp =
       new LoggedNetworkNumber("/Tuning/driveAtAnglekP", ANGLE_KP);
-  private final LoggedNetworkNumber driveAtAngleMaxAngularVelocityDps =
-      new LoggedNetworkNumber("/Tuning/driveAtAngleMaxAngularVelocityDps", ANGLE_MAX_VELOCITY);
-  private final LoggedNetworkNumber driveAtAngleMaxAngularAccelerationDpss =
+  private final LoggedNetworkNumber driveAtAngleMaxAngularVelocityRps =
+      new LoggedNetworkNumber("/Tuning/driveAtAngleMaxAngularVelocityRps", ANGLE_MAX_VELOCITY);
+  private final LoggedNetworkNumber driveAtAngleMaxAngularAccelerationRpss =
       new LoggedNetworkNumber(
-          "/Tuning/driveAtAngleMaxAngularAccelerationDpss", ANGLE_MAX_ACCELERATION);
+          "/Tuning/driveAtAngleMaxAngularAccelerationRpss", ANGLE_MAX_ACCELERATION);
 
   private final ProfiledPIDController angleController;
   protected final Drive drive;
@@ -44,7 +44,6 @@ public class DriveAtAngle extends Command {
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       Supplier<Rotation2d> rotationSupplier) {
-    // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
     this.drive = drive;
     this.xSupplier = xSupplier;
@@ -68,7 +67,7 @@ public class DriveAtAngle extends Command {
     angleController.setP(driveAtAngleKp.get());
     angleController.setConstraints(
         new TrapezoidProfile.Constraints(
-            driveAtAngleMaxAngularVelocityDps.get(), driveAtAngleMaxAngularAccelerationDpss.get()));
+            driveAtAngleMaxAngularVelocityRps.get(), driveAtAngleMaxAngularAccelerationRpss.get()));
   }
 
   // Called every time the scheduler runs while the command is scheduled.

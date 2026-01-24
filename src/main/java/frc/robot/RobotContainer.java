@@ -298,7 +298,6 @@ public class RobotContainer {
     Pose2d robotPosition = drive.getPose();
     Optional<Alliance> currentAlliance = DriverStation.getAlliance();
     if (currentAlliance.isPresent()) {
-      System.out.println("Current Alliance: " + currentAlliance.get().toString());
       switch (currentAlliance.get()) {
         case Red:
           Translation2d hubPositionRed = new Translation2d(11.915, 4.035);
@@ -309,7 +308,7 @@ public class RobotContainer {
           angleToHub = hubPositionBlue.minus(robotPosition.getTranslation()).getAngle();
           break;
         default:
-          System.out.println("Alliance not recognized, defaulting angle to 0 degrees");
+          System.err.println("Alliance not recognized, defaulting angle to 0 degrees");
           angleToHub = Rotation2d.fromDegrees(0);
           break;
       }
