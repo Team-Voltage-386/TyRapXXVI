@@ -96,8 +96,8 @@ public final class DriveConstants {
       driveGearbox = DCMotor.getNEO(1);
       turnGearbox = DCMotor.getNEO(1);
 
-      trackWidth = Units.inchesToMeters(24.75);
-      wheelBase = Units.inchesToMeters(24.75);
+      trackWidth = 0.289052 * 2;
+      wheelBase = 0.339852 * 2;
 
       robotMassKg = 24.088;
       robotMOI = 6.883;
@@ -123,13 +123,13 @@ public final class DriveConstants {
 
       turnCurrentLimit = 20;
 
-      driveKp = 0.2;
+      driveKp = 0.0;
 
       driveKd = 0.0;
 
-      driveKs = 0.17;
+      driveKs = 0.107;
 
-      driveKv = 0.0;
+      driveKv = 0.104;
 
       // Rotor Rotations -> Wheel Radians
       driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction;
@@ -139,7 +139,7 @@ public final class DriveConstants {
 
       turnKp = 4.5;
 
-      turnKi = 1.0;
+      turnKi = 0.5;
 
       turnKd = 0.0;
 
