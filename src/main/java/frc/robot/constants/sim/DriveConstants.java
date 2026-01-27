@@ -37,8 +37,16 @@ public final class DriveConstants {
   public static final RobotConfig ppRobotConfig =
       frc.robot.constants.jr.DriveConstants.ppRobotConfig;
 
-  public static final double odometryFrequency = 100.0;
+  public static final double odometryFrequency;
 
   public static final double wheelRadiusMeters =
       frc.robot.constants.jr.DriveConstants.wheelRadiusMeters;
+
+  static {
+    if (frc.robot.constants.jr.DriveConstants.isReefscape) {
+      odometryFrequency = 100.0;
+    } else {
+      odometryFrequency = 100.0;
+    }
+  }
 }

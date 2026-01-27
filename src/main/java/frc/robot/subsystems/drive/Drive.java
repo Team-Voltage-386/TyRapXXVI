@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -54,6 +55,8 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition()
       };
   private final SwerveDrivePoseEstimator poseEstimator;
+  protected boolean isFieldRelative = true;
+  protected double driveMultiplier = 0.5;
 
   public Drive(
       GyroIO gyroIO,
@@ -169,6 +172,29 @@ public class Drive extends SubsystemBase {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && frc.robot.Constants.currentMode != Mode.SIM);
+  }
+
+  /**
+   * Method to drive the robot using joystick info.
+   *
+   * @param xSpeed        Speed of the robot in the x direction (forward).
+   * @param ySpeed        Speed of the robot in the y direction (sideways).
+   * @param rotSpeed      Angular rate of the robot.
+   */
+  public void drive(double xSpeed, double ySpeed, double rotSpeed) {
+    xSpeed = xSpeed * driveMultiplier;
+    ySpeed = ySpeed * driveMultiplier;
+    rotSpeed = rotSpeed * driveMultiplier;
+
+    ChassisSpeeds chassisSpeeds =
+        isFieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rotSpeed, rawGyroRotation)
+            : new ChassisSpeeds(xSpeed, ySpeed, rotSpeed);
+    runVelocity(chassisSpeeds);
+
+    SmartDashboard.putNumber("desired X speed", xSpeed);
+    SmartDashboard.putNumber("desired Y speed", ySpeed);
+    SmartDashboard.putNumber("dsired rot speed", rotSpeed);
   }
 
   /**
@@ -310,5 +336,9 @@ public class Drive extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return DriveConstants.maxSpeed / DriveConstants.driveBaseRadius;
+  }
+
+  public void setFieldRelative(boolean fieldRelative) {
+    isFieldRelative = fieldRelative;
   }
 }
