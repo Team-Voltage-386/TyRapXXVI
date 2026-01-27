@@ -5,28 +5,35 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
+import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveAtAngle;
+import frc.robot.commands.CenterOnTag;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.sim.VisionConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +41,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -67,19 +75,35 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOSparkMaxCancoder(0),
-                new ModuleIOSparkMaxCancoder(1),
-                new ModuleIOSparkMaxCancoder(2),
-                new ModuleIOSparkMaxCancoder(3));
-        vis =
-            new Vision(
-                drive::addVisionMeasurement,
-                Stream.of(VisionConstants.cameraConfigs)
-                    .map(cam -> new VisionIOPhotonVision(cam))
-                    .toArray(VisionIOPhotonVision[]::new));
+        if (DriveConstants.isReefscape) {
+          drive =
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOSparkFlexCancoder(0),
+                  new ModuleIOSparkFlexCancoder(1),
+                  new ModuleIOSparkFlexCancoder(2),
+                  new ModuleIOSparkFlexCancoder(3));
+          vis =
+              new Vision(
+                  drive::addVisionMeasurement,
+                  Stream.of(VisionConstants.cameraConfigs)
+                      .map(cam -> new VisionIOPhotonVision(cam))
+                      .toArray(VisionIOPhotonVision[]::new));
+        } else {
+          drive =
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOSparkMaxCancoder(0),
+                  new ModuleIOSparkMaxCancoder(1),
+                  new ModuleIOSparkMaxCancoder(2),
+                  new ModuleIOSparkMaxCancoder(3));
+          vis =
+              new Vision(
+                  drive::addVisionMeasurement,
+                  Stream.of(VisionConstants.cameraConfigs)
+                      .map(cam -> new VisionIOPhotonVision(cam))
+                      .toArray(VisionIOPhotonVision[]::new));
+        }
         break;
 
       case SIM:
@@ -264,9 +288,9 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0° when Y button is pressed
     controller
-        .b()
+        .y()
         .onTrue(
             Commands.runOnce(
                     () ->
@@ -274,6 +298,11 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller.rightBumper().onTrue(new InstantCommand(() -> this.pathfindToPosition(0, 0)));
+
+    controller.leftBumper().onTrue(new InstantCommand(() -> this.pathfindToPath("CollectDepot")));
+    controller.b().onTrue(new CenterOnTag(drive, vis));
   }
 
   /**
@@ -290,6 +319,8 @@ public class RobotContainer {
   }
 
   public void simulationPeriodic() {
+    System.out.println(
+        "odometry freq: " + frc.robot.constants.sim.DriveConstants.odometryFrequency);
     sim.simulationPeriodic();
   }
 
@@ -315,5 +346,52 @@ public class RobotContainer {
     }
     angleToHubLoggedNumber.set(angleToHub.getDegrees());
     return angleToHub;
+  }
+  
+  public void pathfindToPosition(double xPosition, double yPosition) {
+    // Since we are using a holonomic drivetrain, the rotation component of this pose
+    // represents the goal holonomic rotation
+    Pose2d targetPose = new Pose2d(xPosition, yPosition, Rotation2d.fromDegrees(180));
+
+    // Create the constraints to use while pathfinding
+    PathConstraints constraints =
+        new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+    // Since AutoBuilder is configured, we can use it to build pathfinding commands
+    Command pathfindingCommand =
+        AutoBuilder.pathfindToPose(
+            targetPose, constraints, 0.0); // , // Goal end velocity in meters/sec
+    // 0.0 // Rotation delay distance in meters. This is how far the robot should travel before
+    // attempting to rotate.
+    CommandScheduler.getInstance().schedule(pathfindingCommand);
+  }
+
+  public void pathfindToPath(String pathName) {
+    // Load the path we want to pathfind to and follow
+    PathPlannerPath path;
+    try {
+      path = PathPlannerPath.fromPathFile(pathName);
+    } catch (FileVersionException e) {
+      System.err.println("Path is wrong file version!");
+      e.printStackTrace();
+      return;
+    } catch (IOException e) {
+      System.err.println("Path file not found!");
+      e.printStackTrace();
+      return;
+    } catch (ParseException e) {
+      System.err.println("Path file can't be parsed!");
+      e.printStackTrace();
+      return;
+    }
+
+    // Create the constraints to use while pathfinding. The constraints defined in the path will
+    // only be used for the path.
+    PathConstraints constraints =
+        new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+    // Since AutoBuilder is configured, we can use it to build pathfinding commands
+    Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
+    CommandScheduler.getInstance().schedule(pathfindingCommand);
   }
 }
