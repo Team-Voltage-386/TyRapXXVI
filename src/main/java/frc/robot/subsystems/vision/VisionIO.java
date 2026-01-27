@@ -8,16 +8,16 @@ public interface VisionIO {
 
   @AutoLog
   class VisionIOInputs {
-
     public boolean connected = false;
     public TargetObservation latestTargetObservation =
-        new TargetObservation(new Rotation2d(), new Rotation2d());
+        new TargetObservation(new Rotation2d(), new Rotation2d(), false, new Pose3d(), 0.0);
     public PoseObservation[] poseObservations = new PoseObservation[0];
     public int[] tagIds = new int[0];
   }
 
   /** Represents the angle to a simple target, not used for pose estimation. */
-  record TargetObservation(Rotation2d tx, Rotation2d ty) {}
+  record TargetObservation(
+      Rotation2d tx, Rotation2d ty, boolean is3dValid, Pose3d tagPose, double zThetaDeg) {}
 
   /** Represents a robot pose sample used for pose estimation. */
   record PoseObservation(

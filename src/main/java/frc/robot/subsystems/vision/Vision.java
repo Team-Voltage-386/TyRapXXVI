@@ -22,6 +22,10 @@ public class Vision extends SubsystemBase {
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
+  protected int timeSinceValid = 0;
+  protected double xDistanceMeters = 0.0;
+  protected double yDistanceMeters = 0.0;
+  protected double zThetaDeg = 0.0;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -39,6 +43,8 @@ public class Vision extends SubsystemBase {
       disconnectedAlerts[i] =
           new Alert("Vision camera " + i + " is disconnected.", AlertType.kWarning);
     }
+
+    timeSinceValid = 0;
   }
 
   /**
@@ -46,7 +52,7 @@ public class Vision extends SubsystemBase {
    *
    * @param cameraIndex The index of the camera to use.
    */
-  public Rotation2d getTargetX(int cameraIndex) {
+  public Rotation2d getTargetXAngle(int cameraIndex) {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
@@ -160,6 +166,45 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         "Vision/Summary/RobotPosesRejected",
         allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+
+    if (allTagPoses.size() == 0) {
+      timeSinceValid++;
+    } else {
+      for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+        if (inputs[cameraIndex].latestTargetObservation.is3dValid()) {
+          xDistanceMeters = inputs[cameraIndex].latestTargetObservation.tagPose().getX();
+          yDistanceMeters = inputs[cameraIndex].latestTargetObservation.tagPose().getY();
+          zThetaDeg = inputs[cameraIndex].latestTargetObservation.zThetaDeg();
+          zThetaDeg += 180;
+          if (zThetaDeg > 180) {
+            zThetaDeg -= 360;
+          }
+          Logger.recordOutput("Vision/Summary/ZThetaDeg", zThetaDeg);
+          timeSinceValid = 0;
+          break;
+        }
+      }
+    }
+  }
+
+  public int getTimeSinceValid() {
+    return timeSinceValid;
+  }
+
+  public double getxDistanceMeters() {
+    return xDistanceMeters;
+  }
+
+  public double getyDistanceMeters() {
+    return yDistanceMeters;
+  }
+
+  public double getFilteredYawDegrees() {
+    return zThetaDeg;
+  }
+
+  public double getYawAngleDegrees() {
+    return zThetaDeg;
   }
 
   @FunctionalInterface
