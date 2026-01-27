@@ -1,10 +1,11 @@
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
@@ -16,6 +17,7 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
 
   private Rotation2d turretYaw = new Rotation2d();
   private Rotation2d turretPitch = new Rotation2d();
+  private double turretRPM = 0.0;
 
   boolean shooting = false;
 
@@ -36,13 +38,18 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
-    turretYaw = position;
+    turretYaw = new Rotation2d(MathUtil.clamp(position.getRadians(), -Math.PI, Math.PI));
   }
 
   /* Set the turret pitch to the specified position. */
   @Override
   public void setTurretPitch(Rotation2d position) {
-    turretPitch = position;
+    turretPitch = new Rotation2d(MathUtil.clamp(position.getRadians(), 0, Math.PI / 2));
+  }
+
+  @Override
+  public void setTurretSpeed(AngularVelocity speed) {
+    turretRPM = speed.in(RPM);
   }
 
   /**
@@ -89,17 +96,17 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(12),
+                      MetersPerSecond.of(turretRPM / 6000 * 12),
                       // The angle at which the note is launched
                       turretPitch.getMeasure())
                   // Set the target center to the Crescendo Speaker of the current alliance
                   .withTargetPosition(
                       () ->
                           FieldMirroringUtils.toCurrentAllianceTranslation(
-                              new Translation3d(0.25, 5.56, 2.3)))
+                              new Translation3d(11.9, 4.1, 1.5)))
                   // Set the tolerance: x: ±0.5m, y: ±1.2m, z: ±0.3m (this is the size of the
                   // speaker's "mouth")
-                  .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
+                  .withTargetTolerance(new Translation3d(1, 1, 1))
                   // Set a callback to run when the note hits the target
                   .withHitTargetCallBack(() -> System.out.println("Hit speaker, +2 points!"))
                   // Configure callbacks to visualize the flight trajectory of the projectile

@@ -24,7 +24,6 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.Arrays;
@@ -74,7 +73,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 Stream.of(VisionConstants.cameraConfigs)
-                    .map(cam -> new VisionIOPhotonVision(cam))
+                    .map(VisionIOPhotonVision::new)
                     .toArray(VisionIOPhotonVision[]::new));
 
         shooter = null;
@@ -125,7 +124,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vis = new Vision(drive::addVisionMeasurement, new VisionIO[] {});
+        vis = new Vision(drive::addVisionMeasurement);
         break;
     }
 
@@ -179,7 +178,7 @@ public class RobotContainer {
             new GoalEndState(0.0, playerStation.getRotation())
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-            );
+        );
 
     // Prevent the path from being flipped if the coordinates are already correct
     path.preventFlipping = true;
@@ -193,9 +192,9 @@ public class RobotContainer {
 
     Pose2d[] testPoses =
         new Pose2d[] {
-          new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
-          new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
-          new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
+            new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
+            new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
+            new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
         };
     List<Waypoint> pptestWaypoints1 = PathPlannerPath.waypointsFromPoses(testPoses);
 
@@ -210,7 +209,7 @@ public class RobotContainer {
             new GoalEndState(0.0, Rotation2d.fromDegrees(90))
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-            );
+        );
 
     pptestpath1.preventFlipping = true;
     Collections.reverse(Arrays.asList(testPoses));
@@ -227,7 +226,7 @@ public class RobotContainer {
             new GoalEndState(0.0, Rotation2d.fromDegrees(0))
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-            );
+        );
     pptestpath2.preventFlipping = true;
     autoChooser.addOption(
         "PP Path Test",
@@ -281,28 +280,22 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .y()
-        .onTrue(Commands.runOnce(() -> shooter.shoot()))
-        .onFalse(Commands.runOnce(() -> shooter.stop()));
+    if (shooter != null) {
+      controller.leftTrigger().whileTrue(shooter.shootCommand());
 
-    controller
-        .povUp()
-        .whileTrue(
-            new RepeatCommand(Commands.runOnce(() -> shooter.addPitch(Rotation2d.fromDegrees(5)))));
-    controller
-        .povDown()
-        .whileTrue(
-            new RepeatCommand(
-                Commands.runOnce(() -> shooter.addPitch(Rotation2d.fromDegrees(-5)))));
-    controller
-        .povLeft()
-        .whileTrue(
-            new RepeatCommand(Commands.runOnce(() -> shooter.addYaw(Rotation2d.fromDegrees(-5)))));
-    controller
-        .povRight()
-        .whileTrue(
-            new RepeatCommand(Commands.runOnce(() -> shooter.addYaw(Rotation2d.fromDegrees(5)))));
+      controller
+          .povUp()
+          .whileTrue(new RepeatCommand(shooter.addPitchCommand(Rotation2d.fromDegrees(5))));
+      controller
+          .povDown()
+          .whileTrue(new RepeatCommand(shooter.addPitchCommand(Rotation2d.fromDegrees(-5))));
+      controller
+          .povLeft()
+          .whileTrue(new RepeatCommand(shooter.addYawCommand(Rotation2d.fromDegrees(-5))));
+      controller
+          .povRight()
+          .whileTrue(new RepeatCommand(shooter.addYawCommand(Rotation2d.fromDegrees(5))));
+    }
   }
 
   /**

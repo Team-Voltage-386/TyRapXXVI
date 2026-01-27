@@ -1,6 +1,10 @@
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -20,23 +24,20 @@ public class Shooter extends SubsystemBase {
 
     io.setTurretPitch(Rotation2d.fromDegrees(45));
     io.setTurretYaw(Rotation2d.k180deg);
+    io.setTurretSpeed(RPM.of(5000));
   }
 
-  // TODO: cleanup API; extract these into individual commands and don't expose to outside
-  public void addPitch(Rotation2d deltaPitch) {
-    io.setTurretPitch(inputs.turretPitch.plus(deltaPitch));
+  public Command addPitchCommand(Rotation2d deltaPitch) {
+    return runOnce(() -> io.setTurretPitch(inputs.turretPitch.plus(deltaPitch)));
   }
 
-  public void addYaw(Rotation2d deltaYaw) {
-    io.setTurretYaw(inputs.turretYaw.plus(deltaYaw));
+  public Command addYawCommand(Rotation2d deltaYaw) {
+    return runOnce(() -> io.setTurretYaw(inputs.turretYaw.plus(deltaYaw)));
   }
 
-  public void shoot() {
-    io.beginShooting();
-  }
-
-  public void stop() {
-    io.endShooting();
+  public Command shootCommand() {
+    return new FunctionalCommand(
+        () -> {}, io::beginShooting, (v) -> io.endShooting(), () -> false, this);
   }
 
   @Override
