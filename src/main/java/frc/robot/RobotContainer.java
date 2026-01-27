@@ -1,14 +1,13 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,8 +20,10 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.constants.sim.VisionConstants;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.flywheel.Flywheel;
+import frc.robot.subsystems.flywheel.FlywheelIOSim;
+import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
@@ -45,7 +46,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vis;
-  private Shooter shooter;
+  private Flywheel flywheel;
+  private Turret turret;
   // private Elevator elevator;
 
   public SimContainer sim;
@@ -76,7 +78,7 @@ public class RobotContainer {
                     .map(VisionIOPhotonVision::new)
                     .toArray(VisionIOPhotonVision[]::new));
 
-        shooter = null;
+        flywheel = null;
         break;
 
       case SIM:
@@ -102,13 +104,17 @@ public class RobotContainer {
                             new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
                     .toArray(VisionIOPhotonVision[]::new));
 
-        ShooterIOSim shooterIo =
-            new ShooterIOSim(
+        TurretIOSim turretIo =
+            new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
                 driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
-        sim.registerSimulator(shooterIo);
+        sim.registerSimulator(turretIo);
 
-        shooter = new Shooter(shooterIo, drive::getPose);
+        turret = new Turret(turretIo, drive::getPose);
+
+        flywheel =
+            new Flywheel(
+                new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -178,7 +184,7 @@ public class RobotContainer {
             new GoalEndState(0.0, playerStation.getRotation())
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-        );
+            );
 
     // Prevent the path from being flipped if the coordinates are already correct
     path.preventFlipping = true;
@@ -192,9 +198,9 @@ public class RobotContainer {
 
     Pose2d[] testPoses =
         new Pose2d[] {
-            new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
-            new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
-            new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
+          new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
+          new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
+          new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
         };
     List<Waypoint> pptestWaypoints1 = PathPlannerPath.waypointsFromPoses(testPoses);
 
@@ -209,7 +215,7 @@ public class RobotContainer {
             new GoalEndState(0.0, Rotation2d.fromDegrees(90))
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-        );
+            );
 
     pptestpath1.preventFlipping = true;
     Collections.reverse(Arrays.asList(testPoses));
@@ -226,7 +232,7 @@ public class RobotContainer {
             new GoalEndState(0.0, Rotation2d.fromDegrees(0))
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-        );
+            );
     pptestpath2.preventFlipping = true;
     autoChooser.addOption(
         "PP Path Test",
@@ -280,21 +286,27 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    if (shooter != null) {
-      controller.leftTrigger().whileTrue(shooter.shootCommand());
+    if (flywheel != null && turret != null) {
+      controller.y().whileTrue(flywheel.shootCommand());
+
+      // TODO: get the speed from the flywheel
+      turret.setDefaultCommand(
+          turret.aimAtCommand(
+              MetersPerSecond.of(12.0),
+              new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero)));
 
       controller
           .povUp()
-          .whileTrue(new RepeatCommand(shooter.addPitchCommand(Rotation2d.fromDegrees(5))));
+          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(5))));
       controller
           .povDown()
-          .whileTrue(new RepeatCommand(shooter.addPitchCommand(Rotation2d.fromDegrees(-5))));
+          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(-5))));
       controller
           .povLeft()
-          .whileTrue(new RepeatCommand(shooter.addYawCommand(Rotation2d.fromDegrees(-5))));
+          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(-5))));
       controller
           .povRight()
-          .whileTrue(new RepeatCommand(shooter.addYawCommand(Rotation2d.fromDegrees(5))));
+          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
     }
   }
 

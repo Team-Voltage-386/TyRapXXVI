@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -13,23 +13,29 @@ import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterIOSim implements ShooterIO, Simulatable {
+/**
+ * Physics sim implementation of turret IO.
+ * <p>
+ * Also includes the shooter functionality for simplicity.
+ */
+public class TurretIOSim implements TurretIO, Simulatable {
 
   private Rotation2d turretYaw = new Rotation2d();
   private Rotation2d turretPitch = new Rotation2d();
-  private double turretRPM = 0.0;
 
-  boolean shooting = false;
+  private double flywheelRPM = 0.0;
+
+  boolean flywheelShooting = false;
 
   private final Supplier<Pose2d> dtPose;
   private final Supplier<ChassisSpeeds> speedSupplier;
 
-  public ShooterIOSim(Supplier<Pose2d> pose3dSupplier, Supplier<ChassisSpeeds> speedSupplier) {
+  public TurretIOSim(Supplier<Pose2d> pose3dSupplier, Supplier<ChassisSpeeds> speedSupplier) {
     this.dtPose = pose3dSupplier;
     this.speedSupplier = speedSupplier;
   }
 
-  public void updateInputs(ShooterIO.ShooterIOInputs inputs) {
+  public void updateInputs(TurretIOInputs inputs) {
     inputs.connected = true;
     inputs.turretYaw = turretYaw;
     inputs.turretPitch = turretPitch;
@@ -47,31 +53,17 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
     turretPitch = new Rotation2d(MathUtil.clamp(position.getRadians(), 0, Math.PI / 2));
   }
 
-  @Override
-  public void setTurretSpeed(AngularVelocity speed) {
-    turretRPM = speed.in(RPM);
+  public void setFlywheelShooting(boolean shooting) {
+    this.flywheelShooting = shooting;
   }
 
-  /**
-   * Begin shooting Fuel with the current shooter configuration.
-   */
-  @Override
-  public void beginShooting() {
-    shooting = true;
-  }
-
-  /**
-   * Stop shooting Fuel.
-   */
-  @Override
-  public void endShooting() {
-    shooting = false;
+  public void setFlywheelSpeed(AngularVelocity speed) {
+    this.flywheelRPM = speed.in(RPM);
   }
 
   @Override
   public void simulationSubTick(int i) {
-    if (shooting && i % 4 == 0) {
-
+    if (flywheelShooting && i % 4 == 0) {
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -96,7 +88,7 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(turretRPM / 6000 * 12),
+                      MetersPerSecond.of(flywheelRPM / 6000 * 12),
                       // The angle at which the note is launched
                       turretPitch.getMeasure())
                   // Set the target center to the Crescendo Speaker of the current alliance
@@ -114,13 +106,13 @@ public class ShooterIOSim implements ShooterIO, Simulatable {
                       // Callback for when the note will eventually hit the target (if configured)
                       (pose3ds) ->
                           Logger.recordOutput(
-                              "Shooter/FuelProjectileSuccessfulShot",
+                              "Shooter/Simulation/FuelProjectileSuccessfulShot",
                               pose3ds.toArray(Pose3d[]::new)),
                       // Callback for when the note will eventually miss the target, or if no target
                       // is configured
                       (pose3ds) ->
                           Logger.recordOutput(
-                              "Shooter/FuelProjectileUnsuccessfulShot",
+                              "Shooter/Simulation/FuelProjectileUnsuccessfulShot",
                               pose3ds.toArray(Pose3d[]::new)))
                   .enableBecomesGamePieceOnFieldAfterTouchGround();
       SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
