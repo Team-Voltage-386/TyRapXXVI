@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -289,10 +287,9 @@ public class RobotContainer {
     if (flywheel != null && turret != null) {
       controller.y().whileTrue(flywheel.shootCommand());
 
-      // TODO: get the speed from the flywheel
       turret.setDefaultCommand(
           turret.aimAtCommand(
-              MetersPerSecond.of(12.0),
+              flywheel::getShotSpeed,
               new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero)));
 
       controller

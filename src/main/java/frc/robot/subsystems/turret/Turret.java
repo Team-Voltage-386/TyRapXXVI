@@ -41,7 +41,9 @@ public class Turret extends SubsystemBase {
    * @param targetPose - The pose to hit with the Fuel.
    * @return The command to aim the turret.
    */
-  public Command aimAtCommand(LinearVelocity shootSpeed, Pose3d targetPose) {
+  // TODO: also calculate the optimal flywheel speed to hit the target at the same time.
+  // TODO: ensure robot movement is included in the calculation.
+  public Command aimAtCommand(Supplier<LinearVelocity> shootSpeed, Pose3d targetPose) {
     return runOnce(
         () -> {
           // deltaY = v0 sin(theta) * t - 0.5 g t^2
@@ -50,8 +52,8 @@ public class Turret extends SubsystemBase {
                   dtPose.get().getTranslation().getX(), dtPose.get().getTranslation().getY(), 0.5);
           Translation3d deltaPos = targetPose.getTranslation().minus(dtPos);
           double g = 9.81; // m/s^2
-          double v0 = shootSpeed.in(MetersPerSecond);
-          double theta = calcHitYaw(deltaPos, v0, g);
+          double v0 = shootSpeed.get().in(MetersPerSecond);
+          double theta = calcHitPitch(deltaPos, v0, g);
 
           double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
           io.setTurretPitch(new Rotation2d(theta));
@@ -59,21 +61,29 @@ public class Turret extends SubsystemBase {
         });
   }
 
-  private static double calcHitYaw(Translation3d deltaPos, double v0, double g) {
-    double x = deltaPos.getX();
+  // Calculate hit pitch with a range of [0, pi/2] radians.
+  // this also accounts for the robot being on either side of the target.
+  private static double calcHitPitch(Translation3d deltaPos, double v0, double g) {
+    double x = Math.hypot(deltaPos.getX(), deltaPos.getY());
     double y = deltaPos.getZ();
-    double discriminant = v0 * v0 * v0 * v0 - g * (g * x * x + 2 * y * v0 * v0);
-    double theta;
-    if (discriminant >= 0) {
-      double theta1 = Math.atan((v0 * v0 + Math.sqrt(discriminant)) / (g * x));
-      double theta2 = Math.atan((v0 * v0 - Math.sqrt(discriminant)) / (g * x));
-      // Choose the smaller angle to avoid high arcs
-      theta = Math.min(theta1, theta2);
-    } else {
-      // Target is out of range; aim at maximum possible angle
-      theta = Math.atan2(v0 * v0, g * x);
+
+    double v0Squared = v0 * v0;
+    double underSqrt = v0Squared * v0Squared - g * (g * x * x + 2 * y * v0Squared);
+
+    if (underSqrt < 0) {
+      // No valid solution, return 45 degrees as a default
+      return Math.PI / 4;
     }
-    return theta;
+
+    double sqrtPart = Math.sqrt(underSqrt);
+    double angle1 = Math.atan((v0Squared + sqrtPart) / (g * x));
+    double angle2 = Math.atan((v0Squared - sqrtPart) / (g * x));
+
+    // Choose the higher angle to ensure it goes over the target
+    double chosenAngle = Math.max(angle1, angle2);
+
+    // Clamp the angle to [0, pi/2]
+    return Math.max(0, Math.min(Math.PI / 2, chosenAngle));
   }
 
   @Override

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.flywheel;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -22,6 +23,8 @@ public class FlywheelIOSim implements FlywheelIO {
   public void updateInputs(FlywheelIO.FlywheelIOInputs inputs) {
     inputs.connected = true;
     inputs.flywheelSpeed = flywheelSpeed;
+    // assuming 12 meters per second at 6000 RPM
+    inputs.shotSpeed = MetersPerSecond.of(flywheelSpeed.in(RPM) / 6000 * 12);
   }
 
   @Override

@@ -1,8 +1,10 @@
 package frc.robot.subsystems.flywheel;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import org.littletonrobotics.junction.AutoLog;
 
 /** Interface for shooter hardware interaction. */
@@ -13,6 +15,8 @@ public interface FlywheelIO {
 
     public boolean connected = false;
     public AngularVelocity flywheelSpeed = RPM.of(0);
+    // the estimated speed of the fuel when initially shot
+    public LinearVelocity shotSpeed = MetersPerSecond.of(0);
   }
 
   default void updateInputs(FlywheelIOInputs inputs) {}

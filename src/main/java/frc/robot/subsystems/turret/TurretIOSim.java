@@ -6,11 +6,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
-import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -63,7 +65,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
 
   @Override
   public void simulationSubTick(int i) {
-    if (flywheelShooting && i % 4 == 0) {
+    if (flywheelShooting && i % 256 == 0) {
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -94,13 +96,12 @@ public class TurretIOSim implements TurretIO, Simulatable {
                   // Set the target center to the Crescendo Speaker of the current alliance
                   .withTargetPosition(
                       () ->
-                          FieldMirroringUtils.toCurrentAllianceTranslation(
-                              new Translation3d(11.9, 4.1, 1.5)))
+                          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                              ? Constants.blueHubPose
+                              : Constants.redHubPose)
                   // Set the tolerance: x: ±0.5m, y: ±1.2m, z: ±0.3m (this is the size of the
                   // speaker's "mouth")
                   .withTargetTolerance(new Translation3d(1, 1, 1))
-                  // Set a callback to run when the note hits the target
-                  .withHitTargetCallBack(() -> System.out.println("Hit speaker, +2 points!"))
                   // Configure callbacks to visualize the flight trajectory of the projectile
                   .withProjectileTrajectoryDisplayCallBack(
                       // Callback for when the note will eventually hit the target (if configured)
