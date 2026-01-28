@@ -5,25 +5,16 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import edu.wpi.first.math.geometry.*;
 import com.pathplanner.lib.util.FileVersionException;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.CenterOnTag;
-import frc.robot.commands.DriveAtAngle;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.constants.jr.DriveConstants;
@@ -36,12 +27,16 @@ import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.json.simple.parser.ParseException;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -352,22 +347,23 @@ public class RobotContainer {
     Pose2d robotPosition = drive.getPose();
     Optional<Alliance> currentAlliance = DriverStation.getAlliance();
     if (currentAlliance.isPresent()) {
-      switch (currentAlliance.get()) {
-        case Red:
-          Translation2d hubPositionRed = new Translation2d(11.915, 4.035);
-          angleToHub = hubPositionRed.minus(robotPosition.getTranslation()).getAngle();
-          break;
-        case Blue:
-          Translation2d hubPositionBlue = new Translation2d(4.626, 4.035);
-          angleToHub = hubPositionBlue.minus(robotPosition.getTranslation()).getAngle();
-          break;
-        default:
-          System.err.println("Alliance not recognized, defaulting angle to 0 degrees");
-          angleToHub = Rotation2d.fromDegrees(0);
-          break;
-      }
+      angleToHub =
+          switch (currentAlliance.get()) {
+            case Red -> {
+              yield Constants.redHubPose
+                  .toTranslation2d()
+                  .minus(robotPosition.getTranslation())
+                  .getAngle();
+            }
+            case Blue -> {
+              yield Constants.blueHubPose
+                  .toTranslation2d()
+                  .minus(robotPosition.getTranslation())
+                  .getAngle();
+            }
+          };
     }
-    angleToHubLoggedNumber.set(angleToHub.getDegrees());
+    Logger.recordOutput("/Drive/AngleToHub", angleToHub.getDegrees());
     return angleToHub;
   }
 
