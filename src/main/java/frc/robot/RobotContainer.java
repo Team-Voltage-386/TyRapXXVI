@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.sim.VisionConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
@@ -61,14 +62,26 @@ public class RobotContainer {
 
     switch (Constants.currentMode) {
       case REAL:
+
         // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOSparkMaxCancoder(0),
-                new ModuleIOSparkMaxCancoder(1),
-                new ModuleIOSparkMaxCancoder(2),
-                new ModuleIOSparkMaxCancoder(3));
+        if (DriveConstants.isReefscape) {
+          drive =
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOSparkFlexCancoder(0),
+                  new ModuleIOSparkFlexCancoder(1),
+                  new ModuleIOSparkFlexCancoder(2),
+                  new ModuleIOSparkFlexCancoder(3));
+        } else {
+          drive =
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOSparkMaxCancoder(0),
+                  new ModuleIOSparkMaxCancoder(1),
+                  new ModuleIOSparkMaxCancoder(2),
+                  new ModuleIOSparkMaxCancoder(3));
+        }
+
         vis =
             new Vision(
                 drive::addVisionMeasurement,
