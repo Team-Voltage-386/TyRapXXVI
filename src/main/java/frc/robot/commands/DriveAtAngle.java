@@ -19,7 +19,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveAtAngle extends Command {
-  private static final double ANGLE_KP = 12.0;
+  private static final double ANGLE_KP = 6.0;
   private static final double ANGLE_KD = 0.0;
   private static final double ANGLE_MAX_VELOCITY = 4 * Math.PI; // radians per second
   private static final double ANGLE_MAX_ACCELERATION = 6 * Math.PI; // radians per second squared
