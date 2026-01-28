@@ -182,7 +182,7 @@ public class RobotContainer {
             new GoalEndState(0.0, playerStation.getRotation())
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-            );
+        );
 
     // Prevent the path from being flipped if the coordinates are already correct
     path.preventFlipping = true;
@@ -196,9 +196,9 @@ public class RobotContainer {
 
     Pose2d[] testPoses =
         new Pose2d[] {
-          new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
-          new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
-          new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
+            new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
+            new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
+            new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
         };
     List<Waypoint> pptestWaypoints1 = PathPlannerPath.waypointsFromPoses(testPoses);
 
@@ -213,7 +213,7 @@ public class RobotContainer {
             new GoalEndState(0.0, Rotation2d.fromDegrees(90))
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-            );
+        );
 
     pptestpath1.preventFlipping = true;
     Collections.reverse(Arrays.asList(testPoses));
@@ -230,7 +230,7 @@ public class RobotContainer {
             new GoalEndState(0.0, Rotation2d.fromDegrees(0))
             // Goal end state. You can set a holonomic rotation here. If using a differential
             // drivetrain, the rotation will have no effect.
-            );
+        );
     pptestpath2.preventFlipping = true;
     autoChooser.addOption(
         "PP Path Test",
@@ -285,7 +285,7 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     if (flywheel != null && turret != null) {
-      controller.y().whileTrue(flywheel.shootCommand());
+      controller.leftTrigger().whileTrue(flywheel.shootCommand());
 
       turret.setDefaultCommand(
           turret.aimAtCommand(
