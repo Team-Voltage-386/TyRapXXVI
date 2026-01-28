@@ -6,6 +6,14 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 import edu.wpi.first.math.geometry.*;
+import com.pathplanner.lib.util.FileVersionException;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.CenterOnTag;
+import frc.robot.commands.DriveAtAngle;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.constants.jr.DriveConstants;
@@ -335,5 +345,76 @@ public class RobotContainer {
 
   public void simulationPeriodic() {
     sim.simulationPeriodic();
+  }
+
+  public Rotation2d getAngletoHub() {
+    Rotation2d angleToHub = Rotation2d.fromDegrees(0);
+    Pose2d robotPosition = drive.getPose();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          Translation2d hubPositionRed = new Translation2d(11.915, 4.035);
+          angleToHub = hubPositionRed.minus(robotPosition.getTranslation()).getAngle();
+          break;
+        case Blue:
+          Translation2d hubPositionBlue = new Translation2d(4.626, 4.035);
+          angleToHub = hubPositionBlue.minus(robotPosition.getTranslation()).getAngle();
+          break;
+        default:
+          System.err.println("Alliance not recognized, defaulting angle to 0 degrees");
+          angleToHub = Rotation2d.fromDegrees(0);
+          break;
+      }
+    }
+    angleToHubLoggedNumber.set(angleToHub.getDegrees());
+    return angleToHub;
+  }
+
+  public void pathfindToPosition(double xPosition, double yPosition) {
+    // Since we are using a holonomic drivetrain, the rotation component of this pose
+    // represents the goal holonomic rotation
+    Pose2d targetPose = new Pose2d(xPosition, yPosition, Rotation2d.fromDegrees(180));
+
+    // Create the constraints to use while pathfinding
+    PathConstraints constraints =
+        new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+    // Since AutoBuilder is configured, we can use it to build pathfinding commands
+    Command pathfindingCommand =
+        AutoBuilder.pathfindToPose(
+            targetPose, constraints, 0.0); // , // Goal end velocity in meters/sec
+    // 0.0 // Rotation delay distance in meters. This is how far the robot should travel before
+    // attempting to rotate.
+    CommandScheduler.getInstance().schedule(pathfindingCommand);
+  }
+
+  public void pathfindToPath(String pathName) {
+    // Load the path we want to pathfind to and follow
+    PathPlannerPath path;
+    try {
+      path = PathPlannerPath.fromPathFile(pathName);
+    } catch (FileVersionException e) {
+      System.err.println("Path is wrong file version!");
+      e.printStackTrace();
+      return;
+    } catch (IOException e) {
+      System.err.println("Path file not found!");
+      e.printStackTrace();
+      return;
+    } catch (ParseException e) {
+      System.err.println("Path file can't be parsed!");
+      e.printStackTrace();
+      return;
+    }
+
+    // Create the constraints to use while pathfinding. The constraints defined in the path will
+    // only be used for the path.
+    PathConstraints constraints =
+        new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+    // Since AutoBuilder is configured, we can use it to build pathfinding commands
+    Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
+    CommandScheduler.getInstance().schedule(pathfindingCommand);
   }
 }
