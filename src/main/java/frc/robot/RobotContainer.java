@@ -5,6 +5,7 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
+import edu.wpi.first.math.geometry.*;
 import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,9 +17,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -29,21 +29,20 @@ import frc.robot.commands.DriveToPose;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.sim.VisionConstants;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.flywheel.Flywheel;
+import frc.robot.subsystems.flywheel.FlywheelIOSim;
+import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
-import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -56,6 +55,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vis;
+  private Flywheel flywheel;
+  private Turret turret;
   // private Elevator elevator;
 
   public SimContainer sim;
@@ -66,14 +67,12 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final LoggedNetworkNumber angleToHubLoggedNumber =
-      new LoggedNetworkNumber("/RobotContainer/angleToHubDeg", 0.0);
-
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
 
     switch (Constants.currentMode) {
       case REAL:
+
         // Real robot, instantiate hardware IO implementations
         if (DriveConstants.isReefscape) {
           drive =
@@ -83,12 +82,6 @@ public class RobotContainer {
                   new ModuleIOSparkFlexCancoder(1),
                   new ModuleIOSparkFlexCancoder(2),
                   new ModuleIOSparkFlexCancoder(3));
-          vis =
-              new Vision(
-                  drive::addVisionMeasurement,
-                  Stream.of(VisionConstants.cameraConfigs)
-                      .map(cam -> new VisionIOPhotonVision(cam))
-                      .toArray(VisionIOPhotonVision[]::new));
         } else {
           drive =
               new Drive(
@@ -97,13 +90,16 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(1),
                   new ModuleIOSparkMaxCancoder(2),
                   new ModuleIOSparkMaxCancoder(3));
-          vis =
-              new Vision(
-                  drive::addVisionMeasurement,
-                  Stream.of(VisionConstants.cameraConfigs)
-                      .map(cam -> new VisionIOPhotonVision(cam))
-                      .toArray(VisionIOPhotonVision[]::new));
         }
+
+        vis =
+            new Vision(
+                drive::addVisionMeasurement,
+                Stream.of(VisionConstants.cameraConfigs)
+                    .map(VisionIOPhotonVision::new)
+                    .toArray(VisionIOPhotonVision[]::new));
+
+        flywheel = null;
         break;
 
       case SIM:
@@ -129,6 +125,18 @@ public class RobotContainer {
                             new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
                     .toArray(VisionIOPhotonVision[]::new));
 
+        TurretIOSim turretIo =
+            new TurretIOSim(
+                driveSim::getSimulatedDriveTrainPose,
+                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
+        sim.registerSimulator(turretIo);
+
+        turret = new Turret(turretIo, drive::getPose);
+
+        flywheel =
+            new Flywheel(
+                new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
+
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
         // elevator = new Elevator(elevatorSim);
@@ -143,7 +151,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vis = new Vision(drive::addVisionMeasurement, new VisionIO[] {});
+        vis = new Vision(drive::addVisionMeasurement);
         break;
     }
 
@@ -279,18 +287,18 @@ public class RobotContainer {
     controller
         .a()
         .whileTrue(
-            new DriveAtAngle(
+            DriveCommands.joystickDriveAtAngle(
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
-                () -> this.getAngletoHub()));
+                Rotation2d::new));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when Y button is pressed
+    // Reset gyro to 0° when B button is pressed
     controller
-        .y()
+        .b()
         .onTrue(
             Commands.runOnce(
                     () ->
@@ -299,10 +307,27 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.rightBumper().onTrue(new InstantCommand(() -> this.pathfindToPosition(0, 0)));
+    if (flywheel != null && turret != null) {
+      controller.leftTrigger().whileTrue(flywheel.shootCommand());
 
-    controller.leftBumper().onTrue(new InstantCommand(() -> this.pathfindToPath("CollectDepot")));
-    controller.b().onTrue(new CenterOnTag(drive, vis));
+      turret.setDefaultCommand(
+          turret.aimAtCommand(
+              flywheel::getShotSpeed,
+              new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero)));
+
+      controller
+          .povUp()
+          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(5))));
+      controller
+          .povDown()
+          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(-5))));
+      controller
+          .povLeft()
+          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(-5))));
+      controller
+          .povRight()
+          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
+    }
   }
 
   /**
@@ -319,8 +344,6 @@ public class RobotContainer {
   }
 
   public void simulationPeriodic() {
-    System.out.println(
-        "odometry freq: " + frc.robot.constants.sim.DriveConstants.odometryFrequency);
     sim.simulationPeriodic();
   }
 
