@@ -9,6 +9,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
+import frc.robot.constants.jr.TurretConstants;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
@@ -63,36 +64,38 @@ public class TurretIOSim implements TurretIO, Simulatable {
     this.flywheelRPM = speed.in(RPM);
   }
 
+  protected int tickCount = 0;
+
   @Override
   public void simulationSubTick(int i) {
-    if (flywheelShooting && i % 256 == 0) {
+    if (flywheelShooting && i == 0 && ++tickCount % 20 == 0) {
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
-                      // Specify the position of the chassis when the note is launched
-                      dtPose.get().getTranslation(),
-                      // Specify the translation of the shooter from the robot center (in the
-                      // shooter’s
-                      // reference frame)
-                      new Translation2d(0.0, 0),
-                      // Specify the field-relative speed of the chassis, adding it to the initial
-                      // velocity
-                      // of the projectile
-                      speedSupplier.get(),
-                      // The shooter facing direction is the same as the robot’s facing direction
-                      dtPose
-                          .get()
-                          .getRotation()
-                          // Add the shooter’s rotation
-                          .plus(turretYaw),
-                      // Initial height of the flying note
-                      Meter.of(0.5),
-                      // The launch speed is proportional to the RPM; assumed to be 16 meters/second
-                      // at 6000
-                      // RPM
-                      MetersPerSecond.of(flywheelRPM / 6000 * 12),
-                      // The angle at which the note is launched
-                      turretPitch.getMeasure())
+                  // Specify the position of the chassis when the note is launched
+                  dtPose.get().getTranslation(),
+                  // Specify the translation of the shooter from the robot center (in the
+                  // shooter’s
+                  // reference frame)
+                  new Translation2d(0.0, 0),
+                  // Specify the field-relative speed of the chassis, adding it to the initial
+                  // velocity
+                  // of the projectile
+                  speedSupplier.get(),
+                  // The shooter facing direction is the same as the robot’s facing direction
+                  dtPose
+                      .get()
+                      .getRotation()
+                      // Add the shooter’s rotation
+                      .plus(turretYaw),
+                  // Initial height of the flying note
+                  Meter.of(0.5),
+                  // The launch speed is proportional to the RPM; assumed to be 16 meters/second
+                  // at 6000
+                  // RPM
+                  MetersPerSecond.of(flywheelRPM * TurretConstants.turretRPMToMetersPerSecond),
+                  // The angle at which the note is launched
+                  turretPitch.getMeasure())
                   // Set the target center to the Crescendo Speaker of the current alliance
                   .withTargetPosition(
                       () ->
@@ -101,7 +104,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                               : Constants.redHubPose)
                   // Set the tolerance: x: ±0.5m, y: ±1.2m, z: ±0.3m (this is the size of the
                   // speaker's "mouth")
-                  .withTargetTolerance(new Translation3d(1, 1, 1))
+                  .withTargetTolerance(new Translation3d(.5, .5, .5))
                   // Configure callbacks to visualize the flight trajectory of the projectile
                   .withProjectileTrajectoryDisplayCallBack(
                       // Callback for when the note will eventually hit the target (if configured)
@@ -115,7 +118,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                           Logger.recordOutput(
                               "Shooter/Simulation/FuelProjectileUnsuccessfulShot",
                               pose3ds.toArray(Pose3d[]::new)))
-                  .enableBecomesGamePieceOnFieldAfterTouchGround();
+                  .disableBecomesGamePieceOnFieldAfterTouchGround();
       SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
     }
   }

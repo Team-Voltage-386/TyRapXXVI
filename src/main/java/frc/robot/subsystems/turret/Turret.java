@@ -41,23 +41,24 @@ public class Turret extends SubsystemBase {
    * @param targetPose - The pose to hit with the Fuel.
    * @return The command to aim the turret.
    */
-  // TODO: also calculate the optimal flywheel speed to hit the target at the same time.
+  // TODO: calculate the optimal constant flywheel speed
   // TODO: ensure robot movement is included in the calculation.
   public Command aimAtCommand(Supplier<LinearVelocity> shootSpeed, Pose3d targetPose) {
     return runOnce(
         () -> {
           // deltaY = v0 sin(theta) * t - 0.5 g t^2
-          Translation3d dtPos =
-              new Translation3d(
-                  dtPose.get().getTranslation().getX(), dtPose.get().getTranslation().getY(), 0.5);
-          Translation3d deltaPos = targetPose.getTranslation().minus(dtPos);
-          double g = 9.81; // m/s^2
+          Pose2d dtPos = dtPose.get();
+          Translation3d dtTrans =
+              new Translation3d(dtPos.getTranslation().getX(), dtPos.getTranslation().getY(), 0.5);
+          Translation3d deltaPos = targetPose.getTranslation().minus(dtTrans);
+          // TODO: ensure this g constant is accurate for real-world
+          double g = 11; // m/s^2
           double v0 = shootSpeed.get().in(MetersPerSecond);
           double theta = calcHitPitch(deltaPos, v0, g);
 
           double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
           io.setTurretPitch(new Rotation2d(theta));
-          io.setTurretYaw(new Rotation2d(yaw));
+          io.setTurretYaw(new Rotation2d(yaw).minus(dtPos.getRotation()));
         });
   }
 
@@ -79,7 +80,7 @@ public class Turret extends SubsystemBase {
     double angle1 = Math.atan((v0Squared + sqrtPart) / (g * x));
     double angle2 = Math.atan((v0Squared - sqrtPart) / (g * x));
 
-    // Choose the higher angle to ensure it goes over the target
+    // Choose the higher angle to ensure it goes over the walls
     double chosenAngle = Math.max(angle1, angle2);
 
     // Clamp the angle to [0, pi/2]
@@ -91,18 +92,19 @@ public class Turret extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter/Turret/Inputs", inputs);
 
-    Translation3d dtPos =
-        new Translation3d(
-            dtPose.get().getTranslation().getX(), dtPose.get().getTranslation().getY(), 0.5);
-    turretVisual[0] = new Pose3d(dtPos, new Rotation3d());
+    Pose2d pose = dtPose.get();
+    Translation3d dtPos3d =
+        new Translation3d(pose.getTranslation().getX(), pose.getTranslation().getY(), 0.5);
+    turretVisual[0] = new Pose3d(dtPos3d, new Rotation3d());
     turretVisual[1] =
         new Pose3d(
-            dtPos.plus(
+            dtPos3d.plus(
                 new Translation3d(
-                    inputs.turretYaw.getCos() * 0.5,
-                    inputs.turretYaw.getSin() * 0.5,
+                    inputs.turretYaw.plus(pose.getRotation()).getCos() * 0.5,
+                    inputs.turretYaw.plus(pose.getRotation()).getSin() * 0.5,
+                    // TODO: this isn't accurate for high pitch angles
                     inputs.turretPitch.getSin() * 0.65)),
-            new Rotation3d());
+            new Rotation3d(dtPose.get().getRotation()));
 
     Logger.recordOutput("Shooter/Turret/Visual", turretVisual);
   }

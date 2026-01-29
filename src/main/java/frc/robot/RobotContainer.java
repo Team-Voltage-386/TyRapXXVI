@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.constants.jr.DriveConstants;
-import frc.robot.constants.sim.VisionConstants;
+import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -26,7 +26,6 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -111,14 +110,8 @@ public class RobotContainer {
                 new ModuleIOSim(mods[1]),
                 new ModuleIOSim(mods[2]),
                 new ModuleIOSim(mods[3]));
-        vis =
-            new Vision(
-                drive::addVisionMeasurement,
-                Stream.of(VisionConstants.cameraConfigs)
-                    .map(
-                        cam ->
-                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
-                    .toArray(VisionIOPhotonVision[]::new));
+        // disable vision simulation for performance reasons
+        vis = new Vision(drive::addVisionMeasurement);
 
         TurretIOSim turretIo =
             new TurretIOSim(
@@ -339,7 +332,7 @@ public class RobotContainer {
   }
 
   public void simulationPeriodic() {
-    sim.simulationPeriodic();
+    sim.simulationPeriodic(drive::addVisionMeasurement);
   }
 
   public Rotation2d getAngletoHub() {
