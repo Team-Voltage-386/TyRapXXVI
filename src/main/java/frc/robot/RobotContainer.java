@@ -162,6 +162,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Drive square", DriveCommands.driveSquare(drive));
+    autoChooser.addOption("SquareStraight", DriveCommands.SquareStraight(drive));
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
