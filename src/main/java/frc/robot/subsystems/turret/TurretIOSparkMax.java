@@ -6,7 +6,6 @@ import static frc.robot.util.SparkUtil.tryUntilOk;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -46,13 +45,13 @@ public class TurretIOSparkMax implements TurretIO {
     yawConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .positionWrappingEnabled(true)
-        .positionWrappingInputRange(0, 1)
-        .pid(.0, 0.0, 0.0);
+        // .positionWrappingEnabled(true)
+        // .positionWrappingInputRange(0, 1)
+        .pid(7.5, 0.0, 4.0);
     yawConfig
         .closedLoop
         .maxMotion
-        .maxAcceleration(300)
+        .maxAcceleration(150)
         .cruiseVelocity(600)
         .allowedProfileError(1000);
     yawConfig.closedLoop.feedForward.kV(turretKv).kS(turretKs);
@@ -95,27 +94,38 @@ public class TurretIOSparkMax implements TurretIO {
     inputs.connected = true;
     inputs.turretYaw = Rotation2d.fromRotations(yawEncoder.getPosition());
     inputs.turretPitch = Rotation2d.kZero;
+    double velocity = yawEncoder.getVelocity();
+    double setpoint = yawMotor.getClosedLoopController().getSetpoint();
+    double velocitySetpoint = yawMotor.getClosedLoopController().getMAXMotionSetpointVelocity();
+    double positionSetpoint = yawMotor.getClosedLoopController().getMAXMotionSetpointPosition();
+    Logger.recordOutput("/Shooter/Turret/Setpoint", setpoint);
+    Logger.recordOutput("/Shooter/Turret/VelocitySetpoint", velocitySetpoint);
+    Logger.recordOutput(
+        "/Shooter/Turret/PositionSetpoint", Rotation2d.fromRotations(positionSetpoint));
+    Logger.recordOutput("/Shooter/Turret/AppliedOutput", yawMotor.getAppliedOutput());
+    Logger.recordOutput("/Shooter/Turret/Velocity", velocity);
   }
 
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
     // TODO: FF
-
     Logger.recordOutput("/Shooter/Turret/DesiredAngle", position);
-    yawMotor
-        .getClosedLoopController()
-        .setSetpoint(
-            position.getRotations(), ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0);
+
+    yawMotor.getClosedLoopController().setSetpoint(position.getRotations(), ControlType.kPosition);
   }
 
   public void testTurretVoltage(double volts) {
-    // yawMotor.setVoltage(volts);
+    yawMotor.setVoltage(volts);
   }
 
   /* Set the turret pitch to the specified position. */
   @Override
   public void setTurretPitch(Rotation2d position) {
     // No pitch control implemented
+  }
+  public void setZero() {
+    System.out.println("turret encoder zeroed");
+    yawEncoder.setPosition(0);
   }
 }

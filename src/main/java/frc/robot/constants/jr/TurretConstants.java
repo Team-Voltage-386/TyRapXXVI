@@ -16,5 +16,5 @@ public class TurretConstants {
   // This is found by running the motor at an arbitrary voltage (e.g., 3.3V) and measuring the
   // velocity reported by the encoder.
   // You then subtract the Ks from the voltage and divide by the velocity to get Kv.
-  public static final double turretKv = (3.3 - turretKs) / 68.25; // Volts per (rpm)
+  public static final double turretKv = ((3.3 - turretKs) / 68.25) - 0.0; // Volts per (rpm)
 }

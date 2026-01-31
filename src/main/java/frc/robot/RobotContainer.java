@@ -354,7 +354,8 @@ public class RobotContainer {
               new RepeatCommand(
                   turret.aimAtCommand(
                       () -> MetersPerSecond.of(12.0),
-                      new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero))));
+                      new Pose3d(Constants.redHubPose, Rotation3d.kZero))));
+      controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
     }
   }
 
