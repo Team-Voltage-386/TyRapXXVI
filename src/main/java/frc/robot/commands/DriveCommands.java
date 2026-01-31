@@ -295,12 +295,27 @@ public class DriveCommands {
     }
   }
 
-  // Change bottom
   public static Command SquareStraight(Drive drive) {
     try {
       System.out.println("Ran SquareStraight");
       // Load the path you want to follow using its name in the GUI
       PathPlannerPath path = PathPlannerPath.fromPathFile("SquareStraight");
+
+      // Create a path following command using AutoBuilder.
+      // This will also trigger event markers defined in the path.
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      DriverStation.reportError("Could not load path:" + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
+  // Robot will make small square
+  public static Command SmallSquare(Drive drive) {
+    try {
+      System.out.println("Ran SmallSquare");
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath path = PathPlannerPath.fromPathFile("SmallSquare");
 
       // Create a path following command using AutoBuilder.
       // This will also trigger event markers defined in the path.
