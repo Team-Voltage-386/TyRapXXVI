@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -24,6 +26,7 @@ import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
+import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import java.io.IOException;
@@ -85,6 +88,8 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(2),
                   new ModuleIOSparkMaxCancoder(3));
         }
+
+        turret = new Turret(new TurretIOSparkMax(), drive::getPose);
 
         vis =
             new Vision(
@@ -300,7 +305,7 @@ public class RobotContainer {
 
       turret.setDefaultCommand(
           turret.aimAtCommand(
-              flywheel::getShotSpeed,
+              () -> MetersPerSecond.of(12.0),
               new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero)));
 
       controller
@@ -309,12 +314,10 @@ public class RobotContainer {
       controller
           .povDown()
           .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(-5))));
-      controller
-          .povLeft()
-          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(-5))));
-      controller
-          .povRight()
-          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
+    }
+    if (turret != null) {
+      controller.povLeft().onTrue(turret.addYawCommand(Rotation2d.fromDegrees(-20)));
+      controller.povRight().onTrue(turret.addYawCommand(Rotation2d.fromDegrees(20)));
     }
   }
 
