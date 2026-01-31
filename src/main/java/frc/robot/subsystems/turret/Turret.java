@@ -24,7 +24,7 @@ public class Turret extends SubsystemBase {
     this.dtPose = dtPose;
 
     io.setTurretPitch(Rotation2d.fromDegrees(45));
-    io.setTurretYaw(Rotation2d.k180deg);
+    io.setTurretYaw(Rotation2d.kZero);
   }
 
   public Command addPitchCommand(Rotation2d deltaPitch) {

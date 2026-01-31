@@ -356,6 +356,10 @@ public class RobotContainer {
                       () -> MetersPerSecond.of(12.0),
                       new Pose3d(Constants.redHubPose, Rotation3d.kZero))));
       controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+
+      controller
+          .rightBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
     }
   }
 
@@ -441,7 +445,7 @@ public class RobotContainer {
     // Create the constraints to use while pathfinding. The constraints defined in the path will
     // only be used for the path.
     PathConstraints constraints =
-        new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+        new PathConstraints(2.5, 2.5, Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
