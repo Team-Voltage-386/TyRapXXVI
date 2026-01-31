@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.jr.TurretConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -48,9 +49,17 @@ public class Turret extends SubsystemBase {
         () -> {
           // deltaY = v0 sin(theta) * t - 0.5 g t^2
           Pose2d dtPos = dtPose.get();
-          Translation3d dtTrans =
-              new Translation3d(dtPos.getTranslation().getX(), dtPos.getTranslation().getY(), 0.5);
-          Translation3d deltaPos = targetPose.getTranslation().minus(dtTrans);
+          Pose2d turretFieldPos =
+              dtPos.plus(
+                  new Transform2d(
+                      TurretConstants.turretPosition.rotateBy(dtPos.getRotation()),
+                      Rotation2d.kZero));
+          Translation3d turretFieldTrans =
+              new Translation3d(
+                  turretFieldPos.getTranslation().getX(),
+                  turretFieldPos.getTranslation().getY(),
+                  0.5);
+          Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
           // TODO: ensure this g constant is accurate for real-world
           double g = 11; // m/s^2
           double v0 = shootSpeed.get().in(MetersPerSecond);
