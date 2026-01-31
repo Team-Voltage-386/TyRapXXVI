@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 /** Handles turret control and aiming functionality */
 public class Turret extends SubsystemBase {
 
-  private final TurretIO io;
+  public final TurretIO io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
 
   private final Pose3d[] turretVisual = new Pose3d[2];

@@ -29,6 +29,7 @@ import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.util.TuningUtil;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,6 +56,8 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   // private Elevator elevator;
+
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 3);
 
   public SimContainer sim;
 
@@ -303,11 +306,6 @@ public class RobotContainer {
     if (flywheel != null && turret != null) {
       controller.leftTrigger().whileTrue(flywheel.shootCommand());
 
-      turret.setDefaultCommand(
-          turret.aimAtCommand(
-              () -> MetersPerSecond.of(12.0),
-              new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero)));
-
       controller
           .povUp()
           .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(5))));
@@ -316,8 +314,47 @@ public class RobotContainer {
           .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(-5))));
     }
     if (turret != null) {
-      controller.povLeft().onTrue(turret.addYawCommand(Rotation2d.fromDegrees(-20)));
-      controller.povRight().onTrue(turret.addYawCommand(Rotation2d.fromDegrees(20)));
+      System.out.println("running at " + runVolts.getValue());
+      controller
+          .povRight()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                  },
+                  () -> false,
+                  turret));
+
+      controller
+          .povLeft()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + -runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                  },
+                  () -> false,
+                  turret));
+
+      controller.povUp().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.kZero)));
+      controller.povDown().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
+
+      controller
+          .rightTrigger()
+          .whileTrue(
+              new RepeatCommand(
+                  turret.aimAtCommand(
+                      () -> MetersPerSecond.of(12.0),
+                      new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero))));
     }
   }
 
