@@ -353,8 +353,7 @@ public class RobotContainer {
           .whileTrue(
               new RepeatCommand(
                   turret.aimAtCommand(
-                      () -> MetersPerSecond.of(12.0),
-                      new Pose3d(Constants.redHubPose, Rotation3d.kZero))));
+                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
       controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
     }
   }
@@ -399,6 +398,26 @@ public class RobotContainer {
     }
     Logger.recordOutput("/Drive/AngleToHub", angleToHub.getDegrees());
     return angleToHub;
+  }
+
+  public Translation3d getHubPose() {
+    Translation3d hubPose = new Translation3d();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          hubPose = Constants.redHubPose;
+          break;
+        case Blue:
+          hubPose = Constants.blueHubPose;
+          break;
+        default:
+          hubPose = Constants.blueHubPose;
+          break;
+      }
+      ;
+    }
+    return hubPose;
   }
 
   public void pathfindToPosition(double xPosition, double yPosition) {

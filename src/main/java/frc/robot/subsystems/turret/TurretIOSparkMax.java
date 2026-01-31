@@ -124,6 +124,7 @@ public class TurretIOSparkMax implements TurretIO {
   public void setTurretPitch(Rotation2d position) {
     // No pitch control implemented
   }
+
   public void setZero() {
     System.out.println("turret encoder zeroed");
     yawEncoder.setPosition(0);
