@@ -17,8 +17,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
+import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -49,6 +51,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vis;
+  private final LightSubsystem m_lightSubsystem = new LightSubsystem();
   private Flywheel flywheel;
   private Turret turret;
   // private Elevator elevator;
@@ -60,6 +63,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // Hub activity logger
+  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, controller);
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -406,4 +412,13 @@ public class RobotContainer {
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
     CommandScheduler.getInstance().schedule(pathfindingCommand);
   }
+  public boolean isHubActive() {
+        return hubActivity.hubIsActive();
+    }
+    public HubActivity getHubActivityCommand() {
+        return hubActivity;
+    }
+    public void setIsAheadHub(boolean setTo) {
+        getHubActivityCommand().setIsAhead(setTo);
+    }
 }
