@@ -18,7 +18,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.commands.HubActivity;
 import frc.robot.constants.sim.VisionConstants;
+import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -43,6 +45,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vis;
+  private final LightSubsystem m_lightSubsystem = new LightSubsystem();
   // private Elevator elevator;
 
   public SimContainer sim;
@@ -52,6 +55,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // Hub activity logger
+  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, controller);
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -284,4 +290,13 @@ public class RobotContainer {
   public void simulationPeriodic() {
     sim.simulationPeriodic();
   }
+  public boolean isHubActive() {
+        return hubActivity.hubIsActive();
+    }
+    public HubActivity getHubActivityCommand() {
+        return hubActivity;
+    }
+    public void setIsAheadHub(boolean setTo) {
+        getHubActivityCommand().setIsAhead(setTo);
+    }
 }
