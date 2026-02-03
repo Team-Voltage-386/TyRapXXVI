@@ -15,9 +15,11 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.CycleLED;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
+import frc.robot.commands.RainbowLED;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.LightSubsystem;
@@ -47,13 +49,16 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  // LED and Rumble
+  private final LightSubsystem m_lightSubsystem = new LightSubsystem();
+  private final CycleLED cycleLED = new CycleLED(m_lightSubsystem);
+  private final RainbowLED rainbowLED = new RainbowLED(m_lightSubsystem);
 
   // Subsystems
   private final Drive drive;
   private final Vision vis;
   private Flywheel flywheel;
   private Turret turret;
-  private final LightSubsystem m_lightSubsystem = new LightSubsystem();
   // private Elevator elevator;
 
   public SimContainer sim;
@@ -61,14 +66,17 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
+  // LEDs and Rumble
+  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, controller);
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  // Hub activity logger
-  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, controller);
-
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
+    m_lightSubsystem.setToColor(5, 200, 0, 0);
+    m_lightSubsystem.setToColor(6, 0, 0, 200);
+    m_lightSubsystem.setToColor(9, 0, 200, 0);
 
     switch (Constants.currentMode) {
       case REAL:
@@ -411,6 +419,10 @@ public class RobotContainer {
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
     CommandScheduler.getInstance().schedule(pathfindingCommand);
+  }
+
+  public boolean areLightsOn() {
+    return m_lightSubsystem.areLightsOn();
   }
 
   public boolean isHubActive() {
