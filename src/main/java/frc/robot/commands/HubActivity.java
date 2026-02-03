@@ -4,27 +4,32 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.LightSubsystem;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
-/** 
+/**
  * Will display whether the hub is active at a given time.
  */
 public class HubActivity extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-
   private final Timer timer = new Timer();
+
   private LightSubsystem LightSubsystem;
   private CommandXboxController m_controller;
   private int counter = 0; // counter starts at 0
   private boolean hubIsActive = true;
-  private boolean isAutoAhead = false; // Will be replaced by actual value when value is recieved during the match.
+  private boolean isAutoAhead =
+      false; // Will be replaced by actual value when value is recieved during the match.
 
-  // prerecorded times for hub activity. Each time the timer reaches the value in the array, the hub toggles activity states.
-  private final int[] timesWinning = {130, 105, 80, 55, -10}; // Now has been replaced by actual values. (Actually I did it wrong, nvm [Nvm to the nvm its fixed])
+  // prerecorded times for hub activity. Each time the timer reaches the value in the array, the hub
+  // toggles activity states.
+  private final int[] timesWinning = {
+    130, 105, 80, 55, -10
+  }; // Now has been replaced by actual values. (Actually I did it wrong, nvm [Nvm to the nvm its
+  // fixed])
   private final int[] timesLosing = {105, 80, 55, 30, -10};
 
   /**
@@ -51,19 +56,18 @@ public class HubActivity extends Command {
   public void execute() {
     System.out.println(timer.getMatchTime());
     if (isAutoAhead) {
-        if (timer.getMatchTime() < timesWinning[counter]) {
-          counter++;
-          hubIsActive = !hubIsActive;
-          m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
-          System.out.println("Hub is " + hubIsActive);
-        }
-        if (timer.getMatchTime() - 3 < timesWinning[counter]) {
-          // Add rumble logic here
-          m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
-          System.out.println("Rumbling");
-        }
+      if (timer.getMatchTime() < timesWinning[counter]) {
+        counter++;
+        hubIsActive = !hubIsActive;
+        m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+        System.out.println("Hub is " + hubIsActive);
       }
-    else {
+      if (timer.getMatchTime() - 3 < timesWinning[counter]) {
+        // Add rumble logic here
+        m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
+        System.out.println("Rumbling");
+      }
+    } else {
       if (timer.getMatchTime() < timesLosing[counter]) {
         counter++;
         hubIsActive = !hubIsActive;
@@ -78,8 +82,7 @@ public class HubActivity extends Command {
     }
     if (hubIsActive) {
       LightSubsystem.changeAllLEDColor(0, 255, 0);
-    }
-    else {
+    } else {
       LightSubsystem.changeAllLEDColor(255, 0, 0);
     }
   }
@@ -94,15 +97,16 @@ public class HubActivity extends Command {
   @Override
   public boolean isFinished() {
     if (isAutoAhead) {
-    return counter >= timesWinning.length; // Returns true when the game ends.
-    }
-    else {
+      return counter >= timesWinning.length; // Returns true when the game ends.
+    } else {
       return counter >= timesLosing.length;
     }
   }
+
   public boolean hubIsActive() {
     return hubIsActive;
   }
+
   public void setIsAhead(boolean setTo) {
     isAutoAhead = setTo;
   }

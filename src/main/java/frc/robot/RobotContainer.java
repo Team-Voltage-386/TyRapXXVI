@@ -290,13 +290,16 @@ public class RobotContainer {
   public void simulationPeriodic() {
     sim.simulationPeriodic();
   }
+
   public boolean isHubActive() {
-        return hubActivity.hubIsActive();
-    }
-    public HubActivity getHubActivityCommand() {
-        return hubActivity;
-    }
-    public void setIsAheadHub(boolean setTo) {
-        getHubActivityCommand().setIsAhead(setTo);
-    }
+    return hubActivity.hubIsActive();
+  }
+
+  public HubActivity getHubActivityCommand() {
+    return hubActivity;
+  }
+
+  public void setIsAheadHub(boolean setTo) {
+    getHubActivityCommand().setIsAhead(setTo);
+  }
 }
