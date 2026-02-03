@@ -18,10 +18,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
-import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
-import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
@@ -53,7 +51,6 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vis;
-  private final LightSubsystem m_lightSubsystem = new LightSubsystem();
   private Flywheel flywheel;
   private Turret turret;
   private final LightSubsystem m_lightSubsystem = new LightSubsystem();
@@ -414,18 +411,6 @@ public class RobotContainer {
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
     CommandScheduler.getInstance().schedule(pathfindingCommand);
-  }
-
-  public boolean isHubActive() {
-    return hubActivity.hubIsActive();
-  }
-
-  public HubActivity getHubActivityCommand() {
-    return hubActivity;
-  }
-
-  public void setIsAheadHub(boolean setTo) {
-    getHubActivityCommand().setIsAhead(setTo);
   }
 
   public boolean isHubActive() {
