@@ -412,13 +412,16 @@ public class RobotContainer {
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
     CommandScheduler.getInstance().schedule(pathfindingCommand);
   }
+
   public boolean isHubActive() {
-        return hubActivity.hubIsActive();
-    }
-    public HubActivity getHubActivityCommand() {
-        return hubActivity;
-    }
-    public void setIsAheadHub(boolean setTo) {
-        getHubActivityCommand().setIsAhead(setTo);
-    }
+    return hubActivity.hubIsActive();
+  }
+
+  public HubActivity getHubActivityCommand() {
+    return hubActivity;
+  }
+
+  public void setIsAheadHub(boolean setTo) {
+    getHubActivityCommand().setIsAhead(setTo);
+  }
 }
