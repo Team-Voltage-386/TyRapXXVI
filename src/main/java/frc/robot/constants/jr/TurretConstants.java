@@ -1,6 +1,7 @@
 package frc.robot.constants.jr;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 
 public class TurretConstants {
 
@@ -14,6 +15,9 @@ public class TurretConstants {
   public static final double offsetX = -0.16;
   public static final double offsetY = 0.045;
   public static final Translation2d turretPosition = new Translation2d(offsetX, offsetY);
+
+  public static final double turretMaxAngleRot = Units.degreesToRotations(120);
+  public static final double turretMinAngleRot = -turretMaxAngleRot;
 
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.

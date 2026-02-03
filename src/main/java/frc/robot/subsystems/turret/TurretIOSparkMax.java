@@ -6,12 +6,14 @@ import static frc.robot.util.SparkUtil.tryUntilOk;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.TurretConstants;
@@ -26,10 +28,9 @@ import org.littletonrobotics.junction.Logger;
 public class TurretIOSparkMax implements TurretIO {
 
   private final SparkMax yawMotor = new SparkMax(TurretConstants.turretCanId, MotorType.kBrushless);
-  // NEEDS the absolute encoder board plugged into MAX controller--not normal board.
   private final RelativeEncoder yawEncoder = yawMotor.getEncoder();
 
-  private SparkMaxConfig yawConfig;
+  private final SparkMaxConfig yawConfig;
 
   TuningUtil yawKp = new TuningUtil("/Tuning/turret/yawKp", .0);
   TuningUtil yawKd = new TuningUtil("/Tuning/turret/yawKd", 0.0);
@@ -42,19 +43,7 @@ public class TurretIOSparkMax implements TurretIO {
         .uvwAverageDepth(2)
         .positionConversionFactor(gearRatioPerRot)
         .velocityConversionFactor(gearRatioPerRot);
-    yawConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        // .positionWrappingEnabled(true)
-        // .positionWrappingInputRange(0, 1)
-        .pid(7.5, 0.0, 4.0);
-    yawConfig
-        .closedLoop
-        .maxMotion
-        .maxAcceleration(150)
-        .cruiseVelocity(600)
-        .allowedProfileError(1000);
-    yawConfig.closedLoop.feedForward.kV(turretKv).kS(turretKs);
+    yawConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(7.5, 0.0, 4.0);
     yawConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -109,10 +98,17 @@ public class TurretIOSparkMax implements TurretIO {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
-    // TODO: FF
-    Logger.recordOutput("/Shooter/Turret/DesiredAngle", position);
+    double desiredAngle =
+        MathUtil.clamp(position.getRotations(), turretMinAngleRot, turretMaxAngleRot);
 
-    yawMotor.getClosedLoopController().setSetpoint(position.getRotations(), ControlType.kPosition);
+    Logger.recordOutput("/Shooter/Turret/DesiredAngle", Rotation2d.fromRotations(desiredAngle));
+
+    yawMotor
+        .getClosedLoopController()
+        .setSetpoint(
+            desiredAngle,
+            ControlType.kPosition,
+            ClosedLoopSlot.kSlot0);
   }
 
   public void testTurretVoltage(double volts) {

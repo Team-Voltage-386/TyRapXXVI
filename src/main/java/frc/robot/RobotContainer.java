@@ -304,48 +304,6 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    if (flywheel != null && turret != null) {
-      controller.leftTrigger().whileTrue(flywheel.shootCommand());
-
-      controller
-          .povUp()
-          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(5))));
-      controller
-          .povDown()
-          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(-5))));
-    }
-    /*if (turret != null) {
-    System.out.println("running at " + runVolts.getValue());
-    controller
-        .povRight()
-        .whileTrue(
-            new FunctionalCommand(
-                () -> {},
-                () -> {
-                  System.out.println("running at " + runVolts.getValue());
-                  ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
-                },
-                (c) -> {
-                  ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
-                },
-                () -> false,
-                turret));
-
-    controller
-        .povLeft()
-        .whileTrue(
-            new FunctionalCommand(
-                () -> {},
-                () -> {
-                  System.out.println("running at " + -runVolts.getValue());
-                  ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
-                },
-                (c) -> {
-                  ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
-                },
-                () -> false,
-                turret));*/
-
     if (turret != null) {
       System.out.println("running at " + runVolts.getValue());
       controller
@@ -355,10 +313,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
                   },
                   () -> false,
                   flywheel));
@@ -370,16 +328,18 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + -runVolts.getValue());
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
                   },
                   (c) -> {
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
                   },
                   () -> false,
                   flywheel));
 
-      controller.povUp().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.kZero)));
-      controller.povDown().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
+      controller.povUp().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
+      controller
+          .povDown()
+          .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg.unaryMinus())));
 
       controller
           .rightTrigger()
