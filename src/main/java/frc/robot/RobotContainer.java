@@ -386,8 +386,12 @@ public class RobotContainer {
           .whileTrue(
               new RepeatCommand(
                   turret.aimAtCommand(
-                      () -> MetersPerSecond.of(12.0),
-                      new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero))));
+                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
+      controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+
+      controller
+          .rightBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
     }
   }
 
@@ -433,6 +437,26 @@ public class RobotContainer {
     return angleToHub;
   }
 
+  public Translation3d getHubPose() {
+    Translation3d hubPose = new Translation3d();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          hubPose = Constants.redHubPose;
+          break;
+        case Blue:
+          hubPose = Constants.blueHubPose;
+          break;
+        default:
+          hubPose = Constants.blueHubPose;
+          break;
+      }
+      ;
+    }
+    return hubPose;
+  }
+
   public void pathfindToPosition(double xPosition, double yPosition) {
     // Since we are using a holonomic drivetrain, the rotation component of this pose
     // represents the goal holonomic rotation
@@ -473,7 +497,7 @@ public class RobotContainer {
     // Create the constraints to use while pathfinding. The constraints defined in the path will
     // only be used for the path.
     PathConstraints constraints =
-        new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+        new PathConstraints(2.5, 2.5, Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
