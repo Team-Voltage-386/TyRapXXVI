@@ -24,6 +24,7 @@ import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
+import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
@@ -101,7 +102,7 @@ public class RobotContainer {
                     .map(VisionIOPhotonVision::new)
                     .toArray(VisionIOPhotonVision[]::new));
 
-        flywheel = null;
+        flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
       case SIM:
@@ -313,6 +314,38 @@ public class RobotContainer {
           .povDown()
           .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(-5))));
     }
+    /*if (turret != null) {
+    System.out.println("running at " + runVolts.getValue());
+    controller
+        .povRight()
+        .whileTrue(
+            new FunctionalCommand(
+                () -> {},
+                () -> {
+                  System.out.println("running at " + runVolts.getValue());
+                  ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                },
+                (c) -> {
+                  ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                },
+                () -> false,
+                turret));
+
+    controller
+        .povLeft()
+        .whileTrue(
+            new FunctionalCommand(
+                () -> {},
+                () -> {
+                  System.out.println("running at " + -runVolts.getValue());
+                  ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
+                },
+                (c) -> {
+                  ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                },
+                () -> false,
+                turret));*/
+
     if (turret != null) {
       System.out.println("running at " + runVolts.getValue());
       controller
@@ -322,13 +355,13 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
                   },
                   () -> false,
-                  turret));
+                  flywheel));
 
       controller
           .povLeft()
@@ -337,13 +370,13 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + -runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
                   },
                   () -> false,
-                  turret));
+                  flywheel));
 
       controller.povUp().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.kZero)));
       controller.povDown().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));

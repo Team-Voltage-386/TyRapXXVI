@@ -17,4 +17,5 @@ public class TurretConstants {
   // velocity reported by the encoder.
   // You then subtract the Ks from the voltage and divide by the velocity to get Kv.
   public static final double turretKv = (3.3 - turretKs) / 68.25; // Volts per (rpm)
+  public static final int flywheelCanId = 12;
 }
