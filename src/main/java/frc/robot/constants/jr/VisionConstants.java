@@ -81,22 +81,22 @@ public final class VisionConstants {
                 new Transform3d(
                     0.7366 / 2,
                     0.6096 / 2,
-                    0.2,
-                    new Rotation3d(0.0, 0.0, Units.degreesToRadians(45)))),
+                    0.3,
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(45)))),
             new CameraConfig(
                 "frontright",
                 new Transform3d(
                     0.7366 / 2,
                     -0.6096 / 2,
                     0.3,
-                    new Rotation3d(0.0, 0.0, Units.degreesToRadians(315)))),
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(315)))),
             new CameraConfig(
                 "backleft",
                 new Transform3d(
                     -0.7366 / 2,
                     0.6096 / 2,
-                    0.2,
-                    new Rotation3d(0.0, 0.0, Units.degreesToRadians(135)))),
+                    0.3,
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(135)))),
             new CameraConfig(
                 "backright",
                 new Transform3d(

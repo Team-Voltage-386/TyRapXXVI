@@ -3,9 +3,12 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Kilograms;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.constants.jr.DriveConstants;
+import frc.robot.subsystems.vision.Vision.VisionConsumer;
 import lombok.Getter;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
@@ -44,7 +47,7 @@ public class SimContainer {
       throw new IllegalStateException("SimContainer can only be instantiated in SIM mode");
     }
 
-    arena = new BlankSimArena();
+    arena = SimulatedArena.getInstance();
 
     driveSim =
         new SwerveDriveSimulation(
@@ -61,14 +64,17 @@ public class SimContainer {
     arena.addCustomSimulation(sim);
   }
 
-  public void simulationPeriodic() {
+  public void simulationPeriodic(VisionConsumer visionConsumer) {
     arena.simulationPeriodic();
 
     Logger.recordOutput("FieldSimulation/RobotPosition", driveSim.getSimulatedDriveTrainPose());
     Logger.recordOutput(
-        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-    Logger.recordOutput(
-        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
+
+    visionConsumer.accept(
+        driveSim.getSimulatedDriveTrainPose(),
+        Timer.getTimestamp(),
+        VecBuilder.fill(0.0, 0.0, 0.0));
   }
 
   @FunctionalInterface

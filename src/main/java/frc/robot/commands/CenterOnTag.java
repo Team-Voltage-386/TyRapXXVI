@@ -5,12 +5,12 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.jr.VisionConstants;
-// import frc.robot.TyRap24Constants.*;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.Vision;
 
 // Used to get a general location, not exact
 public class CenterOnTag extends Command {
+
   Drive dt;
   Vision ll;
   // Note: xDis, xProportion, xVelocity, xError, and xOffset relate to ySpeed

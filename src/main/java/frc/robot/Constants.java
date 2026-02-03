@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -22,4 +23,7 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public static final Translation3d blueHubPose = new Translation3d(4.5974, 4.034536, 1.5748);
+  public static final Translation3d redHubPose = new Translation3d(11.938, 4.034536, 1.5748);
 }
