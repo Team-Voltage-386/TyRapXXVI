@@ -278,8 +278,9 @@ public class DriveCommands {
                               + " inches");
                     })));
   }
-//Note: Remember to switch to oppsite alliences when choosing Red or Blue Auto.
-//Example: For Blue Auto use Red Allience because the field gets flipped.
+
+  // Note: Remember to switch to oppsite alliences when choosing Red or Blue Auto.
+  // Example: For Blue Auto use Red Allience because the field gets flipped.
   // Added command for Pathplanner to drive in a square.
   public static Command driveSquare(Drive drive) {
     try {
@@ -295,6 +296,7 @@ public class DriveCommands {
       return Commands.none();
     }
   }
+
   // Robot will drive straight in the middle in Red Allience.
   public static Command SquareStraight(Drive drive) {
     try {

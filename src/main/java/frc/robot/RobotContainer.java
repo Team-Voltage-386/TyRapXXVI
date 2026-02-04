@@ -376,7 +376,6 @@ public class RobotContainer {
       controller
           .povRight()
           .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
-
     }
     // Auto drive to scoring locations
     controller
