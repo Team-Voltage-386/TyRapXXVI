@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -38,6 +39,7 @@ import org.littletonrobotics.junction.Logger;
 public class Drive extends SubsystemBase {
 
   static final Lock odometryLock = new ReentrantLock();
+  private final Field2d m_field = new Field2d();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
@@ -74,6 +76,7 @@ public class Drive extends SubsystemBase {
     poseEstimator =
         new SwerveDrivePoseEstimator(
             kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+    SmartDashboard.putData("Field", m_field);
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -120,6 +123,7 @@ public class Drive extends SubsystemBase {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
     Logger.processInputs("Drive/Gyro", gyroInputs);
+    m_field.setRobotPose(poseEstimator.getEstimatedPosition());
     for (var module : modules) {
       module.periodic();
     }
