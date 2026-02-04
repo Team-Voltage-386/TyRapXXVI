@@ -21,6 +21,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -29,6 +30,7 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -44,9 +46,12 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -56,7 +61,7 @@ public class RobotContainer {
   private final Vision vis;
   private Flywheel flywheel;
   private Turret turret;
-  // private Elevator elevator;
+  private final IntakeSubsystem intake;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 3);
 
@@ -64,11 +69,14 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController manipulatorController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  /** The container for the robot. Contains subsystems, IO devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, IO devices, and commands.
+   */
   public RobotContainer() {
 
     switch (Constants.currentMode) {
@@ -102,6 +110,7 @@ public class RobotContainer {
                     .map(VisionIOPhotonVision::new)
                     .toArray(VisionIOPhotonVision[]::new));
 
+        intake = new IntakeSubsystem();
         flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
@@ -134,6 +143,8 @@ public class RobotContainer {
             new Flywheel(
                 new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
 
+        intake = new IntakeSubsystem();
+
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
         // elevator = new Elevator(elevatorSim);
@@ -149,6 +160,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
+        intake = new IntakeSubsystem();
         break;
     }
 
@@ -184,7 +196,8 @@ public class RobotContainer {
         PathPlannerPath.waypointsFromPoses(
             reefEscape, new Pose2d(playerStation.getTranslation(), Rotation2d.kZero));
 
-    // PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI); // The
+    // PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 *
+    // Math.PI); // The
     // constraints for this path.
     PathConstraints constraints =
         PathConstraints.unlimitedConstraints(
@@ -197,10 +210,12 @@ public class RobotContainer {
             waypoints,
             constraints,
             null,
-            // The ideal starting state, this is only relevant for pre-planned paths, so can be null
+            // The ideal starting state, this is only relevant for pre-planned paths, so can
+            // be null
             // for on-the-fly paths.
             new GoalEndState(0.0, playerStation.getRotation())
-            // Goal end state. You can set a holonomic rotation here. If using a differential
+            // Goal end state. You can set a holonomic rotation here. If using a
+            // differential
             // drivetrain, the rotation will have no effect.
             );
 
@@ -228,10 +243,12 @@ public class RobotContainer {
             pptestWaypoints1,
             constraints,
             null,
-            // The ideal starting state, this is only relevant for pre-planned paths, so can be null
+            // The ideal starting state, this is only relevant for pre-planned paths, so can
+            // be null
             // for on-the-fly paths.
             new GoalEndState(0.0, Rotation2d.fromDegrees(90))
-            // Goal end state. You can set a holonomic rotation here. If using a differential
+            // Goal end state. You can set a holonomic rotation here. If using a
+            // differential
             // drivetrain, the rotation will have no effect.
             );
 
@@ -245,10 +262,12 @@ public class RobotContainer {
             pptestWaypoints2,
             constraints,
             null,
-            // The ideal starting state, this is only relevant for pre-planned paths, so can be null
+            // The ideal starting state, this is only relevant for pre-planned paths, so can
+            // be null
             // for on-the-fly paths.
             new GoalEndState(0.0, Rotation2d.fromDegrees(0))
-            // Goal end state. You can set a holonomic rotation here. If using a differential
+            // Goal end state. You can set a holonomic rotation here. If using a
+            // differential
             // drivetrain, the rotation will have no effect.
             );
     pptestpath2.preventFlipping = true;
@@ -266,9 +285,11 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses
-   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a
+   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then
+   * passing it to a
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
@@ -350,9 +371,21 @@ public class RobotContainer {
       controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
 
       controller
+          .povRight()
+          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
+
+    }
+    // Auto drive to scoring locations
+    controller
           .rightBumper()
           .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
-    }
+
+    // Manipulator controller bindings
+    manipulatorController.a().onTrue(intake.deployCommand());
+    manipulatorController.b().onTrue(intake.retractCommand());
+    manipulatorController.x().onTrue(intake.takeInCommand());
+    manipulatorController.y().onTrue(intake.stopMotorCommand());
+    manipulatorController.rightBumper().whileTrue(intake.reverseCommand());
   }
 
   /**
@@ -418,7 +451,8 @@ public class RobotContainer {
   }
 
   public void pathfindToPosition(double xPosition, double yPosition) {
-    // Since we are using a holonomic drivetrain, the rotation component of this pose
+    // Since we are using a holonomic drivetrain, the rotation component of this
+    // pose
     // represents the goal holonomic rotation
     Pose2d targetPose = new Pose2d(xPosition, yPosition, Rotation2d.fromDegrees(180));
 
@@ -430,7 +464,8 @@ public class RobotContainer {
     Command pathfindingCommand =
         AutoBuilder.pathfindToPose(
             targetPose, constraints, 0.0); // , // Goal end velocity in meters/sec
-    // 0.0 // Rotation delay distance in meters. This is how far the robot should travel before
+    // 0.0 // Rotation delay distance in meters. This is how far the robot should
+    // travel before
     // attempting to rotate.
     CommandScheduler.getInstance().schedule(pathfindingCommand);
   }
@@ -454,7 +489,8 @@ public class RobotContainer {
       return;
     }
 
-    // Create the constraints to use while pathfinding. The constraints defined in the path will
+    // Create the constraints to use while pathfinding. The constraints defined in
+    // the path will
     // only be used for the path.
     PathConstraints constraints =
         new PathConstraints(2.5, 2.5, Units.degreesToRadians(540), Units.degreesToRadians(720));
