@@ -165,6 +165,7 @@ public class RobotContainer {
     autoChooser.addOption("Drive square", DriveCommands.driveSquare(drive));
     autoChooser.addOption("SquareStraight", DriveCommands.SquareStraight(drive));
     autoChooser.addOption("SmallSquare", DriveCommands.SmallSquare(drive));
+    autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -340,6 +341,9 @@ public class RobotContainer {
         break;
       case "SmallSquare":
         setPoseFromPathStart("SmallSquare");
+        break;
+      case "BlueSquare":
+        setPoseFromPathStart("BlueSquare");
         break;
     }
     return autoChooser.get();
