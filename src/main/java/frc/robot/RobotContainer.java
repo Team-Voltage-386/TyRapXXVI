@@ -30,7 +30,6 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -377,8 +376,8 @@ public class RobotContainer {
     }
     // Auto drive to scoring locations
     controller
-          .rightBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+        .rightBumper()
+        .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
 
     // Manipulator controller bindings
     manipulatorController.a().onTrue(intake.deployCommand());
