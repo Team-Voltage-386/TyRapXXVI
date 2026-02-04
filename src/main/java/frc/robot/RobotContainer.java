@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -23,11 +25,13 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
+import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
+import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.util.TuningUtil;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +61,8 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
+
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 3);
 
   public SimContainer sim;
 
@@ -94,6 +100,8 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(3));
         }
 
+        turret = new Turret(new TurretIOSparkMax(), drive::getPose);
+
         vis =
             new Vision(
                 drive::addVisionMeasurement,
@@ -102,7 +110,7 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
-        flywheel = null;
+        flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
       case SIM:
@@ -316,33 +324,67 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    if (flywheel != null && turret != null) {
-      controller.leftTrigger().whileTrue(flywheel.shootCommand());
-
-      turret.setDefaultCommand(
-          turret.aimAtCommand(
-              flywheel::getShotSpeed,
-              new Pose3d(new Translation3d(11.9, 4.1, 1.5), Rotation3d.kZero)));
-
+    if (turret != null) {
+      System.out.println("running at " + runVolts.getValue());
       controller
-          .povUp()
-          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(5))));
-      controller
-          .povDown()
-          .whileTrue(new RepeatCommand(turret.addPitchCommand(Rotation2d.fromDegrees(-5))));
+          .povRight()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                  },
+                  () -> false,
+                  flywheel));
+
       controller
           .povLeft()
-          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(-5))));
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + -runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                  },
+                  () -> false,
+                  flywheel));
+
+      controller.povUp().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
+      controller
+          .povDown()
+          .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg.unaryMinus())));
+
+      controller
+          .rightTrigger()
+          .whileTrue(
+              new RepeatCommand(
+                  turret.aimAtCommand(
+                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
+      controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+
       controller
           .povRight()
           .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
+
     }
+    // Auto drive to scoring locations
+    controller
+        .rightBumper()
+        .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+
+    // Manipulator controller bindings
     manipulatorController.a().onTrue(intake.deployCommand());
     manipulatorController.b().onTrue(intake.retractCommand());
     manipulatorController.x().onTrue(intake.takeInCommand());
     manipulatorController.y().onTrue(intake.stopMotorCommand());
     manipulatorController.rightBumper().whileTrue(intake.reverseCommand());
-    ;
   }
 
   /**
@@ -385,6 +427,26 @@ public class RobotContainer {
     }
     Logger.recordOutput("/Drive/AngleToHub", angleToHub.getDegrees());
     return angleToHub;
+  }
+
+  public Translation3d getHubPose() {
+    Translation3d hubPose = new Translation3d();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          hubPose = Constants.redHubPose;
+          break;
+        case Blue:
+          hubPose = Constants.blueHubPose;
+          break;
+        default:
+          hubPose = Constants.blueHubPose;
+          break;
+      }
+      ;
+    }
+    return hubPose;
   }
 
   public void pathfindToPosition(double xPosition, double yPosition) {
@@ -430,7 +492,7 @@ public class RobotContainer {
     // the path will
     // only be used for the path.
     PathConstraints constraints =
-        new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+        new PathConstraints(2.5, 2.5, Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
