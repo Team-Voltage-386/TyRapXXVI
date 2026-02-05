@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.subsystems.flywheel.Flywheel;
-
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -75,6 +74,7 @@ public class Turret extends SubsystemBase {
 
           double shooterWheelRPM =
               (v0 / (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)) * 60;
+          flywheel.setFlywheelSpeed(shooterWheelRPM);
           Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
         });
   }

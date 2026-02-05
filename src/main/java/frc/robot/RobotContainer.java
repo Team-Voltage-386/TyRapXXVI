@@ -62,13 +62,14 @@ public class RobotContainer {
   private Turret turret;
   private final IntakeSubsystem intake;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 3);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
+  TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
 
   public SimContainer sim;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController manipulatorController = new CommandXboxController(1);
+  private final CommandXboxController kDriveController = new CommandXboxController(0);
+  private final CommandXboxController kManipController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -296,25 +297,25 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -kDriveController.getLeftY(),
+            () -> -kDriveController.getLeftX(),
+            () -> -kDriveController.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
+    kDriveController
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> -kDriveController.getLeftY(),
+                () -> -kDriveController.getLeftX(),
                 Rotation2d::new));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    kDriveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    controller
+    kDriveController
         .b()
         .onTrue(
             Commands.runOnce(
@@ -326,7 +327,7 @@ public class RobotContainer {
 
     if (turret != null) {
       System.out.println("running at " + runVolts.getValue());
-      controller
+      kDriveController
           .povRight()
           .whileTrue(
               new FunctionalCommand(
@@ -341,7 +342,7 @@ public class RobotContainer {
                   () -> false,
                   flywheel));
 
-      controller
+      kDriveController
           .povLeft()
           .whileTrue(
               new FunctionalCommand(
@@ -356,35 +357,67 @@ public class RobotContainer {
                   () -> false,
                   flywheel));
 
-      controller.povUp().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
-      controller
+      kDriveController
+          .povUp()
+          .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
+      kDriveController
           .povDown()
           .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg.unaryMinus())));
 
-      controller
+      kDriveController
           .rightTrigger()
           .whileTrue(
               new RepeatCommand(
                   turret.aimAtCommand(
-                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
-      controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+                      () -> MetersPerSecond.of(4.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
+      kDriveController
+          .rightTrigger()
+          .onFalse(new InstantCommand(() -> flywheel.setFlywheelSpeed(0)));
 
-      controller
+      kDriveController
+          .start()
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+
+      kDriveController
+          .rightBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+
+      kManipController
           .povRight()
-          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                  },
+                  () -> false,
+                  flywheel));
 
+      kManipController
+          .povLeft()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                  },
+                  () -> false,
+                  flywheel));
+      kManipController.rightBumper().whileTrue(flywheel.shootCommand(() -> setRPM.getValue()));
+      // Manipulator controller bindings
+      kManipController.a().onTrue(intake.deployCommand());
+      kManipController.b().onTrue(intake.retractCommand());
+      kManipController.x().onTrue(intake.takeInCommand());
+      kManipController.y().onTrue(intake.stopMotorCommand());
     }
-    // Auto drive to scoring locations
-    controller
-        .rightBumper()
-        .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
-
-    // Manipulator controller bindings
-    manipulatorController.a().onTrue(intake.deployCommand());
-    manipulatorController.b().onTrue(intake.retractCommand());
-    manipulatorController.x().onTrue(intake.takeInCommand());
-    manipulatorController.y().onTrue(intake.stopMotorCommand());
-    manipulatorController.rightBumper().whileTrue(intake.reverseCommand());
   }
 
   /**

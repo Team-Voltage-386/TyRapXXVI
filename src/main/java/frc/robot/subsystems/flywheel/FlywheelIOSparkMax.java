@@ -1,13 +1,13 @@
 package frc.robot.subsystems.flywheel;
 
 import static edu.wpi.first.units.Units.RPM;
-import static frc.robot.constants.jr.TurretConstants.*;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.util.TuningUtil;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Turret IO on a Spark MAX motor.
@@ -30,30 +31,33 @@ public class FlywheelIOSparkMax implements FlywheelIO {
 
   private SparkMaxConfig flywheelConfig;
 
-  TuningUtil flywheelKp = new TuningUtil("/Tuning/turret/flywheelKp", .0);
-  TuningUtil flywheelKd = new TuningUtil("/Tuning/turret/flywheelKd", 0.0);
+  TuningUtil flywheelKp = new TuningUtil("/Tuning/flywheel/flywheelKp", 0.0026);
+  TuningUtil flywheelKd = new TuningUtil("/Tuning/flywheel/flywheelKd", 0.006);
+  TuningUtil flywheelKv = new TuningUtil("/Tuning/flywheel/flywheelKv", TurretConstants.flywheelKv);
+  TuningUtil flywheelKs = new TuningUtil("/Tuning/flywheel/flywheelKs", TurretConstants.flywheelKs);
+  TuningUtil flywheelKa = new TuningUtil("/Tuning/flywheel/flywheelKa", TurretConstants.flywheelKa);
+  TuningUtil threshold = new TuningUtil("/Tuning/flywheel/Threshold", 400);
 
   public FlywheelIOSparkMax() {
     flywheelConfig = new SparkMaxConfig();
     flywheelConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12.0);
-    flywheelConfig
-        .encoder
-        .uvwAverageDepth(2)
-        .positionConversionFactor(gearRatioPerRot)
-        .velocityConversionFactor(gearRatioPerRot);
+    flywheelConfig.encoder.uvwAverageDepth(4);
     flywheelConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .positionWrappingEnabled(true)
-        .positionWrappingInputRange(0, 1)
         .pid(flywheelKp.getValue(), 0.0, flywheelKd.getValue());
     flywheelConfig
         .closedLoop
         .maxMotion
-        .maxAcceleration(300)
+        .maxAcceleration(400)
         .cruiseVelocity(600)
         .allowedProfileError(1000);
-    flywheelConfig.closedLoop.feedForward.kV(turretKv).kS(turretKs);
+    flywheelConfig
+        .closedLoop
+        .feedForward
+        .kV(flywheelKv.getValue())
+        .kS(flywheelKs.getValue())
+        .kA(flywheelKa.getValue());
     flywheelConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -77,7 +81,7 @@ public class FlywheelIOSparkMax implements FlywheelIO {
         .ifPresent(
             kp -> {
               System.out.println("updated turret kp");
-              flywheelConfig.closedLoop.pid(kp, 0.0, flywheelKp.getValue());
+              flywheelConfig.closedLoop.p(kp);
               flywheelMotor.configure(
                   flywheelConfig,
                   ResetMode.kNoResetSafeParameters,
@@ -88,14 +92,72 @@ public class FlywheelIOSparkMax implements FlywheelIO {
         .ifPresent(
             kd -> {
               System.out.println("updated turret kd");
-              flywheelConfig.closedLoop.pid(flywheelKp.getValue(), 0.0, kd);
+              flywheelConfig.closedLoop.d(kd);
               flywheelMotor.configure(
                   flywheelConfig,
                   ResetMode.kNoResetSafeParameters,
                   PersistMode.kNoPersistParameters);
             });
+    flywheelKs
+        .get()
+        .ifPresent(
+            ks -> {
+              System.out.println("updated turret ks");
+              flywheelConfig.closedLoop.feedForward.kS(ks);
+              flywheelMotor.configure(
+                  flywheelConfig,
+                  ResetMode.kNoResetSafeParameters,
+                  PersistMode.kNoPersistParameters);
+            });
+    flywheelKv
+        .get()
+        .ifPresent(
+            kv -> {
+              System.out.println("updated turret kv");
+              flywheelConfig.closedLoop.feedForward.kV(kv);
+              flywheelMotor.configure(
+                  flywheelConfig,
+                  ResetMode.kNoResetSafeParameters,
+                  PersistMode.kNoPersistParameters);
+            });
+    flywheelKa
+        .get()
+        .ifPresent(
+            ka -> {
+              System.out.println("updated turret ka");
+              flywheelConfig.closedLoop.feedForward.kA(ka);
+              flywheelMotor.configure(
+                  flywheelConfig,
+                  ResetMode.kNoResetSafeParameters,
+                  PersistMode.kNoPersistParameters);
+            });
+
     inputs.connected = true;
     inputs.flywheelSpeed = RPM.of(flywheelEncoder.getVelocity());
+    double velocity = flywheelEncoder.getVelocity();
+    Logger.recordOutput(
+        "/Shooter/Flywheel/VelocitySetpoint",
+        flywheelMotor.getClosedLoopController().getSetpoint());
+    Logger.recordOutput(
+        "/Shooter/Flywheel/AppliedOutput",
+        flywheelMotor.getAppliedOutput() * flywheelMotor.getBusVoltage());
+    Logger.recordOutput("/Shooter/Flywheel/Velocity", velocity);
+  }
+
+  public void setFlywheelVelocity(double velocityRPM) {
+    flywheelMotor.getClosedLoopController().setSetpoint(velocityRPM, ControlType.kVelocity);
+    Logger.recordOutput("/Shooter/Flywheel/VelocitySetpoint2", velocityRPM);
+  }
+
+  // to help the kp value from freaking out at low speeds
+  public void readjustPID() {
+    if (flywheelMotor.getEncoder().getVelocity() < threshold.getValue()) {
+      flywheelConfig.closedLoop.p(0.0);
+    } else {
+      flywheelConfig.closedLoop.p(flywheelKp.getValue());
+    }
+    flywheelMotor.configure(
+        flywheelConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   /** Set the Flywheel to the specific speed. */
