@@ -28,4 +28,6 @@ public class TurretConstants {
   // You then subtract the Ks from the voltage and divide by the velocity to get Kv.
   public static final double turretKv = (3.3 - turretKs) / 68.25; // Volts per (rpm)
   public static final int flywheelCanId = 12;
+
+  public static final double shooterWheelRadiusMeters = 0.05;
 }

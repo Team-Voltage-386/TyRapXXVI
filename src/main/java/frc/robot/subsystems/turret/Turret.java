@@ -7,6 +7,8 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.jr.TurretConstants;
+import frc.robot.subsystems.flywheel.Flywheel;
+
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -19,10 +21,12 @@ public class Turret extends SubsystemBase {
   private final Pose3d[] turretVisual = new Pose3d[2];
 
   private final Supplier<Pose2d> dtPose;
+  private final Flywheel flywheel;
 
-  public Turret(TurretIO io, Supplier<Pose2d> dtPose) {
+  public Turret(TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel) {
     this.io = io;
     this.dtPose = dtPose;
+    this.flywheel = flywheel;
 
     io.setTurretPitch(Rotation2d.fromDegrees(45));
     io.setTurretYaw(Rotation2d.kZero);
@@ -68,6 +72,10 @@ public class Turret extends SubsystemBase {
           double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
           io.setTurretPitch(new Rotation2d(theta));
           io.setTurretYaw(new Rotation2d(yaw).minus(dtPos.getRotation()));
+
+          double shooterWheelRPM =
+              (v0 / (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)) * 60;
+          Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
         });
   }
 

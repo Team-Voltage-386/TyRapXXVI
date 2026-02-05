@@ -100,7 +100,8 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(3));
         }
 
-        turret = new Turret(new TurretIOSparkMax(), drive::getPose);
+        flywheel = new Flywheel(new FlywheelIOSparkMax());
+        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel);
 
         vis =
             new Vision(
@@ -110,7 +111,6 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
       case SIM:
@@ -136,11 +136,11 @@ public class RobotContainer {
                 driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
         sim.registerSimulator(turretIo);
 
-        turret = new Turret(turretIo, drive::getPose);
-
         flywheel =
             new Flywheel(
                 new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
+
+        turret = new Turret(turretIo, drive::getPose, flywheel);
 
         intake = new IntakeSubsystem();
 
