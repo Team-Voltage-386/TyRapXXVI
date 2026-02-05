@@ -143,8 +143,8 @@ public class Robot extends LoggedRobot {
   public void teleopPeriodic() {
     String gameData = DriverStation.getGameSpecificMessage();
     Optional<Alliance> ourTeam = DriverStation.getAlliance();
-    if (!(gameData == "")) {
-      if (gameData == "B") {
+    if (gameData.length() > 0) {
+      if (gameData.equals("B")) {
         switch (ourTeam.get()) {
           case Red:
             robotContainer.setIsAheadHub(false);

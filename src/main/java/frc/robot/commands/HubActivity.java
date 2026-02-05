@@ -49,35 +49,35 @@ public class HubActivity extends Command {
   public void initialize() {
     timer.reset();
     timer.start();
+    counter = 0;
+    isAutoAhead = false;
+    System.out.println("Hub Scheduled");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    System.out.println(timer.getMatchTime());
     if (isAutoAhead) {
-      if (timer.getMatchTime() < timesWinning[counter]) {
+      if (Timer.getMatchTime() < timesWinning[counter]) {
         counter++;
         hubIsActive = !hubIsActive;
         m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
         System.out.println("Hub is " + hubIsActive);
       }
-      if (timer.getMatchTime() - 3 < timesWinning[counter]) {
+      if (Timer.getMatchTime() - 3 < timesWinning[counter]) {
         // Add rumble logic here
         m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
-        System.out.println("Rumbling");
       }
     } else {
-      if (timer.getMatchTime() < timesLosing[counter]) {
+      if (Timer.getMatchTime() < timesLosing[counter]) {
         counter++;
         hubIsActive = !hubIsActive;
         m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
         System.out.println("Hub is " + hubIsActive);
       }
-      if (timer.getMatchTime() - 3 < timesLosing[counter]) {
+      if (Timer.getMatchTime() - 3 < timesLosing[counter]) {
         // Add rumble logic here
         m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
-        System.out.println("Rumbling");
       }
     }
     if (hubIsActive) {
