@@ -22,6 +22,7 @@ import frc.robot.commands.DriveToPose;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -61,6 +62,7 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
+  private final SpindexerSubsystem spindexer;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 3);
 
@@ -110,6 +112,7 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
         flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
@@ -143,6 +146,7 @@ public class RobotContainer {
                 new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
 
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -160,6 +164,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
         break;
     }
 
@@ -385,6 +390,10 @@ public class RobotContainer {
     manipulatorController.x().onTrue(intake.takeInCommand());
     manipulatorController.y().onTrue(intake.stopMotorCommand());
     manipulatorController.rightBumper().whileTrue(intake.reverseCommand());
+    manipulatorController.leftBumper().onTrue(spindexer.spindexerOnCommand());
+    manipulatorController.rightTrigger().onTrue(spindexer.spindexerOnCommand());
+    manipulatorController.leftTrigger().onTrue(spindexer.spindexerOnCommand());
+    manipulatorController.leftStick().onTrue(spindexer.spindexerOnCommand());
   }
 
   /**
