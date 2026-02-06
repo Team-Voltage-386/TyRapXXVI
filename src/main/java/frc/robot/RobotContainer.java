@@ -369,7 +369,7 @@ public class RobotContainer {
           .whileTrue(
               new RepeatCommand(
                   turret.aimAtCommand(
-                      () -> MetersPerSecond.of(4.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
+                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
       kDriveController
           .rightTrigger()
           .onFalse(new InstantCommand(() -> flywheel.setFlywheelSpeed(0)));
