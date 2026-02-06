@@ -19,9 +19,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -54,6 +56,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  // LED and Rumble
+  private final LightSubsystem m_lightSubsystem = new LightSubsystem();
 
   // Subsystems
   private final Drive drive;
@@ -70,6 +74,9 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private final CommandXboxController manipulatorController = new CommandXboxController(1);
 
+  // LEDs and Rumble
+  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, controller);
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -77,6 +84,9 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, IO devices, and commands.
    */
   public RobotContainer() {
+    m_lightSubsystem.setToColor(5, 200, 0, 0);
+    m_lightSubsystem.setToColor(6, 0, 0, 200);
+    m_lightSubsystem.setToColor(9, 0, 200, 0);
 
     switch (Constants.currentMode) {
       case REAL:
@@ -372,7 +382,6 @@ public class RobotContainer {
       controller
           .povRight()
           .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
-
     }
     // Auto drive to scoring locations
     controller
@@ -497,5 +506,21 @@ public class RobotContainer {
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
     CommandScheduler.getInstance().schedule(pathfindingCommand);
+  }
+
+  public boolean areLightsOn() {
+    return m_lightSubsystem.areLightsOn();
+  }
+
+  public boolean isHubActive() {
+    return hubActivity.hubIsActive();
+  }
+
+  public HubActivity getHubActivityCommand() {
+    return hubActivity;
+  }
+
+  public void setIsAheadHub(boolean setTo) {
+    getHubActivityCommand().setIsAhead(setTo);
   }
 }

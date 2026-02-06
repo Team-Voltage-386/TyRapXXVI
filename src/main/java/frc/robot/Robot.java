@@ -3,9 +3,12 @@ package frc.robot;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.revrobotics.util.StatusLogger;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.LocalADStarAK;
+import java.util.Optional;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -132,11 +135,36 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    robotContainer.getHubActivityCommand().schedule();
   }
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    String gameData = DriverStation.getGameSpecificMessage();
+    Optional<Alliance> ourTeam = DriverStation.getAlliance();
+    if (gameData.length() > 0) {
+      if (gameData.equals("B")) {
+        switch (ourTeam.get()) {
+          case Red:
+            robotContainer.setIsAheadHub(false);
+            break;
+          case Blue:
+            robotContainer.setIsAheadHub(true);
+        }
+      } else {
+        switch (ourTeam.get()) {
+          case Red:
+            robotContainer.setIsAheadHub(true);
+            break;
+          case Blue:
+            robotContainer.setIsAheadHub(false);
+        }
+      }
+    } else {
+      System.out.println("Game data not announced");
+    }
+  }
 
   /** This function is called once when test mode is enabled. */
   @Override
