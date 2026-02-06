@@ -17,15 +17,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.CycleLED;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
-import frc.robot.commands.RainbowLED;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
-import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -60,8 +58,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // LED and Rumble
   private final LightSubsystem m_lightSubsystem = new LightSubsystem();
-  private final CycleLED cycleLED = new CycleLED(m_lightSubsystem);
-  private final RainbowLED rainbowLED = new RainbowLED(m_lightSubsystem);
 
   // Subsystems
   private final Drive drive;
@@ -77,7 +73,7 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final CommandXboxController manipulatorController = new CommandXboxController(1);
-  
+
   // LEDs and Rumble
   private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, controller);
 
@@ -386,7 +382,6 @@ public class RobotContainer {
       controller
           .povRight()
           .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
-
     }
     // Auto drive to scoring locations
     controller

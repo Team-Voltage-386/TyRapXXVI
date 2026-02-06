@@ -9,7 +9,6 @@ import frc.robot.subsystems.LightSubsystem;
 
 /** Changes the color of a specific LED, given an index. */
 public class ChangeLEDColorCommand extends Command {
-  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private LightSubsystem lightSubsystem;
 
   private int Index;

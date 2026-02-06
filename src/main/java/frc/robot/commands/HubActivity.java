@@ -14,7 +14,6 @@ import frc.robot.subsystems.LightSubsystem;
  * Will display whether the hub is active at a given time.
  */
 public class HubActivity extends Command {
-  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Timer timer = new Timer();
 
   private LightSubsystem LightSubsystem;
@@ -28,8 +27,7 @@ public class HubActivity extends Command {
   // toggles activity states.
   private final int[] timesWinning = {
     130, 105, 80, 55, -10
-  }; // Now has been replaced by actual values. (Actually I did it wrong, nvm [Nvm to the nvm its
-  // fixed])
+  };
   private final int[] timesLosing = {105, 80, 55, 30, -10};
 
   /**
