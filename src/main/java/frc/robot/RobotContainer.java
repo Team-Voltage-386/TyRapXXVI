@@ -22,6 +22,7 @@ import frc.robot.commands.DriveToPose;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -61,6 +62,7 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
+  private final SpindexerSubsystem spindexer;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
@@ -112,6 +114,8 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
+        flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
       case SIM:
@@ -144,6 +148,7 @@ public class RobotContainer {
         turret = new Turret(turretIo, drive::getPose, flywheel);
 
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -161,6 +166,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
         break;
     }
 
@@ -417,6 +423,10 @@ public class RobotContainer {
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.takeInCommand());
       kManipController.y().onTrue(intake.stopMotorCommand());
+      kManipController.leftBumper().onTrue(spindexer.spindexerOnCommand());
+      kManipController.rightTrigger().onTrue(spindexer.spindexerOnCommand());
+      kManipController.leftTrigger().onTrue(spindexer.spindexerOnCommand());
+      kManipController.leftStick().onTrue(spindexer.spindexerOnCommand());
     }
   }
 
