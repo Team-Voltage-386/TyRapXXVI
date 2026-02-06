@@ -1,10 +1,10 @@
 package frc.robot.subsystems;
 
 import static frc.robot.util.SparkUtil.*;
+
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -44,8 +44,7 @@ public class SpindexerSubsystem extends SubsystemBase {
     SparkMaxConfig feederConfig = new SparkMaxConfig();
     feederConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
     feederConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
-    feederConfig
-        .closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+    feederConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
     feederConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -93,7 +92,7 @@ public class SpindexerSubsystem extends SubsystemBase {
     feeder_motor.set(0);
   }
 
-  public Command feederCommand() {
+  public Command feederOffCommand() {
     return Commands.runOnce(() -> feederOff());
   }
 

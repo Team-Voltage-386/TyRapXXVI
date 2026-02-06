@@ -31,7 +31,7 @@ public class TurretConstants {
   public static final int flywheelCanId = 13;
   public static final double flywheelMaxRPM = 237;
   public static final double flywheelKs = 0.11;
-  public static final double flywheelKv = 0.002;
+  public static final double flywheelKv = 0.00204;
   public static final double flywheelKa = 0.006;
 
   public static final double shooterWheelRadiusMeters = 0.05;

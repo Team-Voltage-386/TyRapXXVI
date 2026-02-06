@@ -115,7 +115,6 @@ public class RobotContainer {
 
         intake = new IntakeSubsystem();
         spindexer = new SpindexerSubsystem();
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
       case SIM:
@@ -374,11 +373,18 @@ public class RobotContainer {
           .rightTrigger()
           .whileTrue(
               new RepeatCommand(
-                  turret.aimAtCommand(
-                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
+                      turret.aimAtCommand(
+                          () -> MetersPerSecond.of(12.0),
+                          new Pose3d(getHubPose(), Rotation3d.kZero)))
+                  .alongWith(spindexer.feederOnCommand())
+                  .alongWith(spindexer.spindexerOnCommand()));
+
       kDriveController
           .rightTrigger()
-          .onFalse(new InstantCommand(() -> flywheel.setFlywheelSpeed(0)));
+          .onFalse(
+              new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
+                  .alongWith(spindexer.feederOffCommand())
+                  .alongWith(spindexer.spindexerOffCommand()));
 
       kDriveController
           .start()
@@ -423,10 +429,11 @@ public class RobotContainer {
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.takeInCommand());
       kManipController.y().onTrue(intake.stopMotorCommand());
+
       kManipController.leftBumper().onTrue(spindexer.spindexerOnCommand());
-      kManipController.rightTrigger().onTrue(spindexer.spindexerOnCommand());
-      kManipController.leftTrigger().onTrue(spindexer.spindexerOnCommand());
-      kManipController.leftStick().onTrue(spindexer.spindexerOnCommand());
+      kManipController.rightTrigger().onTrue(spindexer.spindexerOffCommand());
+      kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
+      kManipController.leftStick().onTrue(spindexer.feederOffCommand());
     }
   }
 

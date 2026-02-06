@@ -24,17 +24,16 @@ import org.littletonrobotics.junction.Logger;
  * Also includes the shooter functionality for simplicity.
  */
 public class FlywheelIOSparkMax implements FlywheelIO {
-
+  // real robot will likely have two motors, use follower
   private final SparkMax flywheelMotor =
       new SparkMax(TurretConstants.flywheelCanId, MotorType.kBrushless);
-  // NEEDS the absolute encoder board plugged into MAX controller--not normal board.
   private final RelativeEncoder flywheelEncoder = flywheelMotor.getEncoder();
   private double flywheelSetpoint;
 
   private SparkMaxConfig flywheelConfig;
 
-  TuningUtil flywheelKp = new TuningUtil("/Tuning/flywheel/flywheelKp", 0.0026);
-  TuningUtil flywheelKd = new TuningUtil("/Tuning/flywheel/flywheelKd", 0.006);
+  TuningUtil flywheelKp = new TuningUtil("/Tuning/flywheel/flywheelKp", 0.001);
+  TuningUtil flywheelKd = new TuningUtil("/Tuning/flywheel/flywheelKd", 0.02);
   TuningUtil flywheelKv = new TuningUtil("/Tuning/flywheel/flywheelKv", TurretConstants.flywheelKv);
   TuningUtil flywheelKs = new TuningUtil("/Tuning/flywheel/flywheelKs", TurretConstants.flywheelKs);
   TuningUtil flywheelKa = new TuningUtil("/Tuning/flywheel/flywheelKa", TurretConstants.flywheelKa);
