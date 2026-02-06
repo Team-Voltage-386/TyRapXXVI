@@ -101,7 +101,8 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(3));
         }
 
-        turret = new Turret(new TurretIOSparkMax(), drive::getPose);
+        flywheel = new Flywheel(new FlywheelIOSparkMax());
+        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel);
 
         vis =
             new Vision(
@@ -111,7 +112,6 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
       case SIM:
@@ -137,11 +137,11 @@ public class RobotContainer {
                 driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
         sim.registerSimulator(turretIo);
 
-        turret = new Turret(turretIo, drive::getPose);
-
         flywheel =
             new Flywheel(
                 new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
+
+        turret = new Turret(turretIo, drive::getPose, flywheel);
 
         intake = new IntakeSubsystem();
 
@@ -369,7 +369,11 @@ public class RobotContainer {
           .whileTrue(
               new RepeatCommand(
                   turret.aimAtCommand(
-                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
+                      () -> MetersPerSecond.of(4.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
+      kDriveController
+          .rightTrigger()
+          .onFalse(new InstantCommand(() -> flywheel.setFlywheelSpeed(0)));
+
       kDriveController
           .start()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
@@ -408,11 +412,11 @@ public class RobotContainer {
                   () -> false,
                   flywheel));
       kManipController.rightBumper().whileTrue(flywheel.shootCommand(() -> setRPM.getValue()));
-          // Manipulator controller bindings
-    kManipController.a().onTrue(intake.deployCommand());
-    kManipController.b().onTrue(intake.retractCommand());
-    kManipController.x().onTrue(intake.takeInCommand());
-    kManipController.y().onTrue(intake.stopMotorCommand());
+      // Manipulator controller bindings
+      kManipController.a().onTrue(intake.deployCommand());
+      kManipController.b().onTrue(intake.retractCommand());
+      kManipController.x().onTrue(intake.takeInCommand());
+      kManipController.y().onTrue(intake.stopMotorCommand());
     }
   }
 

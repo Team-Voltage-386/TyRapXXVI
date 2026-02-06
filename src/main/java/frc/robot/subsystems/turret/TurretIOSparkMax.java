@@ -105,10 +105,7 @@ public class TurretIOSparkMax implements TurretIO {
 
     yawMotor
         .getClosedLoopController()
-        .setSetpoint(
-            desiredAngle,
-            ControlType.kPosition,
-            ClosedLoopSlot.kSlot0);
+        .setSetpoint(desiredAngle, ControlType.kPosition, ClosedLoopSlot.kSlot0);
   }
 
   public void testTurretVoltage(double volts) {

@@ -33,4 +33,6 @@ public class TurretConstants {
   public static final double flywheelKs = 0.11;
   public static final double flywheelKv = 0.002;
   public static final double flywheelKa = 0.006;
+
+  public static final double shooterWheelRadiusMeters = 0.05;
 }

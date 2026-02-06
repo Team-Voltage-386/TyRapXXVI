@@ -33,6 +33,10 @@ public class Flywheel extends SubsystemBase {
     return inputs.shotSpeed;
   }
 
+  public void setFlywheelSpeed(double rpm) {
+    io.setFlywheelVelocity(rpm);
+  }
+
   @Override
   public void periodic() {
     io.readjustPID();
