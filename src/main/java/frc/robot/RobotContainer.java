@@ -23,8 +23,8 @@ import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.LightSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -202,6 +202,7 @@ public class RobotContainer {
     autoChooser.addOption("SquareStraight", DriveCommands.SquareStraight(drive));
     autoChooser.addOption("SmallSquare", DriveCommands.SmallSquare(drive));
     autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
+    autoChooser.addOption("LeftNeutralZone", buildLeftNeutralZoneAuto());
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -474,6 +475,9 @@ public class RobotContainer {
       case "BlueSquare":
         setPoseFromPathStart("BlueSquare");
         break;
+      case "LeftNeutralZone":
+        setPoseFromPathStart("StartCollectNeutralTopQtr");
+        break;
     }
     return autoChooser.get();
   }
@@ -641,5 +645,26 @@ public class RobotContainer {
       System.err.println("Path file can't be parsed!");
       e.printStackTrace();
     }
+  }
+
+  public Command buildLeftNeutralZoneAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+              turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
+              intake.deployCommand()),
+            DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()).withTimeout(5),
+            spindexer
+                .spindexerOffCommand()
+                .alongWith(spindexer.feederOffCommand()),
+            DriveCommands.buildFollowPath("CollectDepot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()).withTimeout(3),
+            spindexer
+                .spindexerOffCommand()
+                .alongWith(spindexer.feederOffCommand()),
+            turret.disableAutoAimCommand().alongWith(intake.retractCommand())
+            );
+    return auto;
   }
 }

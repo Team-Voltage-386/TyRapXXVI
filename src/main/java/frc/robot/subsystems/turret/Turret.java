@@ -20,7 +20,10 @@ public class Turret extends SubsystemBase {
   private final Pose3d[] turretVisual = new Pose3d[2];
 
   private final Supplier<Pose2d> dtPose;
+  private Pose3d currentTargetPose = new Pose3d();
   private final Flywheel flywheel;
+
+  private boolean autoAimEnabled = false;
 
   public Turret(TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel) {
     this.io = io;
@@ -39,6 +42,49 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> io.setTurretYaw(inputs.turretYaw.plus(deltaYaw)));
   }
 
+  public Command enableAutoAimCommand(Pose3d targetPose) {
+    return runOnce(
+        () -> {
+          autoAimEnabled = true;
+          currentTargetPose = targetPose;
+        });
+  }
+
+  public Command disableAutoAimCommand() {
+    return runOnce(() -> autoAimEnabled = false);
+  }
+
+  public LinearVelocity calculateShotSpeed(Pose3d targetPose) {
+    // Placholder: Need real calculations
+    return MetersPerSecond.of(9.0);
+  }
+
+  public void aimAtTarget(Pose3d targetPose) {
+    // deltaY = v0 sin(theta) * t - 0.5 g t^2
+    LinearVelocity shootSpeed = calculateShotSpeed(targetPose);
+    Pose2d dtPos = dtPose.get();
+    Pose2d turretFieldPos =
+        dtPos.plus(
+            new Transform2d(
+                TurretConstants.turretPosition.rotateBy(dtPos.getRotation()), Rotation2d.kZero));
+    Translation3d turretFieldTrans =
+        new Translation3d(
+            turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.5);
+    Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
+    // TODO: ensure this g constant is accurate for real-world
+    double g = 11; // m/s^2
+    double v0 = shootSpeed.in(MetersPerSecond);
+    double theta = calcHitPitch(deltaPos, v0, g);
+
+    double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
+    io.setTurretPitch(new Rotation2d(theta));
+    io.setTurretYaw(new Rotation2d(yaw).minus(dtPos.getRotation()));
+
+    double shooterWheelRPM = (v0 / (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)) * 60;
+    flywheel.setFlywheelSpeed(shooterWheelRPM);
+    Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
+  }
+
   /**
    * Aims the turret to shoot a Fuel through the specified target pose.
    *
@@ -50,32 +96,7 @@ public class Turret extends SubsystemBase {
   public Command aimAtCommand(Supplier<LinearVelocity> shootSpeed, Pose3d targetPose) {
     return runOnce(
         () -> {
-          // deltaY = v0 sin(theta) * t - 0.5 g t^2
-          Pose2d dtPos = dtPose.get();
-          Pose2d turretFieldPos =
-              dtPos.plus(
-                  new Transform2d(
-                      TurretConstants.turretPosition.rotateBy(dtPos.getRotation()),
-                      Rotation2d.kZero));
-          Translation3d turretFieldTrans =
-              new Translation3d(
-                  turretFieldPos.getTranslation().getX(),
-                  turretFieldPos.getTranslation().getY(),
-                  0.5);
-          Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
-          // TODO: ensure this g constant is accurate for real-world
-          double g = 11; // m/s^2
-          double v0 = shootSpeed.get().in(MetersPerSecond);
-          double theta = calcHitPitch(deltaPos, v0, g);
-
-          double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
-          io.setTurretPitch(new Rotation2d(theta));
-          io.setTurretYaw(new Rotation2d(yaw).minus(dtPos.getRotation()));
-
-          double shooterWheelRPM =
-              (v0 / (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)) * 60;
-          flywheel.setFlywheelSpeed(shooterWheelRPM);
-          Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
+          aimAtTarget(targetPose);
         });
   }
 
@@ -106,6 +127,13 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    if (autoAimEnabled) {
+      aimAtTarget(currentTargetPose);
+    } else {
+      flywheel.setFlywheelSpeed(0);
+    }
+
     io.updateInputs(inputs);
     Logger.processInputs("Shooter/Turret/Inputs", inputs);
 
