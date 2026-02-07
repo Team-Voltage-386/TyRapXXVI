@@ -407,7 +407,11 @@ public class RobotContainer {
 
       kDriveController
           .rightBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+
+      kDriveController
+          .leftBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
 
       kManipController
           .povRight()
