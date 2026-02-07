@@ -22,6 +22,7 @@ import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
@@ -66,6 +67,7 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
+  private final ClimbSubsystem climb;
   private final SpindexerSubsystem spindexer;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
@@ -124,6 +126,7 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
 
@@ -157,6 +160,7 @@ public class RobotContainer {
         turret = new Turret(turretIo, drive::getPose, flywheel);
 
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -174,6 +178,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
     }
@@ -197,6 +202,11 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Drive square", DriveCommands.driveSquare(drive));
+    autoChooser.addOption("SquareStraight", DriveCommands.SquareStraight(drive));
+    autoChooser.addOption("SmallSquare", DriveCommands.SmallSquare(drive));
+    autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
+    autoChooser.addOption("LeftNeutralZone", buildLeftNeutralZoneAuto());
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -399,7 +409,11 @@ public class RobotContainer {
 
       kDriveController
           .rightBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+
+      kDriveController
+          .leftBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
 
       kManipController
           .povRight()
@@ -450,6 +464,27 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    String selectedAutoName = autoChooser.getSendableChooser().getSelected();
+    if (selectedAutoName == null) {
+      return Commands.none();
+    }
+    switch (selectedAutoName) {
+      case "Drive square":
+        setPoseFromPathStart("Square");
+        break;
+      case "SquareStraight":
+        setPoseFromPathStart("SquareStraight");
+        break;
+      case "SmallSquare":
+        setPoseFromPathStart("SmallSquare");
+        break;
+      case "BlueSquare":
+        setPoseFromPathStart("BlueSquare");
+        break;
+      case "LeftNeutralZone":
+        setPoseFromPathStart("StartCollectNeutralTopQtr");
+        break;
+    }
     return autoChooser.get();
   }
 
@@ -574,5 +609,73 @@ public class RobotContainer {
 
   public void setIsAheadHub(boolean setTo) {
     getHubActivityCommand().setIsAhead(setTo);
+  }
+
+  protected void setPoseFromPathStart(String pathName) {
+    try {
+      System.out.println("Setting pose from path start: " + pathName);
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+      List<Waypoint> waypoints;
+      Optional<Pose2d> pose = path.getStartingHolonomicPose();
+      Optional<Alliance> ally = DriverStation.getAlliance();
+      waypoints = path.getWaypoints();
+      Waypoint first = waypoints.get(0);
+      Rotation2d startRotation = Rotation2d.kZero;
+      if (pose.isPresent()) {
+        startRotation = pose.get().getRotation();
+      }
+      if (ally.isPresent()) {
+        if (ally.get() == Alliance.Red) {
+          System.out.println("Flipping start location for red");
+          first = first.flip();
+          if (pose.isPresent()) {
+            startRotation = pose.get().getRotation().plus(Rotation2d.fromDegrees(180));
+          }
+        }
+      }
+      if (pose.isPresent()) {
+        drive.setPose(new Pose2d(first.anchor(), startRotation));
+        System.out.println(first.toString());
+        System.out.println("First.anchor(): " + first.anchor().toString());
+        System.out.println("startRotation: " + startRotation.toString());
+      } else {
+        System.out.println("Error getting PathPlanner pose");
+      }
+      if (Robot.isSimulation()) {
+        if (sim != null) {
+          System.out.println("Setting sim pose to " + drive.getPose());
+          sim.getDriveSim().setSimulationWorldPose(drive.getPose());
+        }
+      }
+    } catch (IOException e) {
+      System.err.println("Path file not found!");
+      e.printStackTrace();
+    } catch (ParseException e) {
+      System.err.println("Path file can't be parsed!");
+      e.printStackTrace();
+    }
+  }
+
+  public Command buildLeftNeutralZoneAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
+                intake.deployCommand()),
+            DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(5),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            DriveCommands.buildFollowPath("CollectDepot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(3),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret
+                .disableAutoAimCommand()
+                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            DriveCommands.buildFollowPath("AlignTowerFromDepot"),
+            climb.retractCommand());
+    return auto;
   }
 }

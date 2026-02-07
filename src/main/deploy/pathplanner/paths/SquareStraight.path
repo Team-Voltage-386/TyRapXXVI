@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.614795180722891,
-        "y": 7.367951807228916
+        "x": 14.983736654804272,
+        "y": 4.09417556346382
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.2884442539327465,
-        "y": 7.3694399726623026
+        "x": 14.166037959667854,
+        "y": 4.104934756820878
       },
       "isLocked": false,
-      "linkedName": "BlueTopShotFar"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.8043937232524963,
-        "y": 5.982268188302426
+        "x": 13.197710557532623,
+        "y": 4.09417556346382
       },
       "prevControl": {
-        "x": 1.786374299795739,
-        "y": 5.873005852664174
+        "x": 12.229383155397391,
+        "y": 4.115693950177937
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BlueDepot"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Red Allience Side (Blue Allience)",
   "idealStartingState": {
     "velocity": 0.0,
     "rotation": 0.0

@@ -92,7 +92,7 @@ public final class DriveConstants {
   static {
     if (isReefscape) {
       // TODO: port constants from reefscape, most of these are from jr (except ids and offsets)
-      wheelRadiusMeters = 0.044;
+      wheelRadiusMeters = 0.0434;
       driveMotorReduction = 6.12; // MAXSwerve with 14 pinion teeth and 22 spur teeth
       driveGearbox = DCMotor.getNEO(1);
       turnGearbox = DCMotor.getNEO(1);
