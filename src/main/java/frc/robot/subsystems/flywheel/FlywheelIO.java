@@ -31,4 +31,8 @@ public interface FlywheelIO {
    * Start/stop shooting Fuel with the current shooter configuration.
    */
   default void setFlywheelShooting(boolean shooting) {}
+
+  default void setFlywheelVelocity(double velocityRPM) {}
+
+  default void readjustPID() {}
 }
