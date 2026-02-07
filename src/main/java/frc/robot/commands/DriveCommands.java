@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -275,6 +277,72 @@ public class DriveCommands {
                               + formatter.format(Units.metersToInches(wheelRadius))
                               + " inches");
                     })));
+  }
+
+  // Note: Remember to switch to oppsite alliences when choosing Red or Blue Auto.
+  // Example: For Blue Auto use Red Allience because the field gets flipped.
+  // Added command for Pathplanner to drive in a square.
+  public static Command driveSquare(Drive drive) {
+    try {
+      System.out.println("Ran Square");
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath path = PathPlannerPath.fromPathFile("Square");
+
+      // Create a path following command using AutoBuilder.
+      // This will also trigger event markers defined in the path.
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      DriverStation.reportError("Could not load path:" + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
+  // Robot will drive straight in the middle in Red Allience.
+  public static Command SquareStraight(Drive drive) {
+    try {
+      System.out.println("Ran SquareStraight");
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath path = PathPlannerPath.fromPathFile("SquareStraight");
+
+      // Create a path following command using AutoBuilder.
+      // This will also trigger event markers defined in the path.
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      DriverStation.reportError("Could not load path:" + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
+  // Robot will make small square on Red Allience on the right side.
+  public static Command SmallSquare(Drive drive) {
+    try {
+      System.out.println("Ran SmallSquare");
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath path = PathPlannerPath.fromPathFile("SmallSquare");
+
+      // Create a path following command using AutoBuilder.
+      // This will also trigger event markers defined in the path.
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      DriverStation.reportError("Could not load path:" + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
+  // Robot will make a square in the middle on Blue Allience.
+  public static Command BlueSquare(Drive drive) {
+    try {
+      System.out.println("Ran BlueSquare");
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath path = PathPlannerPath.fromPathFile("BlueSquare");
+
+      // Create a path following command using AutoBuilder.
+      // This will also trigger event markers defined in the path.
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      DriverStation.reportError("Could not load path:" + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
   }
 
   private static class WheelRadiusCharacterizationState {

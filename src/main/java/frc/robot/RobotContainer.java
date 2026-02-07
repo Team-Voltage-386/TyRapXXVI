@@ -198,6 +198,10 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Drive square", DriveCommands.driveSquare(drive));
+    autoChooser.addOption("SquareStraight", DriveCommands.SquareStraight(drive));
+    autoChooser.addOption("SmallSquare", DriveCommands.SmallSquare(drive));
+    autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -453,6 +457,24 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    String selectedAutoName = autoChooser.getSendableChooser().getSelected();
+    if (selectedAutoName == null) {
+      return Commands.none();
+    }
+    switch (selectedAutoName) {
+      case "Drive square":
+        setPoseFromPathStart("Square");
+        break;
+      case "SquareStraight":
+        setPoseFromPathStart("SquareStraight");
+        break;
+      case "SmallSquare":
+        setPoseFromPathStart("SmallSquare");
+        break;
+      case "BlueSquare":
+        setPoseFromPathStart("BlueSquare");
+        break;
+    }
     return autoChooser.get();
   }
 
@@ -573,5 +595,51 @@ public class RobotContainer {
 
   public void setIsAheadHub(boolean setTo) {
     getHubActivityCommand().setIsAhead(setTo);
+  }
+
+  protected void setPoseFromPathStart(String pathName) {
+    try {
+      System.out.println("Setting pose from path start: " + pathName);
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+      List<Waypoint> waypoints;
+      Optional<Pose2d> pose = path.getStartingHolonomicPose();
+      Optional<Alliance> ally = DriverStation.getAlliance();
+      waypoints = path.getWaypoints();
+      Waypoint first = waypoints.get(0);
+      Rotation2d startRotation = Rotation2d.kZero;
+      if (pose.isPresent()) {
+        startRotation = pose.get().getRotation();
+      }
+      if (ally.isPresent()) {
+        if (ally.get() == Alliance.Red) {
+          System.out.println("Flipping start location for red");
+          first = first.flip();
+          if (pose.isPresent()) {
+            startRotation = pose.get().getRotation().plus(Rotation2d.fromDegrees(180));
+          }
+        }
+      }
+      if (pose.isPresent()) {
+        drive.setPose(new Pose2d(first.anchor(), startRotation));
+        System.out.println(first.toString());
+        System.out.println("First.anchor(): " + first.anchor().toString());
+        System.out.println("startRotation: " + startRotation.toString());
+      } else {
+        System.out.println("Error getting PathPlanner pose");
+      }
+      if (Robot.isSimulation()) {
+        if (sim != null) {
+          System.out.println("Setting sim pose to " + drive.getPose());
+          sim.getDriveSim().setSimulationWorldPose(drive.getPose());
+        }
+      }
+    } catch (IOException e) {
+      System.err.println("Path file not found!");
+      e.printStackTrace();
+    } catch (ParseException e) {
+      System.err.println("Path file can't be parsed!");
+      e.printStackTrace();
+    }
   }
 }
