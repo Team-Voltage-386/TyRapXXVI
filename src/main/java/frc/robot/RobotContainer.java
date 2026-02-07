@@ -660,20 +660,21 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-              turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
-              intake.deployCommand()),
+                turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
+                intake.deployCommand()),
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()).withTimeout(5),
-            spindexer
-                .spindexerOffCommand()
-                .alongWith(spindexer.feederOffCommand()),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(5),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             DriveCommands.buildFollowPath("CollectDepot"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()).withTimeout(3),
-            spindexer
-                .spindexerOffCommand()
-                .alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand().alongWith(intake.retractCommand())
-            );
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(3),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret
+                .disableAutoAimCommand()
+                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            DriveCommands.buildFollowPath("AlignTowerFromDepot"),
+            climb.retractCommand());
     return auto;
   }
 }

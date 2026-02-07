@@ -20,7 +20,7 @@ public class ClimbSubsystem extends SubsystemBase {
   private final SparkMax deploy_motor;
 
   public ClimbSubsystem() {
-    
+
     deploy_motor = new SparkMax(ClimbConstants.DEPLOY_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig deployConfig = new SparkMaxConfig();
     deployConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
@@ -66,7 +66,6 @@ public class ClimbSubsystem extends SubsystemBase {
   public Command retractCommand() {
     return Commands.runOnce(() -> retract());
   }
-
 
   public void makeSafe() {
     retract();
