@@ -22,6 +22,7 @@ import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
@@ -66,6 +67,7 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
+  private final ClimbSubsystem climb;
   private final SpindexerSubsystem spindexer;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
@@ -124,6 +126,7 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
 
@@ -157,6 +160,7 @@ public class RobotContainer {
         turret = new Turret(turretIo, drive::getPose, flywheel);
 
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
@@ -175,6 +179,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
     }
