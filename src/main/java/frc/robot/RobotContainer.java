@@ -19,9 +19,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -54,6 +57,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  // LED and Rumble
+  private final LightSubsystem m_lightSubsystem = new LightSubsystem();
 
   // Subsystems
   private final Drive drive;
@@ -61,14 +66,19 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
+  private final SpindexerSubsystem spindexer;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 3);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
+  TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
 
   public SimContainer sim;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController manipulatorController = new CommandXboxController(1);
+  private final CommandXboxController kDriveController = new CommandXboxController(0);
+  private final CommandXboxController kManipController = new CommandXboxController(1);
+
+  // LEDs and Rumble
+  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, kDriveController);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -77,6 +87,9 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, IO devices, and commands.
    */
   public RobotContainer() {
+    m_lightSubsystem.setToColor(5, 200, 0, 0);
+    m_lightSubsystem.setToColor(6, 0, 0, 200);
+    m_lightSubsystem.setToColor(9, 0, 200, 0);
 
     switch (Constants.currentMode) {
       case REAL:
@@ -100,7 +113,8 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(3));
         }
 
-        turret = new Turret(new TurretIOSparkMax(), drive::getPose);
+        flywheel = new Flywheel(new FlywheelIOSparkMax());
+        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel);
 
         vis =
             new Vision(
@@ -110,7 +124,7 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
+        spindexer = new SpindexerSubsystem();
         break;
 
       case SIM:
@@ -136,13 +150,14 @@ public class RobotContainer {
                 driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
         sim.registerSimulator(turretIo);
 
-        turret = new Turret(turretIo, drive::getPose);
-
         flywheel =
             new Flywheel(
                 new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
 
+        turret = new Turret(turretIo, drive::getPose, flywheel);
+
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -160,6 +175,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
         intake = new IntakeSubsystem();
+        spindexer = new SpindexerSubsystem();
         break;
     }
 
@@ -300,25 +316,25 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -kDriveController.getLeftY(),
+            () -> -kDriveController.getLeftX(),
+            () -> -kDriveController.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
+    kDriveController
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> -kDriveController.getLeftY(),
+                () -> -kDriveController.getLeftX(),
                 Rotation2d::new));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    kDriveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    controller
+    kDriveController
         .b()
         .onTrue(
             Commands.runOnce(
@@ -330,7 +346,7 @@ public class RobotContainer {
 
     if (turret != null) {
       System.out.println("running at " + runVolts.getValue());
-      controller
+      kDriveController
           .povRight()
           .whileTrue(
               new FunctionalCommand(
@@ -345,7 +361,7 @@ public class RobotContainer {
                   () -> false,
                   flywheel));
 
-      controller
+      kDriveController
           .povLeft()
           .whileTrue(
               new FunctionalCommand(
@@ -360,34 +376,79 @@ public class RobotContainer {
                   () -> false,
                   flywheel));
 
-      controller.povUp().onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
-      controller
+      kDriveController
+          .povUp()
+          .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
+      kDriveController
           .povDown()
           .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg.unaryMinus())));
 
-      controller
+      kDriveController
           .rightTrigger()
           .whileTrue(
               new RepeatCommand(
-                  turret.aimAtCommand(
-                      () -> MetersPerSecond.of(12.0), new Pose3d(getHubPose(), Rotation3d.kZero))));
-      controller.start().onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+                      turret.aimAtCommand(
+                          () -> MetersPerSecond.of(12.0),
+                          new Pose3d(getHubPose(), Rotation3d.kZero)))
+                  .alongWith(spindexer.feederOnCommand())
+                  .alongWith(spindexer.spindexerOnCommand()));
 
-      controller
+      kDriveController
+          .rightTrigger()
+          .onFalse(
+              new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
+                  .alongWith(spindexer.feederOffCommand())
+                  .alongWith(spindexer.spindexerOffCommand()));
+
+      kDriveController
+          .start()
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+
+      kDriveController
+          .rightBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+
+      kManipController
           .povRight()
-          .whileTrue(new RepeatCommand(turret.addYawCommand(Rotation2d.fromDegrees(5))));
-    }
-    // Auto drive to scoring locations
-    controller
-        .rightBumper()
-        .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                  },
+                  () -> false,
+                  flywheel));
 
-    // Manipulator controller bindings
-    manipulatorController.a().onTrue(intake.deployCommand());
-    manipulatorController.b().onTrue(intake.retractCommand());
-    manipulatorController.x().onTrue(intake.takeInCommand());
-    manipulatorController.y().onTrue(intake.stopMotorCommand());
-    manipulatorController.rightBumper().whileTrue(intake.reverseCommand());
+      kManipController
+          .povLeft()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                  },
+                  () -> false,
+                  flywheel));
+      kManipController.rightBumper().whileTrue(flywheel.shootCommand(() -> setRPM.getValue()));
+      // Manipulator controller bindings
+      kManipController.a().onTrue(intake.deployCommand());
+      kManipController.b().onTrue(intake.retractCommand());
+      kManipController.x().onTrue(intake.takeInCommand());
+      kManipController.y().onTrue(intake.stopMotorCommand());
+
+      kManipController.leftBumper().onTrue(spindexer.spindexerOnCommand());
+      kManipController.rightTrigger().onTrue(spindexer.spindexerOffCommand());
+      kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
+      kManipController.leftStick().onTrue(spindexer.feederOffCommand());
+    }
   }
 
   /**
@@ -518,6 +579,22 @@ public class RobotContainer {
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
     CommandScheduler.getInstance().schedule(pathfindingCommand);
+  }
+
+  public boolean areLightsOn() {
+    return m_lightSubsystem.areLightsOn();
+  }
+
+  public boolean isHubActive() {
+    return hubActivity.hubIsActive();
+  }
+
+  public HubActivity getHubActivityCommand() {
+    return hubActivity;
+  }
+
+  public void setIsAheadHub(boolean setTo) {
+    getHubActivityCommand().setIsAhead(setTo);
   }
 
   protected void setPoseFromPathStart(String pathName) {
