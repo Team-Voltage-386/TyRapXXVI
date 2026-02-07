@@ -133,21 +133,20 @@ public class RobotContainer {
                 new ModuleIOSim(mods[3]));
         // disable vision simulation for performance reasons
         vis = new Vision(drive::addVisionMeasurement);
+        spindexer = new SpindexerSubsystem();
 
+        flywheel = new Flywheel(new FlywheelIOSim());
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
-                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
+                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative,
+                spindexer,
+                flywheel);
         sim.registerSimulator(turretIo);
-
-        flywheel =
-            new Flywheel(
-                new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
 
         turret = new Turret(turretIo, drive::getPose, flywheel);
 
         intake = new IntakeSubsystem();
-        spindexer = new SpindexerSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);

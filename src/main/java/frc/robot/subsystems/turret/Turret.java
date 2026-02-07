@@ -72,8 +72,7 @@ public class Turret extends SubsystemBase {
           io.setTurretPitch(new Rotation2d(theta));
           io.setTurretYaw(new Rotation2d(yaw).minus(dtPos.getRotation()));
 
-          double shooterWheelRPM =
-              (v0 / (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)) * 60;
+          double shooterWheelRPM = (v0 * TurretConstants.turretRPMToMetersPerSecond);
           flywheel.setFlywheelSpeed(shooterWheelRPM);
           Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
         });

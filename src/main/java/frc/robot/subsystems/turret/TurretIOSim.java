@@ -5,11 +5,12 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
+import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.flywheel.Flywheel;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
@@ -25,17 +26,22 @@ public class TurretIOSim implements TurretIO, Simulatable {
 
   private Rotation2d turretYaw = new Rotation2d();
   private Rotation2d turretPitch = new Rotation2d();
-
-  private double flywheelRPM = 0.0;
-
-  boolean flywheelShooting = false;
+  boolean flywheelShooting = true;
 
   private final Supplier<Pose2d> dtPose;
   private final Supplier<ChassisSpeeds> speedSupplier;
+  private final SpindexerSubsystem spindexerSubsystem;
+  private final Flywheel flywheel;
 
-  public TurretIOSim(Supplier<Pose2d> pose3dSupplier, Supplier<ChassisSpeeds> speedSupplier) {
+  public TurretIOSim(
+      Supplier<Pose2d> pose3dSupplier,
+      Supplier<ChassisSpeeds> speedSupplier,
+      SpindexerSubsystem spindexer,
+      Flywheel flywheel) {
     this.dtPose = pose3dSupplier;
     this.speedSupplier = speedSupplier;
+    this.spindexerSubsystem = spindexer;
+    this.flywheel = flywheel;
   }
 
   public void updateInputs(TurretIOInputs inputs) {
@@ -56,19 +62,11 @@ public class TurretIOSim implements TurretIO, Simulatable {
     turretPitch = new Rotation2d(MathUtil.clamp(position.getRadians(), 0, Math.PI / 2));
   }
 
-  public void setFlywheelShooting(boolean shooting) {
-    this.flywheelShooting = shooting;
-  }
-
-  public void setFlywheelSpeed(AngularVelocity speed) {
-    this.flywheelRPM = speed.in(RPM);
-  }
-
   protected int tickCount = 0;
 
   @Override
   public void simulationSubTick(int i) {
-    if (flywheelShooting && i == 0 && ++tickCount % 20 == 0) {
+    if (spindexerSubsystem.feederOn && i == 0 && ++tickCount % 20 == 0) {
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -77,7 +75,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                       // Specify the translation of the shooter from the robot center (in the
                       // shooter’s
                       // reference frame)
-                      new Translation2d(0.0, 0),
+                      TurretConstants.turretPosition,
                       // Specify the field-relative speed of the chassis, adding it to the initial
                       // velocity
                       // of the projectile
@@ -93,7 +91,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(flywheelRPM * TurretConstants.turretRPMToMetersPerSecond),
+                      MetersPerSecond.of(12),
                       // The angle at which the note is launched
                       turretPitch.getMeasure())
                   // Set the target center to the Crescendo Speaker of the current alliance

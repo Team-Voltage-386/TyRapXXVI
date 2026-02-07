@@ -25,7 +25,6 @@ public interface FlywheelIO {
    * Set the turret wheel speed to the specified value. This does not start shooting; it only sets
    * the target speed.
    */
-  default void setFlywheelSpeed(AngularVelocity speed) {}
 
   /**
    * Start/stop shooting Fuel with the current shooter configuration.
@@ -33,6 +32,10 @@ public interface FlywheelIO {
   default void setFlywheelShooting(boolean shooting) {}
 
   default void setFlywheelVelocity(double velocityRPM) {}
+
+  default double getFlywheelVelocity() {
+    return 0.0;
+  }
 
   default void readjustPID() {}
 }
