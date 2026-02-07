@@ -23,8 +23,8 @@ import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.LightSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -402,7 +402,11 @@ public class RobotContainer {
 
       kDriveController
           .rightBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+
+      kDriveController
+          .leftBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
 
       kManipController
           .povRight()
