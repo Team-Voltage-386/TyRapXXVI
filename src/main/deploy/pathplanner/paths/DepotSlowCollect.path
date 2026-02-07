@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.7278054567022547,
+        "x": 1.2765243179122192,
         "y": 5.966275207591934
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.5723413520668803,
-        "y": 5.832991430543656
+        "x": 1.0267602783234544,
+        "y": 5.977134513661011
       },
       "isLocked": false,
-      "linkedName": "BlueDepot"
+      "linkedName": "DepotOffset"
     },
     {
       "anchor": {
-        "x": 0.9266723813657414,
-        "y": 4.829281105324074
+        "x": 0.7278054567022547,
+        "y": 5.966275207591934
       },
       "prevControl": {
-        "x": 1.1328461213549712,
-        "y": 4.970675549836061
+        "x": 0.9773740499960035,
+        "y": 5.951594702104065
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "BlueDepot"
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 0.8,
+    "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.74833185427048
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
