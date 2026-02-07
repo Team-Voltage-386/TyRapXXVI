@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.units.measure.AngularVelocity;
+import org.littletonrobotics.junction.Logger;
 
 public class FlywheelIOSim implements FlywheelIO {
 
@@ -21,6 +22,7 @@ public class FlywheelIOSim implements FlywheelIO {
   @Override
   public void setFlywheelVelocity(double rpm) {
     flywheelSpeed = RPM.of(rpm);
+    Logger.recordOutput("/Shooter/Flywheel/VelocitySetpoint", rpm);
   }
 
   @Override

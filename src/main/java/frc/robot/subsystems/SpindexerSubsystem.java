@@ -19,7 +19,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   private final SparkMax spindexer_motor;
 
   private final SparkMax feeder_motor;
-  public boolean feederOn = true;
+  public boolean feederOn = false;
 
   public SpindexerSubsystem() {
     spindexer_motor = new SparkMax(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID, MotorType.kBrushless);

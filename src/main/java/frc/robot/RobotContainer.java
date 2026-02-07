@@ -382,9 +382,7 @@ public class RobotContainer {
           .rightTrigger()
           .whileTrue(
               new RepeatCommand(
-                      turret.aimAtCommand(
-                          () -> MetersPerSecond.of(12.0),
-                          new Pose3d(getHubPose(), Rotation3d.kZero)))
+                      turret.aimAtCommand(() -> MetersPerSecond.of(9.0), () -> getHubPose3d()))
                   .alongWith(spindexer.feederOnCommand())
                   .alongWith(spindexer.spindexerOnCommand()));
 
@@ -506,6 +504,10 @@ public class RobotContainer {
       ;
     }
     return hubPose;
+  }
+
+  public Pose3d getHubPose3d() {
+    return new Pose3d(getHubPose(), Rotation3d.kZero);
   }
 
   public void pathfindToPosition(double xPosition, double yPosition) {

@@ -34,5 +34,5 @@ public class TurretConstants {
   public static final double shooterWheelRadiusMeters = 0.05;
 
   public static final double turretRPMToMetersPerSecond =
-      (1 / (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)) * 60;
+      (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters) / 60;
 }

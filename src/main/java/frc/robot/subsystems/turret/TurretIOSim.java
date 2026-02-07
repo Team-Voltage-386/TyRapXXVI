@@ -54,6 +54,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
   @Override
   public void setTurretYaw(Rotation2d position) {
     turretYaw = new Rotation2d(MathUtil.clamp(position.getRadians(), -Math.PI, Math.PI));
+    Logger.recordOutput("Shooter/Turret/TurretYaw", turretYaw);
   }
 
   /* Set the turret pitch to the specified position. */
@@ -91,7 +92,9 @@ public class TurretIOSim implements TurretIO, Simulatable {
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(12),
+                      MetersPerSecond.of(
+                          flywheel.getFlywheelVelocity()
+                              * TurretConstants.turretRPMToMetersPerSecond),
                       // The angle at which the note is launched
                       turretPitch.getMeasure())
                   // Set the target center to the Crescendo Speaker of the current alliance

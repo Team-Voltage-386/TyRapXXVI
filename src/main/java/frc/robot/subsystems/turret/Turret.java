@@ -47,9 +47,10 @@ public class Turret extends SubsystemBase {
    */
   // TODO: calculate the optimal constant flywheel speed
   // TODO: ensure robot movement is included in the calculation.
-  public Command aimAtCommand(Supplier<LinearVelocity> shootSpeed, Pose3d targetPose) {
+  public Command aimAtCommand(Supplier<LinearVelocity> shootSpeed, Supplier<Pose3d> targetPoseIn) {
     return runOnce(
         () -> {
+          Pose3d targetPose = targetPoseIn.get();
           // deltaY = v0 sin(theta) * t - 0.5 g t^2
           Pose2d dtPos = dtPose.get();
           Pose2d turretFieldPos =
@@ -64,7 +65,7 @@ public class Turret extends SubsystemBase {
                   0.5);
           Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
           // TODO: ensure this g constant is accurate for real-world
-          double g = 11; // m/s^2
+          double g = 9.81; // m/s^2
           double v0 = shootSpeed.get().in(MetersPerSecond);
           double theta = calcHitPitch(deltaPos, v0, g);
 
@@ -72,7 +73,7 @@ public class Turret extends SubsystemBase {
           io.setTurretPitch(new Rotation2d(theta));
           io.setTurretYaw(new Rotation2d(yaw).minus(dtPos.getRotation()));
 
-          double shooterWheelRPM = (v0 * TurretConstants.turretRPMToMetersPerSecond);
+          double shooterWheelRPM = v0 / TurretConstants.turretRPMToMetersPerSecond;
           flywheel.setFlywheelSpeed(shooterWheelRPM);
           Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
         });
