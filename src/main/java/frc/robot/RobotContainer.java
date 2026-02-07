@@ -78,7 +78,7 @@ public class RobotContainer {
   private final CommandXboxController kManipController = new CommandXboxController(1);
 
   // LEDs and Rumble
-  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, controller);
+  private final HubActivity hubActivity = new HubActivity(m_lightSubsystem, kDriveController);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
