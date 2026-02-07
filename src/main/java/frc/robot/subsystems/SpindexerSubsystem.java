@@ -19,6 +19,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   private final SparkMax spindexer_motor;
 
   private final SparkMax feeder_motor;
+  public boolean feederOn = true;
 
   public SpindexerSubsystem() {
     spindexer_motor = new SparkMax(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -62,6 +63,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void spindexerOn() {
     System.out.println("turning on spindexer");
+    feederOn = true;
     spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
   }
 
@@ -71,6 +73,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void spindexerOff() {
     System.out.println("turning off spindexer");
+    feederOn = false;
     spindexer_motor.set(0);
   }
 

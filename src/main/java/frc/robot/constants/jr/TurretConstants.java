@@ -4,9 +4,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
 public class TurretConstants {
-
-  public static final double turretRPMToMetersPerSecond =
-      (1.0 / 6000) * 12; // 12 meters per second @ 6000 RPM
   public static final int turretCanId = 52;
   public static final double zeroRotRadians = 0;
 
@@ -35,4 +32,7 @@ public class TurretConstants {
   public static final double flywheelKa = 0.006;
 
   public static final double shooterWheelRadiusMeters = 0.05;
+
+  public static final double turretRPMToMetersPerSecond =
+      (1 / (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)) * 60;
 }
