@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -31,6 +29,7 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
+import frc.robot.subsystems.turret.ShotCalculation;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
@@ -70,6 +69,7 @@ public class RobotContainer {
   private final IntakeSubsystem intake;
   private final ClimbSubsystem climb;
   private final SpindexerSubsystem spindexer;
+  private ShotCalculation shotCalculation;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
@@ -117,7 +117,7 @@ public class RobotContainer {
         }
 
         flywheel = new Flywheel(new FlywheelIOSparkMax());
-        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel);
+        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel, shotCalculation);
 
         vis =
             new Vision(
@@ -147,22 +147,21 @@ public class RobotContainer {
                 new ModuleIOSim(mods[3]));
         // disable vision simulation for performance reasons
         vis = new Vision(drive::addVisionMeasurement);
+        spindexer = new SpindexerSubsystem();
 
+        flywheel = new Flywheel(new FlywheelIOSim());
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
-                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
+                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative,
+                spindexer,
+                flywheel);
         sim.registerSimulator(turretIo);
-
-        flywheel =
-            new Flywheel(
-                new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
-
-        turret = new Turret(turretIo, drive::getPose, flywheel);
+        shotCalculation = new ShotCalculation(drive);
+        turret = new Turret(turretIo, drive::getPose, flywheel, shotCalculation);
 
         intake = new IntakeSubsystem();
         climb = new ClimbSubsystem();
-        spindexer = new SpindexerSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -394,10 +393,7 @@ public class RobotContainer {
       kDriveController
           .rightTrigger()
           .whileTrue(
-              new RepeatCommand(
-                      turret.aimAtCommand(
-                          () -> MetersPerSecond.of(12.0),
-                          new Pose3d(getHubPose(), Rotation3d.kZero)))
+              new RepeatCommand(turret.aimAtCommand(() -> getHubPose3d()))
                   .alongWith(spindexer.feederOnCommand())
                   .alongWith(spindexer.spindexerOnCommand()));
 
@@ -547,6 +543,14 @@ public class RobotContainer {
       ;
     }
     return hubPose;
+  }
+
+  public Pose3d getHubPose3d() {
+    return new Pose3d(getHubPose(), Rotation3d.kZero);
+  }
+
+  public Pose3d getPose3d(Translation3d pose) {
+    return new Pose3d(pose, Rotation3d.kZero);
   }
 
   public void pathfindToPosition(double xPosition, double yPosition) {
