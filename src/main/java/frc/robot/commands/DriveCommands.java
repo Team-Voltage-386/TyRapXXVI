@@ -345,6 +345,21 @@ public class DriveCommands {
     }
   }
 
+  // Robot will make a square in the middle on Blue Allience.
+  public static Command buildFollowPath(String pathName) {
+    try {
+      System.out.println("Building path with name: " + pathName);
+      // Load the path you want to follow using its name in the GUI
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+      // Create a path following command using AutoBuilder.
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      DriverStation.reportError("Could not load path:" + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
+  }
+
   private static class WheelRadiusCharacterizationState {
 
     double[] positions = new double[4];

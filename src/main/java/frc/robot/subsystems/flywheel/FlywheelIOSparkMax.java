@@ -43,7 +43,7 @@ public class FlywheelIOSparkMax implements FlywheelIO {
 
   public FlywheelIOSparkMax() {
     flywheelConfig = new SparkMaxConfig();
-    flywheelConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12.0);
+    flywheelConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(12.0);
     flywheelConfig.encoder.uvwAverageDepth(4).uvwMeasurementPeriod(16);
     flywheelConfig
         .closedLoop
@@ -163,6 +163,10 @@ public class FlywheelIOSparkMax implements FlywheelIO {
     flywheelSetpoint = velocityRPM;
 
     Logger.recordOutput("/Shooter/Flywheel/VelocitySetpoint2", velocityRPM);
+  }
+
+  public double getFlywheelVelocity() {
+    return flywheelEncoder.getVelocity();
   }
 
   // to help the kp value from freaking out at low speeds

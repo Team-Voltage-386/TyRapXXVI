@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -22,13 +20,15 @@ import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.LightSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
+import frc.robot.subsystems.turret.ShotCalculation;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
@@ -66,7 +66,9 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
+  private final ClimbSubsystem climb;
   private final SpindexerSubsystem spindexer;
+  private ShotCalculation shotCalculation;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
@@ -114,7 +116,7 @@ public class RobotContainer {
         }
 
         flywheel = new Flywheel(new FlywheelIOSparkMax());
-        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel);
+        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel, shotCalculation);
 
         vis =
             new Vision(
@@ -124,6 +126,7 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
 
@@ -143,21 +146,21 @@ public class RobotContainer {
                 new ModuleIOSim(mods[3]));
         // disable vision simulation for performance reasons
         vis = new Vision(drive::addVisionMeasurement);
+        spindexer = new SpindexerSubsystem();
 
+        flywheel = new Flywheel(new FlywheelIOSim());
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
-                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
+                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative,
+                spindexer,
+                flywheel);
         sim.registerSimulator(turretIo);
-
-        flywheel =
-            new Flywheel(
-                new FlywheelIOSim(turretIo::setFlywheelSpeed, turretIo::setFlywheelShooting));
-
-        turret = new Turret(turretIo, drive::getPose, flywheel);
+        shotCalculation = new ShotCalculation(drive);
+        turret = new Turret(turretIo, drive::getPose, flywheel, shotCalculation);
 
         intake = new IntakeSubsystem();
-        spindexer = new SpindexerSubsystem();
+        climb = new ClimbSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
         // simContainer.registerSimulator(elevatorSim);
@@ -175,6 +178,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
         intake = new IntakeSubsystem();
+        climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
     }
@@ -202,6 +206,7 @@ public class RobotContainer {
     autoChooser.addOption("SquareStraight", DriveCommands.SquareStraight(drive));
     autoChooser.addOption("SmallSquare", DriveCommands.SmallSquare(drive));
     autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
+    autoChooser.addOption("LeftNeutralZone", buildLeftNeutralZoneAuto());
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -386,10 +391,7 @@ public class RobotContainer {
       kDriveController
           .rightTrigger()
           .whileTrue(
-              new RepeatCommand(
-                      turret.aimAtCommand(
-                          () -> MetersPerSecond.of(12.0),
-                          new Pose3d(getHubPose(), Rotation3d.kZero)))
+              new RepeatCommand(turret.aimAtCommand(() -> getHubPose3d()))
                   .alongWith(spindexer.feederOnCommand())
                   .alongWith(spindexer.spindexerOnCommand()));
 
@@ -406,7 +408,11 @@ public class RobotContainer {
 
       kDriveController
           .rightBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("BottomScoreLocation"), drive));
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+
+      kDriveController
+          .leftBumper()
+          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
 
       kManipController
           .povRight()
@@ -474,6 +480,9 @@ public class RobotContainer {
       case "BlueSquare":
         setPoseFromPathStart("BlueSquare");
         break;
+      case "LeftNeutralZone":
+        setPoseFromPathStart("StartCollectNeutralTopQtr");
+        break;
     }
     return autoChooser.get();
   }
@@ -529,6 +538,14 @@ public class RobotContainer {
       ;
     }
     return hubPose;
+  }
+
+  public Pose3d getHubPose3d() {
+    return new Pose3d(getHubPose(), Rotation3d.kZero);
+  }
+
+  public Pose3d getPose3d(Translation3d pose) {
+    return new Pose3d(pose, Rotation3d.kZero);
   }
 
   public void pathfindToPosition(double xPosition, double yPosition) {
@@ -641,5 +658,27 @@ public class RobotContainer {
       System.err.println("Path file can't be parsed!");
       e.printStackTrace();
     }
+  }
+
+  public Command buildLeftNeutralZoneAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
+                intake.deployCommand()),
+            DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(5),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            DriveCommands.buildFollowPath("CollectDepot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(3),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret
+                .disableAutoAimCommand()
+                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            DriveCommands.buildFollowPath("AlignTowerFromDepot"),
+            climb.retractCommand());
+    return auto;
   }
 }

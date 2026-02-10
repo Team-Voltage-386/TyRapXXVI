@@ -25,9 +25,7 @@ public class HubActivity extends Command {
 
   // prerecorded times for hub activity. Each time the timer reaches the value in the array, the hub
   // toggles activity states.
-  private final int[] timesWinning = {
-    130, 105, 80, 55, -10
-  };
+  private final int[] timesWinning = {130, 105, 80, 55, -10};
   private final int[] timesLosing = {105, 80, 55, 30, -10};
 
   /**
