@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
+import frc.robot.commands.RotateToAngle;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.ClimbSubsystem;
@@ -210,6 +211,7 @@ public class RobotContainer {
     autoChooser.addOption("SmallSquare", DriveCommands.SmallSquare(drive));
     autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
     autoChooser.addOption("LeftNeutralZone", buildLeftNeutralZoneAuto());
+    autoChooser.addOption("LeftNeutralDepot", buildNeutralCollectDepot());
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -486,6 +488,9 @@ public class RobotContainer {
       case "LeftNeutralZone":
         setPoseFromPathStart("StartCollectNeutralTopQtr");
         break;
+      case "LeftNeutralDepot":
+        setPoseFromPathStart("CollectNeutralTopToDepot");
+        break;
     }
     return autoChooser.get();
   }
@@ -668,6 +673,26 @@ public class RobotContainer {
             DriveCommands.buildFollowPath("CollectDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(3),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret
+                .disableAutoAimCommand()
+                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            DriveCommands.buildFollowPath("AlignTowerFromDepot"),
+            new RotateToAngle(drive, () -> Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(2)),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildNeutralCollectDepot() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
+                intake.deployCommand()),
+            DriveCommands.buildFollowPath("CollectNeutralTopToDepot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            DriveCommands.buildFollowPath("DepotSlowCollect"),
+            new WaitCommand(5),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             turret
                 .disableAutoAimCommand()
