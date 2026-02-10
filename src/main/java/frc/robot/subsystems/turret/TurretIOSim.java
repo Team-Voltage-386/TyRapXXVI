@@ -53,7 +53,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
-    turretYaw = new Rotation2d(MathUtil.clamp(position.getRadians(), -Math.PI, Math.PI));
+    turretYaw = new Rotation2d(position.getRadians());
     Logger.recordOutput("Shooter/Turret/TurretYaw", turretYaw);
   }
 
@@ -67,7 +67,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
 
   @Override
   public void simulationSubTick(int i) {
-    if (spindexerSubsystem.feederOn && i == 0 && ++tickCount % 20 == 0) {
+    if (spindexerSubsystem.feederOn && i == 0 && ++tickCount % 10 == 0) {
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -88,7 +88,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                           // Add the shooter’s rotation
                           .plus(turretYaw),
                       // Initial height of the flying note
-                      Meter.of(0.5),
+                      Meter.of(0.559),
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM

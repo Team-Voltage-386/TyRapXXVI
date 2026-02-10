@@ -161,8 +161,6 @@ public class Robot extends LoggedRobot {
             robotContainer.setIsAheadHub(false);
         }
       }
-    } else {
-      System.out.println("Game data not announced");
     }
   }
 
