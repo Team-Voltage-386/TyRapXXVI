@@ -22,13 +22,15 @@ import frc.robot.commands.RotateToAngle;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.ClimbSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOSparkMax;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.turret.ShotCalculation;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
@@ -126,7 +128,7 @@ public class RobotContainer {
                     .map(VisionIOPhotonVision::new)
                     .toArray(VisionIOPhotonVision[]::new));
 
-        intake = new IntakeSubsystem();
+        intake = new IntakeSubsystem(new IntakeIOSparkMax());
         climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
@@ -150,17 +152,20 @@ public class RobotContainer {
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
+        IntakeIOSim intakeIOSim = new IntakeIOSim(driveSim);
+
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
                 driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative,
                 spindexer,
-                flywheel);
+                flywheel,
+                intakeIOSim);
         sim.registerSimulator(turretIo);
         shotCalculation = new ShotCalculation(drive);
         turret = new Turret(turretIo, drive::getPose, flywheel, shotCalculation);
 
-        intake = new IntakeSubsystem();
+        intake = new IntakeSubsystem(intakeIOSim);
         climb = new ClimbSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();
@@ -178,7 +183,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
-        intake = new IntakeSubsystem();
+        intake = new IntakeSubsystem(null);
         climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
@@ -342,7 +347,7 @@ public class RobotContainer {
 
     // Reset gyro to 0° when B button is pressed
     kDriveController
-        .b()
+        .y()
         .onTrue(
             Commands.runOnce(
                     () ->
@@ -386,9 +391,6 @@ public class RobotContainer {
       kDriveController
           .povUp()
           .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
-      kDriveController
-          .povDown()
-          .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg.unaryMinus())));
 
       kDriveController
           .rightTrigger()
@@ -452,10 +454,10 @@ public class RobotContainer {
       kManipController.x().onTrue(intake.takeInCommand());
       kManipController.y().onTrue(intake.stopMotorCommand());
 
-      kManipController.leftBumper().onTrue(spindexer.spindexerOnCommand());
-      kManipController.rightTrigger().onTrue(spindexer.spindexerOffCommand());
+      kManipController.rightTrigger().onTrue(spindexer.spindexerOnCommand());
+      kManipController.rightTrigger().onFalse(spindexer.spindexerOffCommand());
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
-      kManipController.leftStick().onTrue(spindexer.feederOffCommand());
+      kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());
     }
   }
 
