@@ -23,8 +23,8 @@ import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.LightSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -320,7 +320,7 @@ public class RobotContainer {
             () -> -kDriveController.getLeftX(),
             () -> -kDriveController.getRightX()));
 
-    // Lock to 0° when A button is held
+    // Lock to nearest 45° when A button is held
     kDriveController
         .a()
         .whileTrue(
@@ -328,7 +328,7 @@ public class RobotContainer {
                 drive,
                 () -> -kDriveController.getLeftY(),
                 () -> -kDriveController.getLeftX(),
-                Rotation2d::new));
+                () -> getAngleForRamp()));
 
     // Switch to X pattern when X button is pressed
     kDriveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -595,6 +595,13 @@ public class RobotContainer {
 
   public void setIsAheadHub(boolean setTo) {
     getHubActivityCommand().setIsAhead(setTo);
+  }
+
+  public Rotation2d getAngleForRamp() {
+    double degrees = drive.getPose().getRotation().getDegrees();
+    double rot45 = Math.ceil(degrees / 90) * 90 - 45;
+    Rotation2d rotation = new Rotation2d(rot45 * Math.PI / 180); // Rotation degrees to radians
+    return rotation;
   }
 
   protected void setPoseFromPathStart(String pathName) {
