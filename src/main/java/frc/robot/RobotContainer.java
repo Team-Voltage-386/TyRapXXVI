@@ -152,17 +152,20 @@ public class RobotContainer {
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
+        IntakeIOSim intakeIOSim = new IntakeIOSim(driveSim);
+
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
                 driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative,
                 spindexer,
-                flywheel);
+                flywheel,
+                intakeIOSim);
         sim.registerSimulator(turretIo);
         shotCalculation = new ShotCalculation(drive);
         turret = new Turret(turretIo, drive::getPose, flywheel, shotCalculation);
 
-        intake = new IntakeSubsystem(new IntakeIOSim(driveSim));
+        intake = new IntakeSubsystem(intakeIOSim);
         climb = new ClimbSubsystem();
 
         // ElevatorIOSim elevatorSim = new ElevatorIOSim();

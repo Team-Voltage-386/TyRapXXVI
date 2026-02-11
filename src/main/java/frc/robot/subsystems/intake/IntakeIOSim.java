@@ -33,6 +33,7 @@ public class IntakeIOSim implements IntakeIO {
             IntakeSimulation.IntakeSide.FRONT,
             // The intake can hold up to 40 fuel
             40);
+    this.intakeSimulation.setGamePiecesCount(8);
   }
 
   public void deploy() {
@@ -64,6 +65,15 @@ public class IntakeIOSim implements IntakeIO {
 
   public boolean isMotorStalled() {
     return false;
+  }
+
+  public int getBallCount() {
+    return this.intakeSimulation.getGamePiecesAmount();
+  }
+
+  public int removeBall() {
+    return this.intakeSimulation.setGamePiecesCount(
+        this.intakeSimulation.getGamePiecesAmount() - 1);
   }
 
   @Override
