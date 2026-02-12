@@ -70,8 +70,9 @@ public class RobotContainer {
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 0.5);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
+  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 100);
 
   public SimContainer sim;
 
@@ -116,6 +117,8 @@ public class RobotContainer {
         }
 
         flywheel = new Flywheel(new FlywheelIOSparkMax());
+
+        shotCalculation = new ShotCalculation(drive);
         turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel, shotCalculation);
 
         vis =
@@ -358,10 +361,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
                   },
                   () -> false,
                   flywheel));
@@ -373,10 +376,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + -runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(-runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
                   },
                   () -> false,
                   flywheel));
@@ -391,7 +394,8 @@ public class RobotContainer {
       kDriveController
           .rightTrigger()
           .whileTrue(
-              new RepeatCommand(turret.aimAtCommand(() -> getHubPose3d()))
+              turret
+                  .aimAtCommand(() -> getHubPose3d())
                   .alongWith(spindexer.feederOnCommand())
                   .alongWith(spindexer.spindexerOnCommand()));
 
@@ -401,10 +405,11 @@ public class RobotContainer {
               new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
                   .alongWith(spindexer.feederOffCommand())
                   .alongWith(spindexer.spindexerOffCommand()));
+      kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
 
       kDriveController
           .start()
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
 
       kDriveController
           .rightBumper()
@@ -664,11 +669,10 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
-                intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(5),
+            new WaitCommand(3),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             DriveCommands.buildFollowPath("CollectDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),

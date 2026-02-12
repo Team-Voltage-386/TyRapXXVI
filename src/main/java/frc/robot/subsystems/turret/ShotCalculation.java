@@ -38,7 +38,7 @@ public class ShotCalculation {
   // Cache parameters
   private LaunchingParameters latestParameters = null;
 
-  private Drive dt;
+  Drive dt;
   private Translation2d target;
 
   private static double minDistance;
@@ -56,7 +56,7 @@ public class ShotCalculation {
     maxDistance = 6.7;
     phaseDelay = 0.03; // figure this out idk ask chief delphi
 
-    launchHoodAngleMap.put(1.5, Rotation2d.fromDegrees(67.5));
+    // launchHoodAngleMap.put(1.5, Rotation2d.fromDegrees(67.5)); max is 62 degrees
     launchHoodAngleMap.put(2.5, Rotation2d.fromDegrees(61.1));
     launchHoodAngleMap.put(3.5, Rotation2d.fromDegrees(56.67));
     launchHoodAngleMap.put(4.5, Rotation2d.fromDegrees(56.0));
@@ -97,8 +97,6 @@ public class ShotCalculation {
                 robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
                 robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
 
-    // TODO: use hub pose based on alliance, i tried to but it ending up messing the distance values
-    // for some reason
     Pose2d turretPosition =
         estimatedPose.transformBy(
             new Transform2d(TurretConstants.turretPosition, Rotation2d.kZero));
@@ -180,7 +178,7 @@ public class ShotCalculation {
   }
 
   public boolean boundLookahead(Pose2d pose) {
-    if (pose.getX() > 16.0) {
+    if (pose.getX() > 16.5) {
       return false;
     }
     if (pose.getX() < 0.5) {
