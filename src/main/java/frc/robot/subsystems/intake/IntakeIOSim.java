@@ -6,19 +6,28 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Inches;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.drivesims.AbstractDriveTrainSimulation;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 public class IntakeIOSim implements IntakeIO {
 
   private final IntakeSimulation intakeSimulation;
   protected boolean isDeployed = false;
   protected IntakingState intakingState = IntakingState.STOPPED;
+  // the main mechanism object
+  LoggedMechanism2d mech = new LoggedMechanism2d(0.7366, 0.3048);
+  // the mechanism root node
+  LoggedMechanismRoot2d root = mech.getRoot("Intake", 0.66, 0.1);
+  LoggedMechanismLigament2d intakeMechanism;
 
   /** Creates a new SimIntakeSubsystem. */
   public IntakeIOSim(AbstractDriveTrainSimulation driveTrainSimulation) {
-
+    intakeMechanism = root.append(new LoggedMechanismLigament2d("IntakeArm", 0.3, 90,));
     this.intakeSimulation =
         IntakeSimulation.OverTheBumperIntake(
             // Specify the type of game pieces that the intake can collect
@@ -40,12 +49,14 @@ public class IntakeIOSim implements IntakeIO {
     System.out.println("deploying intake mechanism");
     this.isDeployed = true;
     this.intakeSimulation.startIntake();
+    intakeMechanism.setAngle(Rotation2d.fromDegrees(0));
   }
 
   public void retract() {
     System.out.println("retracting intake mechanism");
     this.isDeployed = false;
     this.intakeSimulation.stopIntake();
+    intakeMechanism.setAngle(Rotation2d.fromDegrees(90));
   }
 
   public void takeIn() {
@@ -83,5 +94,6 @@ public class IntakeIOSim implements IntakeIO {
     inputs.intakingState = this.intakingState;
 
     Logger.recordOutput("Intake/BallCount", this.intakeSimulation.getGamePiecesAmount());
+    Logger.recordOutput("Intake/Mech", mech);
   }
 }
