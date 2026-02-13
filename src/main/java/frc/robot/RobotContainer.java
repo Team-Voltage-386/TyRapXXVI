@@ -155,9 +155,7 @@ public class RobotContainer {
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
-                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative,
-                spindexer,
-                flywheel);
+                driveSim::getDriveTrainSimulatedChassisSpeedsFieldRelative);
         sim.registerSimulator(turretIo);
         shotCalculation = new ShotCalculation(drive);
         turret = new Turret(turretIo, drive::getPose, flywheel, shotCalculation);
