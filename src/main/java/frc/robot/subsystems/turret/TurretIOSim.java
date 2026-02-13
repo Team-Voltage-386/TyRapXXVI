@@ -11,6 +11,7 @@ import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.flywheel.Flywheel;
+import frc.robot.subsystems.intake.IntakeIOSim;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
@@ -32,16 +33,19 @@ public class TurretIOSim implements TurretIO, Simulatable {
   private final Supplier<ChassisSpeeds> speedSupplier;
   private final SpindexerSubsystem spindexerSubsystem;
   private final Flywheel flywheel;
+  private final IntakeIOSim intakeIOSim;
 
   public TurretIOSim(
       Supplier<Pose2d> pose3dSupplier,
       Supplier<ChassisSpeeds> speedSupplier,
       SpindexerSubsystem spindexer,
-      Flywheel flywheel) {
+      Flywheel flywheel,
+      IntakeIOSim intakeIOSim) {
     this.dtPose = pose3dSupplier;
     this.speedSupplier = speedSupplier;
     this.spindexerSubsystem = spindexer;
     this.flywheel = flywheel;
+    this.intakeIOSim = intakeIOSim;
   }
 
   public void updateInputs(TurretIOInputs inputs) {
@@ -67,7 +71,10 @@ public class TurretIOSim implements TurretIO, Simulatable {
 
   @Override
   public void simulationSubTick(int i) {
-    if (spindexerSubsystem.feederOn && i == 0 && ++tickCount % 10 == 0) {
+    if (spindexerSubsystem.feederOn
+        && i == 0
+        && ++tickCount % 10 == 0
+        && this.intakeIOSim.getBallCount() > 0) {
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -121,6 +128,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                               pose3ds.toArray(Pose3d[]::new)))
                   .disableBecomesGamePieceOnFieldAfterTouchGround();
       SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
+      this.intakeIOSim.removeBall();
     }
   }
 }

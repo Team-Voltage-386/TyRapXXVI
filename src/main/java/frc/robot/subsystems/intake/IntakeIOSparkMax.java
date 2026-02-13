@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.intake;
 
 import static frc.robot.util.SparkUtil.*;
 
@@ -10,18 +10,15 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.jr.IntakeConstants;
 
-public class IntakeSubsystem extends SubsystemBase {
+public class IntakeIOSparkMax implements IntakeIO {
 
   private final SparkMax retrieval_motor;
 
   private final SparkMax deploy_motor;
 
-  public IntakeSubsystem() {
+  public IntakeIOSparkMax() {
     retrieval_motor = new SparkMax(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig retrievalConfig = new SparkMaxConfig();
     retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
@@ -72,10 +69,6 @@ public class IntakeSubsystem extends SubsystemBase {
         .setSetpoint(IntakeConstants.EXTENDED_DEPLOY_POSITION, ControlType.kPosition);
   }
 
-  public Command deployCommand() {
-    return Commands.runOnce(() -> deploy());
-  }
-
   public void retract() {
     System.out.println("retracting intake mechanism");
     deploy_motor
@@ -83,17 +76,9 @@ public class IntakeSubsystem extends SubsystemBase {
         .setSetpoint(IntakeConstants.RETRACTED_DEPLOY_POSITION, ControlType.kPosition);
   }
 
-  public Command retractCommand() {
-    return Commands.runOnce(() -> retract());
-  }
-
   public void takeIn() {
     System.out.println("taking in balls");
     retrieval_motor.setVoltage(IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE);
-  }
-
-  public Command takeInCommand() {
-    return Commands.runOnce(() -> takeIn());
   }
 
   public void stopMotor() {
@@ -101,17 +86,9 @@ public class IntakeSubsystem extends SubsystemBase {
     retrieval_motor.set(0);
   }
 
-  public Command stopMotorCommand() {
-    return Commands.runOnce(() -> stopMotor());
-  }
-
   public void reverse() {
     System.out.println("Reversing motor");
     retrieval_motor.setVoltage(IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE * -1);
-  }
-
-  public Command reverseCommand() {
-    return Commands.startEnd(() -> reverse(), () -> stopMotor());
   }
 
   public boolean isMotorStalled() {
@@ -123,13 +100,16 @@ public class IntakeSubsystem extends SubsystemBase {
     retract();
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
+  public void updateInputs(IntakeIOInputs inputs) {
+    inputs.connected = true;
+    inputs.deployed =
+        Math.abs(deploy_motor.getEncoder().getPosition() - IntakeConstants.EXTENDED_DEPLOY_POSITION)
+            < 5;
+    inputs.intakingState =
+        retrieval_motor.getAppliedOutput() > 0.1
+            ? IntakingState.INTAKING
+            : retrieval_motor.getAppliedOutput() < -0.1
+                ? IntakingState.REVERSE
+                : IntakingState.STOPPED;
   }
 }
