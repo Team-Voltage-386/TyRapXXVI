@@ -705,7 +705,7 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
+                turret.enableAutoAimCommand(() -> getHubPose3d()),
                 intake.deployCommand()),
             DriveCommands.buildFollowPath("CollectNeutralTopToDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
