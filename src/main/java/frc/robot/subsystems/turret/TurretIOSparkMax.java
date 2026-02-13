@@ -27,13 +27,19 @@ import org.littletonrobotics.junction.Logger;
  */
 public class TurretIOSparkMax implements TurretIO {
 
-  private final SparkMax yawMotor = new SparkMax(TurretConstants.turretCanId, MotorType.kBrushless);
+  private final SparkMax yawMotor =
+      new SparkMax(TurretConstants.turretYawCanId, MotorType.kBrushless);
+  private final SparkMax hoodMotor =
+      new SparkMax(TurretConstants.turretPitchCanId, MotorType.kBrushless);
+
   private final RelativeEncoder yawEncoder = yawMotor.getEncoder();
-
   private final SparkMaxConfig yawConfig;
+  private final SparkMaxConfig hoodConfig;
 
-  TuningUtil yawKp = new TuningUtil("/Tuning/turret/yawKp", .0);
+  TuningUtil yawKp = new TuningUtil("/Tuning/turret/yawKp", 0.0);
   TuningUtil yawKd = new TuningUtil("/Tuning/turret/yawKd", 0.0);
+  TuningUtil hoodKp = new TuningUtil("/Tuning/turret/hoodKp", 0.0);
+  TuningUtil hoodKd = new TuningUtil("/Tuning/turret/hoodKd", 0.0);
 
   public TurretIOSparkMax() {
     yawConfig = new SparkMaxConfig();
@@ -59,6 +65,25 @@ public class TurretIOSparkMax implements TurretIO {
                 yawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
     yawEncoder.setPosition(0);
+
+    hoodConfig = new SparkMaxConfig();
+    hoodConfig.encoder.uvwAverageDepth(4).positionConversionFactor(1).velocityConversionFactor(1);
+    hoodConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0, 0.0, 0.0);
+    hoodConfig
+        .signals
+        .primaryEncoderPositionAlwaysOn(true)
+        .primaryEncoderPositionPeriodMs((int) (1000.0 / DriveConstants.odometryFrequency))
+        .appliedOutputPeriodMs(20)
+        .busVoltagePeriodMs(20)
+        .outputCurrentPeriodMs(20);
+    hoodConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12.0);
+    hoodConfig.softLimit.forwardSoftLimit(0.74);
+    tryUntilOk(
+        5,
+        () ->
+            hoodMotor.configure(
+                hoodConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+    hoodMotor.getEncoder().setPosition(0);
   }
 
   public void updateInputs(TurretIOInputs inputs) {
@@ -80,19 +105,37 @@ public class TurretIOSparkMax implements TurretIO {
               yawMotor.configure(
                   yawConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
             });
+    hoodKp
+        .get()
+        .ifPresent(
+            kp -> {
+              System.out.println("updated hood kp");
+              hoodConfig.closedLoop.pid(kp, 0.0, hoodKd.getValue());
+              hoodMotor.configure(
+                  hoodConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+            });
+    hoodKd
+        .get()
+        .ifPresent(
+            kd -> {
+              System.out.println("updated hood kd");
+              hoodConfig.closedLoop.pid(hoodKp.getValue(), 0.0, kd);
+              hoodMotor.configure(
+                  hoodConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+            });
+
     inputs.connected = true;
     inputs.turretYaw = Rotation2d.fromRotations(yawEncoder.getPosition());
-    inputs.turretPitch = Rotation2d.kZero;
+    inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
-    double velocitySetpoint = yawMotor.getClosedLoopController().getMAXMotionSetpointVelocity();
-    double positionSetpoint = yawMotor.getClosedLoopController().getMAXMotionSetpointPosition();
+    double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
     Logger.recordOutput("/Shooter/Turret/Setpoint", setpoint);
-    Logger.recordOutput("/Shooter/Turret/VelocitySetpoint", velocitySetpoint);
-    Logger.recordOutput(
-        "/Shooter/Turret/PositionSetpoint", Rotation2d.fromRotations(positionSetpoint));
     Logger.recordOutput("/Shooter/Turret/AppliedOutput", yawMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Turret/Velocity", velocity);
+    Logger.recordOutput("/Shooter/Hood/AppliedOutput", hoodMotor.getAppliedOutput());
+    Logger.recordOutput("/Shooter/Hood/Setpoint", hoodsetpoint);
+    Logger.recordOutput("/Shooter/Hood/position", hoodMotor.getEncoder().getPosition());
   }
 
   /** Set the turret yaw to the specified position. */
@@ -112,14 +155,29 @@ public class TurretIOSparkMax implements TurretIO {
     yawMotor.setVoltage(volts);
   }
 
+  public void testHoodVoltage(double volts) {
+    hoodMotor.setVoltage(volts);
+  }
+
   /* Set the turret pitch to the specified position. */
   @Override
   public void setTurretPitch(Rotation2d position) {
+    double desiredSetpoint =
+        (TurretConstants.maxHoodSetpoint / TurretConstants.turretHoodAngleRange)
+            * (TurretConstants.turretMaxHoodAngle - position.getDegrees());
+    Logger.recordOutput("/Shooter/Hood/TrueDesiredAngle", position.getDegrees());
+    Logger.recordOutput("/Shooter/Hood/CalculatedDesiredAngle", desiredSetpoint);
+    hoodMotor.getClosedLoopController().setSetpoint(desiredSetpoint, ControlType.kPosition);
     // No pitch control implemented
   }
 
   public void setZero() {
     System.out.println("turret encoder zeroed");
     yawEncoder.setPosition(0);
+  }
+
+  public void setHoodZero() {
+    System.out.println("turret hood encoder zeroed");
+    hoodMotor.getEncoder().setPosition(0);
   }
 }

@@ -30,7 +30,7 @@ public class Turret extends SubsystemBase {
     this.flywheel = flywheel;
     this.shotCalculation = shotCalculation;
 
-    io.setTurretPitch(Rotation2d.fromDegrees(45));
+    io.setTurretPitch(Rotation2d.fromDegrees(62));
     io.setTurretYaw(Rotation2d.kZero);
   }
 
@@ -42,11 +42,11 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> io.setTurretYaw(inputs.turretYaw.plus(deltaYaw)));
   }
 
-  public Command enableAutoAimCommand(Pose3d targetPose) {
+  public Command enableAutoAimCommand(Supplier<Pose3d> targetPose) {
     return runOnce(
         () -> {
           autoAimEnabled = true;
-          currentTargetPose = targetPose;
+          currentTargetPose = targetPose.get();
         });
   }
 
@@ -69,9 +69,6 @@ public class Turret extends SubsystemBase {
     double shooterWheelRPM =
         shotCalculation.getParameters().flywheelSpeed()
             / TurretConstants.turretRPMToMetersPerSecond;
-    if (shotCalculation.getParameters().isValid() == false) {
-      shooterWheelRPM = 0;
-    }
     flywheel.setFlywheelSpeed(shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
     shotCalculation.clearLaunchingParameters();
@@ -84,16 +81,20 @@ public class Turret extends SubsystemBase {
    * @return The command to aim the turret.
    */
   public Command aimAtCommand(Supplier<Pose3d> targetPoseIn) {
-    return runOnce(
+    return run(
         () -> {
           aimAtTarget(targetPoseIn.get());
         });
   }
 
+  public Command adjustPitch(Supplier<Double> pitchDeg) {
+    return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
+  }
+
   @Override
   public void periodic() {
 
-    if (autoAimEnabled && shotCalculation.getParameters().isValid()) {
+    if (autoAimEnabled) {
       aimAtTarget(currentTargetPose);
     } else {
       flywheel.setFlywheelSpeed(0);

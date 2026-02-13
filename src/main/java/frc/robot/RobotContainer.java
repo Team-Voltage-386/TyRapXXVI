@@ -73,8 +73,9 @@ public class RobotContainer {
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 0.5);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
+  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 100);
 
   public SimContainer sim;
 
@@ -119,6 +120,8 @@ public class RobotContainer {
         }
 
         flywheel = new Flywheel(new FlywheelIOSparkMax());
+
+        shotCalculation = new ShotCalculation(drive);
         turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel, shotCalculation);
 
         vis =
@@ -332,7 +335,7 @@ public class RobotContainer {
             () -> -kDriveController.getLeftX(),
             () -> -kDriveController.getRightX()));
 
-    // Lock to 0° when A button is held
+    // Lock to nearest 45° when A button is held
     kDriveController
         .a()
         .whileTrue(
@@ -340,7 +343,7 @@ public class RobotContainer {
                 drive,
                 () -> -kDriveController.getLeftY(),
                 () -> -kDriveController.getLeftX(),
-                Rotation2d::new));
+                () -> getAngleForRamp()));
 
     // Switch to X pattern when X button is pressed
     kDriveController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -365,10 +368,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
                   },
                   () -> false,
                   flywheel));
@@ -380,10 +383,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + -runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(-runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
                   },
                   () -> false,
                   flywheel));
@@ -395,7 +398,8 @@ public class RobotContainer {
       kDriveController
           .rightTrigger()
           .whileTrue(
-              new RepeatCommand(turret.aimAtCommand(() -> getHubPose3d()))
+              turret
+                  .aimAtCommand(() -> getHubPose3d())
                   .alongWith(spindexer.feederOnCommand())
                   .alongWith(spindexer.spindexerOnCommand()));
 
@@ -405,10 +409,11 @@ public class RobotContainer {
               new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
                   .alongWith(spindexer.feederOffCommand())
                   .alongWith(spindexer.spindexerOffCommand()));
+      kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
 
       kDriveController
           .start()
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setZero()));
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
 
       kDriveController
           .rightBumper()
@@ -621,6 +626,13 @@ public class RobotContainer {
     getHubActivityCommand().setIsAhead(setTo);
   }
 
+  public Rotation2d getAngleForRamp() {
+    double degrees = drive.getPose().getRotation().getDegrees();
+    double rot45 = Math.ceil(degrees / 90) * 90 - 45;
+    Rotation2d rotation = new Rotation2d(rot45 * Math.PI / 180); // Rotation degrees to radians
+    return rotation;
+  }
+
   protected void setPoseFromPathStart(String pathName) {
     try {
       System.out.println("Setting pose from path start: " + pathName);
@@ -671,11 +683,10 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(new Pose3d(getHubPose(), Rotation3d.kZero)),
-                intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(5),
+            new WaitCommand(3),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             DriveCommands.buildFollowPath("CollectDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
