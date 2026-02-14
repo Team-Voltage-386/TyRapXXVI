@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.8043937232524963,
-        "y": 5.982268188302426
+        "x": 0.7278054567022547,
+        "y": 5.966275207591934
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.6489296186171218,
-        "y": 5.848984411254147
+        "x": 1.5723413520668803,
+        "y": 5.832991430543656
       },
       "isLocked": false,
       "linkedName": "BlueDepot"
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.74833185427048
+    "rotation": 0.332667339934469
   },
   "reversed": false,
   "folder": null,

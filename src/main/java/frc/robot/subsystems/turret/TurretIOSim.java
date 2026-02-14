@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
+import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.flywheel.Flywheel;
+import frc.robot.subsystems.intake.IntakeIOSim;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.SimulatedArena.Simulatable;
@@ -35,10 +38,19 @@ public class TurretIOSim implements TurretIO, Simulatable {
   private final Supplier<ChassisSpeeds> speedSupplier;
   private final double maxErrorAngle = 0;
   private final double maxErrorVelocity = 0;
+  private final IntakeIOSim intakeIOSim;
+  private final SpindexerSubsystem spindexerSubsystem;
 
-  public TurretIOSim(Supplier<Pose2d> pose3dSupplier, Supplier<ChassisSpeeds> speedSupplier) {
+  public TurretIOSim(
+      Supplier<Pose2d> pose3dSupplier,
+      Supplier<ChassisSpeeds> speedSupplier,
+      SpindexerSubsystem spindexer,
+      Flywheel flywheel,
+      IntakeIOSim intakeIOSim) {
     this.dtPose = pose3dSupplier;
     this.speedSupplier = speedSupplier;
+    this.intakeIOSim = intakeIOSim;
+    this.spindexerSubsystem = spindexer;
   }
 
   public void updateInputs(TurretIOInputs inputs) {
@@ -71,7 +83,10 @@ public class TurretIOSim implements TurretIO, Simulatable {
 
   @Override
   public void simulationSubTick(int i) {
-    if (flywheelShooting && i == 0 && ++tickCount % 20 == 0) {
+    if (spindexerSubsystem.feederOn
+        && i == 0
+        && ++tickCount % 10 == 0
+        && this.intakeIOSim.getBallCount() > 0) {
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -92,11 +107,13 @@ public class TurretIOSim implements TurretIO, Simulatable {
                           // Add the shooter’s rotation
                           .plus(turretYaw),
                       // Initial height of the flying note
-                      Meter.of(0.5 - maxErrorVelocity + 2 * (Math.random() * maxErrorVelocity)),
+                      Meter.of(0.5),
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(flywheelRPM * TurretConstants.turretRPMToMetersPerSecond),
+                      MetersPerSecond.of(
+                          (flywheelRPM - maxErrorVelocity + 2 * (Math.random() * maxErrorVelocity))
+                              * TurretConstants.turretRPMToMetersPerSecond),
                       // The angle at which the note is launched
                       turretPitch
                           .getMeasure()
@@ -127,6 +144,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                               pose3ds.toArray(Pose3d[]::new)))
                   .disableBecomesGamePieceOnFieldAfterTouchGround();
       SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
+      this.intakeIOSim.removeBall();
     }
   }
 }
