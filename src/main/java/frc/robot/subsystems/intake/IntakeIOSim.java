@@ -27,7 +27,7 @@ public class IntakeIOSim implements IntakeIO {
 
   /** Creates a new SimIntakeSubsystem. */
   public IntakeIOSim(AbstractDriveTrainSimulation driveTrainSimulation) {
-    intakeMechanism = root.append(new LoggedMechanismLigament2d("IntakeArm", 0.3, 90,));
+    intakeMechanism = root.append((new LoggedMechanismLigament2d("IntakeArm", 0.3, 90)));
     this.intakeSimulation =
         IntakeSimulation.OverTheBumperIntake(
             // Specify the type of game pieces that the intake can collect
