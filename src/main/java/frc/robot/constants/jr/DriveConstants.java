@@ -89,6 +89,13 @@ public final class DriveConstants {
 
   public static final RobotConfig ppRobotConfig;
 
+  public static final double minVelocity,
+      maxVelocity,
+      maxAccMss,
+      maxDccMss,
+      driveDistanceProp,
+      driveDistanceThreshold;
+
   static {
     if (isReefscape) {
       // TODO: port constants from reefscape, most of these are from jr (except ids and offsets)
@@ -187,7 +194,12 @@ public final class DriveConstants {
                   driveCurrentLimit,
                   1),
               moduleTranslations);
-
+      minVelocity = 0.1;
+      maxVelocity = 5.0;
+      maxAccMss = 3;
+      maxDccMss = 8;
+      driveDistanceProp = 3;
+      driveDistanceThreshold = 0.02;
     } else {
       wheelRadiusMeters = 0.048;
       driveMotorReduction = 6.12; // MAXSwerve with 14 pinion teeth and 22 spur teeth
@@ -281,6 +293,12 @@ public final class DriveConstants {
                   driveCurrentLimit,
                   1),
               moduleTranslations);
+      minVelocity = 0.1;
+      maxVelocity = 5.0;
+      maxAccMss = 3;
+      maxDccMss = 8;
+      driveDistanceProp = 3;
+      driveDistanceThreshold = 0.02;
     }
   }
 }
