@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
@@ -36,10 +35,11 @@ public class TurretIOSim implements TurretIO, Simulatable {
 
   private final Supplier<Pose2d> dtPose;
   private final Supplier<ChassisSpeeds> speedSupplier;
-  private final double maxErrorAngle = 0;
-  private final double maxErrorVelocity = 0;
+  private final double maxErrorAngle = 50;
+  private final double maxErrorVelocity = 100;
   private final IntakeIOSim intakeIOSim;
   private final SpindexerSubsystem spindexerSubsystem;
+  private final Flywheel flywheel;
 
   public TurretIOSim(
       Supplier<Pose2d> pose3dSupplier,
@@ -51,6 +51,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
     this.speedSupplier = speedSupplier;
     this.intakeIOSim = intakeIOSim;
     this.spindexerSubsystem = spindexer;
+    this.flywheel = flywheel;
   }
 
   public void updateInputs(TurretIOInputs inputs) {
@@ -71,15 +72,8 @@ public class TurretIOSim implements TurretIO, Simulatable {
     turretPitch = new Rotation2d(MathUtil.clamp(position.getRadians(), 0, Math.PI / 2));
   }
 
-  public void setFlywheelShooting(boolean shooting) {
-    this.flywheelShooting = shooting;
-  }
-
-  public void setFlywheelSpeed(AngularVelocity speed) {
-    this.flywheelRPM = speed.in(RPM);
-  }
-
   protected int tickCount = 0;
+  private double calculatedVelocity;
 
   @Override
   public void simulationSubTick(int i) {
@@ -87,6 +81,12 @@ public class TurretIOSim implements TurretIO, Simulatable {
         && i == 0
         && ++tickCount % 10 == 0
         && this.intakeIOSim.getBallCount() > 0) {
+      calculatedVelocity =
+          (flywheel.getFlywheelVelocity()
+                  - maxErrorVelocity
+                  + (2 * (Math.random() * maxErrorVelocity)))
+              * TurretConstants.turretRPMToMetersPerSecond;
+      Logger.recordOutput("Simulation/Shooter/calculatedVelocity", calculatedVelocity);
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -107,13 +107,11 @@ public class TurretIOSim implements TurretIO, Simulatable {
                           // Add the shooter’s rotation
                           .plus(turretYaw),
                       // Initial height of the flying note
-                      Meter.of(0.5),
+                      Meter.of(0.559),
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(
-                          (flywheelRPM - maxErrorVelocity + 2 * (Math.random() * maxErrorVelocity))
-                              * TurretConstants.turretRPMToMetersPerSecond),
+                      MetersPerSecond.of(calculatedVelocity),
                       // The angle at which the note is launched
                       turretPitch
                           .getMeasure()
@@ -144,7 +142,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                               pose3ds.toArray(Pose3d[]::new)))
                   .disableBecomesGamePieceOnFieldAfterTouchGround();
       SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
-      this.intakeIOSim.removeBall();
+      // this.intakeIOSim.removeBall();
     }
   }
 }
