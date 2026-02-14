@@ -25,7 +25,7 @@ public class ClimbSubsystem extends SubsystemBase {
   // the main mechanism object
   LoggedMechanism2d mech = new LoggedMechanism2d(0.7366, 0.3048);
   // the mechanism root node
-  LoggedMechanismRoot2d root = mech.getRoot("Climb", 0.7, 0.1);
+  LoggedMechanismRoot2d root = mech.getRoot("Climb", 0.0, 0.1);
   LoggedMechanismLigament2d climbermechanism;
 
   public ClimbSubsystem() {
