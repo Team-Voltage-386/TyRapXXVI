@@ -679,6 +679,10 @@ public class RobotContainer {
     }
   }
 
+  public void runTeleopStart() {
+    CommandScheduler.getInstance().schedule(intake.deployCommand());
+  }
+
   public Command buildLeftNeutralZoneAuto() {
     Command auto =
         new SequentialCommandGroup(
@@ -705,10 +709,10 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()),
-                intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("CollectNeutralTopToDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(3),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
             new WaitCommand(5),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
@@ -716,6 +720,7 @@ public class RobotContainer {
                 .disableAutoAimCommand()
                 .alongWith(intake.retractCommand(), climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
+            new RotateToAngle(drive, () -> Rotation2d.kZero, Rotation2d.fromDegrees(2)),
             climb.retractCommand());
     return auto;
   }
