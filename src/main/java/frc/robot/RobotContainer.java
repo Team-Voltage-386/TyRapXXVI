@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveDistance2;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.RotateToAngle;
@@ -552,6 +553,26 @@ public class RobotContainer {
     return hubPose;
   }
 
+  public Rotation2d getLadderAngle() {
+    Rotation2d ladderAngle = new Rotation2d();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          ladderAngle = Rotation2d.fromDegrees(180);
+          break;
+        case Blue:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+        default:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+      }
+      ;
+    }
+    return ladderAngle;
+  }
+
   public Pose3d getHubPose3d() {
     return new Pose3d(getHubPose(), Rotation3d.kZero);
   }
@@ -715,6 +736,8 @@ public class RobotContainer {
                 .disableAutoAimCommand()
                 .alongWith(intake.retractCommand(), climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
+            new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(2)),
+            new DriveDistance2(drive, () -> 0.3, -90),
             climb.retractCommand());
     return auto;
   }
