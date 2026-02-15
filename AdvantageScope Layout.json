@@ -3,8 +3,8 @@
     {
       "x": 0,
       "y": 38,
-      "width": 1536,
-      "height": 820,
+      "width": 1726,
+      "height": 1047,
       "state": {
         "sidebar": {
           "width": 449,
@@ -247,23 +247,23 @@
                     }
                   },
                   {
-                    "type": "ghost",
+                    "type": "cone",
                     "logKey": "NT:/SmartDashboard/MapleSim/Goals/BlueHub",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "model": "2026 KitBot",
-                      "color": "#00ff00"
+                      "color": "#00ff00",
+                      "position": "center"
                     }
                   },
                   {
-                    "type": "ghost",
+                    "type": "cone",
                     "logKey": "NT:/SmartDashboard/MapleSim/Goals/RedHub",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "model": "2026 KitBot",
-                      "color": "#00ff00"
+                      "color": "#00ff00",
+                      "position": "center"
                     }
                   }
                 ],
@@ -274,14 +274,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -4.27749258131449,
-                  4.300941152866322,
-                  -3.5962152864076966
+                  7.595790665497026,
+                  5.971377918177035,
+                  -7.097673629402127
                 ],
                 "cameraTarget": [
-                  -5.454011145569205,
-                  2.891647392210995,
-                  -2.2305188845752326
+                  2.494901981125521,
+                  -2.8702837472378597,
+                  2.154767099861219
                 ]
               },
               "controlsHeight": 200
@@ -290,29 +290,19 @@
               "type": 1,
               "title": "Line Graph",
               "controller": {
-                "leftSources": [],
-                "rightSources": [
+                "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Drive/Module0/TurnPosition/value",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Intake/BallCount",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#2b66a2",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Setpoints/0/angle/value",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#e5b31b",
+                      "color": "#af2437",
                       "size": "normal"
                     }
                   }
                 ],
+                "rightSources": [],
                 "discreteSources": [],
                 "leftLockedRange": null,
                 "rightLockedRange": null,
