@@ -702,6 +702,17 @@ public class RobotContainer {
     }
   }
 
+  public void runTeleopStart() {
+    // Down climb by extending the climber mechanism
+    CommandScheduler.getInstance()
+        .schedule(
+            new SequentialCommandGroup(
+                climb.deployCommand(), new WaitCommand(2), climb.retractCommand()));
+    // Ensure the intake is deployed. This is mainly for simulation testing
+    // since the intake should normally be deployed at the start of auto
+    CommandScheduler.getInstance().schedule(intake.deployCommand());
+  }
+
   public Command buildLeftNeutralZoneAuto() {
     Command auto =
         new SequentialCommandGroup(
@@ -731,15 +742,14 @@ public class RobotContainer {
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("CollectNeutralTopToDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
             new WaitCommand(5),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret
-                .disableAutoAimCommand()
-                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
-            new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(2)),
-            new DriveDistance2(drive, () -> 0.3, -90),
+            new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
             climb.retractCommand());
     return auto;
   }
