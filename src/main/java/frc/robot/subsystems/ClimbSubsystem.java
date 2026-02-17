@@ -27,6 +27,7 @@ public class ClimbSubsystem extends SubsystemBase {
   // the mechanism root node
   LoggedMechanismRoot2d root = mech.getRoot("Climb", 0.0, 0.1);
   LoggedMechanismLigament2d climbermechanism;
+  double currentSetPoint = ClimbConstants.RETRACTED_DEPLOY_POSITION;
 
   public ClimbSubsystem() {
 
@@ -60,7 +61,7 @@ public class ClimbSubsystem extends SubsystemBase {
     deploy_motor
         .getClosedLoopController()
         .setSetpoint(ClimbConstants.EXTENDED_DEPLOY_POSITION, ControlType.kPosition);
-    climbermechanism.setLength(0.66);
+    currentSetPoint = ClimbConstants.EXTENDED_DEPLOY_POSITION;
   }
 
   public Command deployCommand() {
@@ -72,7 +73,7 @@ public class ClimbSubsystem extends SubsystemBase {
     deploy_motor
         .getClosedLoopController()
         .setSetpoint(ClimbConstants.RETRACTED_DEPLOY_POSITION, ControlType.kPosition);
-    climbermechanism.setLength(0.43);
+    currentSetPoint = ClimbConstants.RETRACTED_DEPLOY_POSITION;
   }
 
   public Command retractCommand() {
@@ -86,11 +87,26 @@ public class ClimbSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+
+    if (currentSetPoint == ClimbConstants.EXTENDED_DEPLOY_POSITION) {
+      if (climbermechanism.getLength() < ClimbConstants.extended_length) {
+        climbermechanism.setLength(
+            climbermechanism.getLength() + (ClimbConstants.extensionSpeed / 50));
+      }
+    } else {
+      if (currentSetPoint == ClimbConstants.RETRACTED_DEPLOY_POSITION) {
+        if (climbermechanism.getLength() > ClimbConstants.retracted_length) {
+          climbermechanism.setLength(
+              climbermechanism.getLength() - (ClimbConstants.extensionSpeed / 50));
+        }
+      }
+    }
     Logger.recordOutput("Climber/Mech", mech);
   }
 }
