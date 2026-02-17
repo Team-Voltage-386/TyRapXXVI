@@ -153,19 +153,20 @@ public class FlywheelIOSparkMax implements FlywheelIO {
     Logger.recordOutput("/Shooter/Flywheel/Velocity", velocity);
     Logger.recordOutput("/Shooter/Flywheel/Current", flywheelMotorMaster.getOutputCurrent());
     readjustPID();
-    }
+  }
+
+  public void setFlywheelVelocity(double velocityRPM) {
+    flywheelSetpoint = velocityRPM;
+
+    Logger.recordOutput("/Shooter/Flywheel/VelocitySetpoint2", velocityRPM);
+  }
+
   public double getFlywheelVelocity() {
     return flywheelEncoder.getVelocity();
   }
 
   // to help the kp value from freaking out at low speeds
   public void readjustPID() {
-    // if (flywheelMotor.getEncoder().getVelocity() < threshold.getValue()) {
-    //   flywheelMotor
-    //       .getClosedLoopController()
-    //       .setSetpoint(
-    //           filter.calculate(flywheelSetpoint), ControlType.kVelocity, ClosedLoopSlot.kSlot0);
-    // } else {
     outputVoltage =
         flywheelFeedforward.calculate(flywheelSetpoint)
             + flywheelPID.calculate(flywheelEncoder.getVelocity(), flywheelSetpoint);
