@@ -101,6 +101,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                       // RPM
                       MetersPerSecond.of(
                           flywheel.getFlywheelVelocity()
+                              * 1.1
                               * TurretConstants.turretRPMToMetersPerSecond),
                       // The angle at which the note is launched
                       turretPitch.getMeasure())
