@@ -23,6 +23,8 @@ public class Turret extends SubsystemBase {
 
   private boolean autoAimEnabled = false;
 
+  private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
+
   public Turret(
       TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel, ShotCalculation shotCalculation) {
     this.io = io;
@@ -32,6 +34,19 @@ public class Turret extends SubsystemBase {
 
     io.setTurretPitch(Rotation2d.fromDegrees(62));
     io.setTurretYaw(Rotation2d.kZero);
+  }
+
+  public Command manualIncrimentPitch(Rotation2d deltaPitch) {
+    return runOnce(
+        () -> {
+          manualPitch = manualPitch.plus(deltaPitch);
+          if (manualPitch.getDegrees() > TurretConstants.turretMaxHoodAngle) {
+            manualPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
+          } else if (manualPitch.getDegrees() < TurretConstants.turretMinHoodAngle) {
+            manualPitch = Rotation2d.fromDegrees(TurretConstants.turretMinHoodAngle);
+          }
+          io.setTurretPitch(manualPitch);
+        });
   }
 
   public Command addPitchCommand(Rotation2d deltaPitch) {
