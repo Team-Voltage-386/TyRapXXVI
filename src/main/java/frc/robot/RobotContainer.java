@@ -74,7 +74,7 @@ public class RobotContainer {
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 0.5);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.0);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
   TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 100);
 
@@ -409,6 +409,8 @@ public class RobotContainer {
           .rightTrigger()
           .onFalse(
               new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
+                  .alongWith(
+                      turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
                   .alongWith(spindexer.feederOffCommand())
                   .alongWith(spindexer.spindexerOffCommand()));
       kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
