@@ -32,8 +32,8 @@ public class IntakeIOSim implements IntakeIO {
             // The intake is mounted on the front side of the chassis
             IntakeSimulation.IntakeSide.FRONT,
             // The intake can hold up to 40 fuel
-            100);
-    this.intakeSimulation.setGamePiecesCount(999);
+            40);
+    this.intakeSimulation.setGamePiecesCount(8);
   }
 
   public void deploy() {
