@@ -82,28 +82,28 @@ public final class VisionConstants {
                     0.7366 / 2,
                     0.6096 / 2,
                     0.3,
-                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(45)))),
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(0)))),
             new CameraConfig(
                 "frontright",
                 new Transform3d(
                     0.7366 / 2,
                     -0.6096 / 2,
                     0.3,
-                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(315)))),
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(270)))),
             new CameraConfig(
                 "backleft",
                 new Transform3d(
                     -0.7366 / 2,
                     0.6096 / 2,
                     0.3,
-                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(135)))),
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(90)))),
             new CameraConfig(
                 "backright",
                 new Transform3d(
                     -0.7366 / 2,
                     -0.6096 / 2,
                     0.3,
-                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(225)))),
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(180)))),
           };
 
       cameraStdDevFactors = new double[] {1.0};
