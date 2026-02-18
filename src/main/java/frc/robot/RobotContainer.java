@@ -218,6 +218,7 @@ public class RobotContainer {
     autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
     autoChooser.addOption("LeftNeutralZone", buildLeftNeutralZoneAuto());
     autoChooser.addOption("LeftNeutralDepot", buildNeutralCollectDepot());
+    autoChooser.addOption("CollectNeutralBottomToHumanPlayer", buildRightNeutralZoneAuto());
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -496,6 +497,9 @@ public class RobotContainer {
       case "LeftNeutralDepot":
         setPoseFromPathStart("CollectNeutralTopToDepot");
         break;
+      case "CollectNeutralBottomToHumanPlayer":
+        setPoseFromPathStart("CollectNeutralBottomToHumanPlayer");
+        break;
     }
     return autoChooser.get();
   }
@@ -553,7 +557,28 @@ public class RobotContainer {
     return hubPose;
   }
 
-  public Rotation2d getLadderAngle() {
+  public Rotation2d getLeftLadderAngle() {
+    Rotation2d ladderAngle = new Rotation2d();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          ladderAngle = Rotation2d.fromDegrees(180);
+          break;
+        case Blue:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+        default:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+      }
+      ;
+    }
+    return ladderAngle;
+  }
+
+  // added Right
+  public Rotation2d getRightLadderAngle() {
     Rotation2d ladderAngle = new Rotation2d();
     Optional<Alliance> currentAlliance = DriverStation.getAlliance();
     if (currentAlliance.isPresent()) {
@@ -746,7 +771,24 @@ public class RobotContainer {
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
-            new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)),
+            new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildRightNeutralZoneAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("CollectNeutralBottomToHumanPlayer"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            DriveCommands.buildFollowPath("BlueHumanPlayerStation"),
+            new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
             new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
             climb.retractCommand());
     return auto;

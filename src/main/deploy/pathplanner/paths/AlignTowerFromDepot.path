@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.5723413520668803,
-        "y": 5.832991430543656
+        "x": 1.201209964412812,
+        "y": 5.69729537366548
       },
       "isLocked": false,
       "linkedName": "BlueDepot"
@@ -20,8 +20,8 @@
         "y": 4.829281105324074
       },
       "prevControl": {
-        "x": 1.1328461213549712,
-        "y": 4.970675549836061
+        "x": 0.9045213655525064,
+        "y": 5.07829783668653
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.0,
-    "maxAcceleration": 3.0,
+    "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -179.0451587461277
   },
   "useDefaultConstraints": false
 }

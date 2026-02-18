@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2765243179122192,
-        "y": 5.966275207591934
+        "x": 1.5562633451957297,
+        "y": 5.998552787663108
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.0267602783234544,
-        "y": 5.977134513661011
+        "x": 1.3064993056069647,
+        "y": 6.009412093732185
       },
       "isLocked": false,
       "linkedName": "DepotOffset"
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -179.0451587461277
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }
