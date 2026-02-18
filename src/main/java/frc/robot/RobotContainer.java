@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveDistance2;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.RotateToAngle;
@@ -73,7 +74,7 @@ public class RobotContainer {
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 0.5);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.0);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
   TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 100);
 
@@ -407,6 +408,8 @@ public class RobotContainer {
           .rightTrigger()
           .onFalse(
               new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
+                  .alongWith(
+                      turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
                   .alongWith(spindexer.feederOffCommand())
                   .alongWith(spindexer.spindexerOffCommand()));
       kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
@@ -552,6 +555,26 @@ public class RobotContainer {
     return hubPose;
   }
 
+  public Rotation2d getLadderAngle() {
+    Rotation2d ladderAngle = new Rotation2d();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          ladderAngle = Rotation2d.fromDegrees(180);
+          break;
+        case Blue:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+        default:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+      }
+      ;
+    }
+    return ladderAngle;
+  }
+
   public Pose3d getHubPose3d() {
     return new Pose3d(getHubPose(), Rotation3d.kZero);
   }
@@ -679,6 +702,17 @@ public class RobotContainer {
     }
   }
 
+  public void runTeleopStart() {
+    // Down climb by extending the climber mechanism
+    CommandScheduler.getInstance()
+        .schedule(
+            new SequentialCommandGroup(
+                climb.deployCommand(), new WaitCommand(2), climb.retractCommand()));
+    // Ensure the intake is deployed. This is mainly for simulation testing
+    // since the intake should normally be deployed at the start of auto
+    CommandScheduler.getInstance().schedule(intake.deployCommand());
+  }
+
   public Command buildLeftNeutralZoneAuto() {
     Command auto =
         new SequentialCommandGroup(
@@ -708,13 +742,14 @@ public class RobotContainer {
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("CollectNeutralTopToDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
             new WaitCommand(5),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret
-                .disableAutoAimCommand()
-                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
+            new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
             climb.retractCommand());
     return auto;
   }

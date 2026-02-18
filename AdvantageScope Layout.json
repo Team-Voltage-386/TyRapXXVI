@@ -2,9 +2,9 @@
   "hubs": [
     {
       "x": 0,
-      "y": 39,
-      "width": 1710,
-      "height": 1073,
+      "y": 38,
+      "width": 1726,
+      "height": 1047,
       "state": {
         "sidebar": {
           "width": 449,
@@ -45,7 +45,10 @@
             "/AdvantageKit/Shooter/Turret",
             "/AdvantageKit/Shooter/Turret/Inputs",
             "/AdvantageKit/Shooter/Turret/Inputs/TurretPitch",
-            "/AdvantageKit/Shooter/Turret/Inputs/TurretYaw"
+            "/AdvantageKit/Shooter/Turret/Inputs/TurretYaw",
+            "/AdvantageKit/RealOutputs/Climber/Mech",
+            "/AdvantageKit/RealOutputs/Climber/Mech/Climb",
+            "/AdvantageKit/RealOutputs/Intake"
           ]
         },
         "tabs": {
@@ -167,6 +170,24 @@
                     }
                   },
                   {
+                    "type": "mechanism",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Climber/Mech",
+                    "logType": "Mechanism2d",
+                    "visible": true,
+                    "options": {
+                      "plane": "yz"
+                    }
+                  },
+                  {
+                    "type": "mechanism",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Intake/Mech",
+                    "logType": "Mechanism2d",
+                    "visible": true,
+                    "options": {
+                      "plane": "xz"
+                    }
+                  },
+                  {
                     "type": "trajectory",
                     "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/Trajectory",
                     "logType": "Pose2d[]",
@@ -226,23 +247,23 @@
                     }
                   },
                   {
-                    "type": "ghost",
+                    "type": "cone",
                     "logKey": "NT:/SmartDashboard/MapleSim/Goals/BlueHub",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "model": "Banana Split",
-                      "color": "#00ff00"
+                      "color": "#00ff00",
+                      "position": "center"
                     }
                   },
                   {
-                    "type": "ghost",
+                    "type": "cone",
                     "logKey": "NT:/SmartDashboard/MapleSim/Goals/RedHub",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "model": "Presto",
-                      "color": "#00ff00"
+                      "color": "#00ff00",
+                      "position": "center"
                     }
                   }
                 ],
@@ -253,14 +274,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  11.871782608913833,
-                  5.952896542090459,
-                  1.8912157433643015
+                  7.595790665497026,
+                  5.971377918177035,
+                  -7.097673629402127
                 ],
                 "cameraTarget": [
-                  0,
-                  0.5,
-                  0
+                  2.494901981125521,
+                  -2.8702837472378597,
+                  2.154767099861219
                 ]
               },
               "controlsHeight": 200
@@ -269,29 +290,19 @@
               "type": 1,
               "title": "Line Graph",
               "controller": {
-                "leftSources": [],
-                "rightSources": [
+                "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Drive/Module0/TurnPosition/value",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Intake/BallCount",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#2b66a2",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Setpoints/0/angle/value",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#e5b31b",
+                      "color": "#af2437",
                       "size": "normal"
                     }
                   }
                 ],
+                "rightSources": [],
                 "discreteSources": [],
                 "leftLockedRange": null,
                 "rightLockedRange": null,

@@ -136,6 +136,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
     robotContainer.getHubActivityCommand().schedule();
+    robotContainer.runTeleopStart();
   }
 
   /** This function is called periodically during operator control. */
