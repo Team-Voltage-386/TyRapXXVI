@@ -392,9 +392,8 @@ public class RobotContainer {
                   () -> false,
                   flywheel));
 
-      kDriveController
-          .povUp()
-          .onTrue(turret.runOnce(() -> turret.io.setTurretYaw(Rotation2d.k180deg)));
+      kDriveController.povUp().onTrue(turret.manualIncrimentPitch(Rotation2d.fromDegrees(.5)));
+      kDriveController.povDown().onTrue(turret.manualIncrimentPitch(Rotation2d.fromDegrees(-.5)));
 
       kDriveController
           .rightTrigger()
