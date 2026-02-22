@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.7278054567022547,
-        "y": 5.966275207591934
+        "x": 3.452822222222222,
+        "y": 7.421133333333334
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.201209964412812,
-        "y": 5.69729537366548
+        "x": 1.6791333333333331,
+        "y": 6.3226555555555555
       },
       "isLocked": false,
-      "linkedName": "BlueDepot"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.9266723813657414,
-        "y": 4.829281105324074
+        "x": 2.626444444444445,
+        "y": 3.772977777777778
       },
       "prevControl": {
-        "x": 0.9045213655525064,
-        "y": 5.07829783668653
+        "x": 2.8727473831493637,
+        "y": 3.730142484089966
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BlueLeftTower"
+      "linkedName": "BlueMiddle"
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 7.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.332667339934469
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.0451587461277
+    "rotation": -0.8814039965820846
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }
