@@ -114,7 +114,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                       // Specify the translation of the shooter from the robot center (in the
                       // shooter’s
                       // reference frame)
-                      new Translation2d(0.0, 0),
+                      TurretConstants.turretPosition,
                       // Specify the field-relative speed of the chassis, adding it to the initial
                       // velocity
                       // of the projectile
@@ -144,7 +144,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                               : Constants.redHubPose)
                   // Set the tolerance: x: ±0.5m, y: ±1.2m, z: ±0.3m (this is the size of the
                   // speaker's "mouth")
-                  .withTargetTolerance(new Translation3d(.5, 0, .5))
+                  .withTargetTolerance(new Translation3d(.5, .5, .5))
                   // Configure callbacks to visualize the flight trajectory of the projectile
                   .withProjectileTrajectoryDisplayCallBack(
                       // Callback for when the note will eventually hit the target (if configured)
@@ -160,7 +160,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                               pose3ds.toArray(Pose3d[]::new)))
                   .enableBecomesGamePieceOnFieldAfterTouchGround();
       SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
-      this.intakeIOSim.removeBall(); // TODO: Uncomment this and restore ball limit to 40
+      this.intakeIOSim.removeBall();
     }
   }
 }
