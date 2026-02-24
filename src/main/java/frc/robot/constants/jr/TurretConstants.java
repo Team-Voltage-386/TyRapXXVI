@@ -41,5 +41,6 @@ public class TurretConstants {
   public static final double shooterWheelRadiusMeters = 0.05;
 
   public static final double turretRPMToMetersPerSecond =
-      (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters) / 60;
+      (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)
+          / 60; // Incorrect. / 60 is too little force. Try different values to see what works.
 }
