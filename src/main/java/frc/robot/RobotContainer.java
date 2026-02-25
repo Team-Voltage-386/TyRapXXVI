@@ -586,10 +586,10 @@ public class RobotContainer {
     if (currentAlliance.isPresent()) {
       switch (currentAlliance.get()) {
         case Red:
-          ladderAngle = Rotation2d.fromDegrees(180);
+          ladderAngle = Rotation2d.fromDegrees(0);
           break;
         case Blue:
-          ladderAngle = Rotation2d.fromDegrees(0);
+          ladderAngle = Rotation2d.fromDegrees(180);
           break;
         default:
           ladderAngle = Rotation2d.fromDegrees(0);

@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 1.5562633451957297,
-        "y": 5.998552787663108
+        "y": 6.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3064993056069647,
-        "y": 6.009412093732185
+        "x": 1.3062633451957275,
+        "y": 6.0
       },
       "isLocked": false,
       "linkedName": "DepotOffset"
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 0.7278054567022547,
-        "y": 5.966275207591934
+        "y": 6.0
       },
       "prevControl": {
-        "x": 0.9773740499960035,
-        "y": 5.951594702104065
+        "x": 0.9778054567022547,
+        "y": 6.0
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.0451587461277
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
