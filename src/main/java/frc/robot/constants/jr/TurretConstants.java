@@ -32,7 +32,8 @@ public class TurretConstants {
   // You then subtract the Ks from the voltage and divide by the velocity to get Kv.
   public static final double turretKv = (3.3 - turretKs) / 68.25; // Volts per (rpm)
 
-  public static final int flywheelCanId = 13;
+  public static final int flywheelMasterCanId = 13;
+  public static final int flywheelSlaveCanId = 88; // unknown
   public static final double flywheelKs = 0.11;
   public static final double flywheelKv = 0.00204;
   public static final double flywheelKa = 0.006;
@@ -40,5 +41,6 @@ public class TurretConstants {
   public static final double shooterWheelRadiusMeters = 0.05;
 
   public static final double turretRPMToMetersPerSecond =
-      (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters) / 60;
+      (2 * Math.PI * TurretConstants.shooterWheelRadiusMeters)
+          / 60; // Incorrect. / 60 is too little force. Try different values to see what works.
 }
