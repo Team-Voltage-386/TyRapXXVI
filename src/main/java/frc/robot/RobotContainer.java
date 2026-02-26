@@ -38,6 +38,7 @@ import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
 import java.util.Arrays;
@@ -152,7 +153,14 @@ public class RobotContainer {
                 new ModuleIOSim(mods[2]),
                 new ModuleIOSim(mods[3]));
         // disable vision simulation for performance reasons
-        vis = new Vision(drive::addVisionMeasurement);
+        vis =
+            new Vision(
+                drive::addVisionMeasurement,
+                Stream.of(VisionConstants.cameraConfigs)
+                    .map(
+                        cam ->
+                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
+                    .toArray(VisionIOPhotonVision[]::new));
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
@@ -416,24 +424,37 @@ public class RobotContainer {
       kDriveController
           .start()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
-      //positions for climb alignment, poses are blue side only
+      // positions for climb alignment, poses are blue side only
       kDriveController
           .rightBumper()
           .onTrue(
-              pathfindToPosition(1.5, 2.555)
+              vis.turnClimbCameraOn()
                   .andThen(
-                      new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
-                  .andThen(new DriveToPose(drive, new Pose2d(1.067, 2.555, getLadderAngle())))
-                  .andThen(new DriveDistance2(drive, () -> 0.35, 90).withTimeout(0.3)));
+                      pathfindToPosition(1.5, 2.555)
+                          .andThen(
+                              new RotateToAngle(
+                                  drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
+                          .andThen(
+                              new DriveToPose(drive, new Pose2d(1.067, 2.555, getLadderAngle())))
+                          .andThen(new DriveDistance2(drive, () -> 0.35, 90).withTimeout(0.3))
+                          .andThen(vis.turnClimbCameraOff()))
+                  .handleInterrupt(
+                      () -> CommandScheduler.getInstance().schedule(vis.turnClimbCameraOff())));
 
       kDriveController
           .leftBumper()
           .onTrue(
-              pathfindToPosition(1.5, 4.7)
+              vis.turnClimbCameraOn()
                   .andThen(
-                      new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
-                  .andThen(new DriveToPose(drive, new Pose2d(1.067, 4.7, getLadderAngle())))
-                  .andThen(new DriveDistance2(drive, () -> 0.35, -90).withTimeout(0.3)));
+                      pathfindToPosition(1.5, 4.7)
+                          .andThen(
+                              new RotateToAngle(
+                                  drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
+                          .andThen(new DriveToPose(drive, new Pose2d(1.067, 4.7, getLadderAngle())))
+                          .andThen(new DriveDistance2(drive, () -> 0.35, -90).withTimeout(0.3))
+                          .andThen(vis.turnClimbCameraOff()))
+                  .handleInterrupt(
+                      () -> CommandScheduler.getInstance().schedule(vis.turnClimbCameraOff())));
 
       kManipController
           .povRight()
