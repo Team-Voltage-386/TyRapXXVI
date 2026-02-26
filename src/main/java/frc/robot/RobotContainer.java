@@ -219,6 +219,8 @@ public class RobotContainer {
     autoChooser.addOption("LeftNeutralZone", buildLeftNeutralZoneAuto());
     autoChooser.addOption("LeftNeutralDepot", buildNeutralCollectDepot());
     autoChooser.addOption("CollectNeutralBottomToHumanPlayer", buildRightNeutralZoneAuto());
+    autoChooser.addOption("SimpleLeftAuto", buildSimpleLeftAuto());
+    autoChooser.addOption("SimpleRightAuto", buildSimpleRightAuto());
 
     // TODO: extract this into a constant
     Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
@@ -501,6 +503,12 @@ public class RobotContainer {
         break;
       case "CollectNeutralBottomToHumanPlayer":
         setPoseFromPathStart("CollectNeutralBottomToHumanPlayer");
+        break;
+      case "SimpleLeftAuto":
+        setPoseFromPathStart("Spacing");
+        break;
+      case "SimpleRightAuto":
+        setPoseFromPathStart("Spacing");
         break;
     }
     return autoChooser.get();
@@ -790,6 +798,40 @@ public class RobotContainer {
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("BlueHumanPlayerStation"),
+            new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildSimpleLeftAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("Spacing"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            DriveCommands.buildFollowPath("ClimbLeftFromCenter"),
+            new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildSimpleRightAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("Spacing"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            DriveCommands.buildFollowPath("ClimbRightFromCenter"),
             new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
             new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
             climb.retractCommand());
