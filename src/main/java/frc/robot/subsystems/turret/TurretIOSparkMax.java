@@ -38,7 +38,7 @@ public class TurretIOSparkMax implements TurretIO {
 
   TuningUtil yawKp = new TuningUtil("/Tuning/turret/yawKp", 0.0);
   TuningUtil yawKd = new TuningUtil("/Tuning/turret/yawKd", 0.0);
-  TuningUtil hoodKp = new TuningUtil("/Tuning/turret/hoodKp", 0.0);
+  TuningUtil hoodKp = new TuningUtil("/Tuning/turret/hoodKp", 0.9);
   TuningUtil hoodKd = new TuningUtil("/Tuning/turret/hoodKd", 0.0);
 
   public TurretIOSparkMax() {
@@ -171,7 +171,7 @@ public class TurretIOSparkMax implements TurretIO {
     // No pitch control implemented
   }
 
-  public void setZero() {
+  public void setYawZero() {
     System.out.println("turret encoder zeroed");
     yawEncoder.setPosition(0);
   }
