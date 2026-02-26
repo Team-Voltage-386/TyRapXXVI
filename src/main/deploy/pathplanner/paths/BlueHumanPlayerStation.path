@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5562633451957297,
-        "y": 6.0
+        "x": 0.8023666666666669,
+        "y": 0.6727520759193351
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3062633451957275,
-        "y": 6.0
+        "x": 0.8225222222222222,
+        "y": 0.985163187030446
       },
       "isLocked": false,
-      "linkedName": "DepotOffset"
+      "linkedName": "HumanPlayerStation"
     },
     {
       "anchor": {
-        "x": 0.7278054567022547,
-        "y": 6.0
+        "x": 1.084544444444444,
+        "y": 2.5737222222222216
       },
       "prevControl": {
-        "x": 0.9778054567022547,
-        "y": 6.0
+        "x": 1.0543111111111108,
+        "y": 2.0698333333333325
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BlueDepot"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.8,
+    "maxVelocity": 4.0,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -50,5 +50,5 @@
     "velocity": 0,
     "rotation": 180.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

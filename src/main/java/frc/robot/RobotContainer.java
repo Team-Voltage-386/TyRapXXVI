@@ -1,7 +1,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
@@ -14,10 +13,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveDistance2;
-import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.RotateToAngle;
 import frc.robot.constants.jr.DriveConstants;
@@ -38,11 +35,12 @@ import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.util.AutoWrapper;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -89,6 +87,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // Autos
+  private final Map<String, AutoWrapper> autos = new HashMap<>();
 
   /**
    * The container for the robot. Contains subsystems, IO devices, and commands.
@@ -197,126 +198,10 @@ public class RobotContainer {
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     autoChooser.addDefaultOption("Nothing", Commands.none());
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("Drive square", DriveCommands.driveSquare(drive));
-    autoChooser.addOption("SquareStraight", DriveCommands.SquareStraight(drive));
-    autoChooser.addOption("SmallSquare", DriveCommands.SmallSquare(drive));
-    autoChooser.addOption("BlueSquare", DriveCommands.BlueSquare(drive));
-    autoChooser.addOption("LeftNeutralZone", buildLeftNeutralZoneAuto());
-    autoChooser.addOption("LeftNeutralDepot", buildNeutralCollectDepot());
-
-    // TODO: extract this into a constant
-    Transform2d robotScoreOffsetRight = new Transform2d(0, 0.1, Rotation2d.fromDegrees(0));
-    Transform2d robotScoreOffsetLeft = new Transform2d(0, -0.1, Rotation2d.fromDegrees(0));
-
-    Pose2d reefEscape = DriveToPose.tagPose(11, new Transform2d(1, 0, Rotation2d.kCW_90deg));
-    Pose2d playerStation =
-        DriveToPose.tagPose(1, new Transform2d(Translation2d.kZero, Rotation2d.k180deg));
-
-    List<Waypoint> waypoints =
-        PathPlannerPath.waypointsFromPoses(
-            reefEscape, new Pose2d(playerStation.getTranslation(), Rotation2d.kZero));
-
-    // PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 *
-    // Math.PI); // The
-    // constraints for this path.
-    PathConstraints constraints =
-        PathConstraints.unlimitedConstraints(
-            12.0); // You can also use unlimited constraints, only limited by motor torque and
-    // nominal battery voltage
-
-    // Create the path using the waypoints created above
-    PathPlannerPath path =
-        new PathPlannerPath(
-            waypoints,
-            constraints,
-            null,
-            // The ideal starting state, this is only relevant for pre-planned paths, so can
-            // be null
-            // for on-the-fly paths.
-            new GoalEndState(0.0, playerStation.getRotation())
-            // Goal end state. You can set a holonomic rotation here. If using a
-            // differential
-            // drivetrain, the rotation will have no effect.
-            );
-
-    // Prevent the path from being flipped if the coordinates are already correct
-    path.preventFlipping = true;
-    autoChooser.addOption(
-        "11L to CS to 6R",
-        new SequentialCommandGroup(
-            new DriveToPose(drive, DriveToPose.tagPose(11, robotScoreOffsetLeft)),
-            AutoBuilder.followPath(path),
-            Commands.waitSeconds(3),
-            new DriveToPose(drive, DriveToPose.tagPose(6, robotScoreOffsetRight))));
-
-    Pose2d[] testPoses =
-        new Pose2d[] {
-          new Pose2d(4.0, 2.0, Rotation2d.fromDegrees(90)),
-          new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0)),
-          new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(90)),
-        };
-    List<Waypoint> pptestWaypoints1 = PathPlannerPath.waypointsFromPoses(testPoses);
-
-    // Create the path using the waypoints created above
-    PathPlannerPath pptestpath1 =
-        new PathPlannerPath(
-            pptestWaypoints1,
-            constraints,
-            null,
-            // The ideal starting state, this is only relevant for pre-planned paths, so can
-            // be null
-            // for on-the-fly paths.
-            new GoalEndState(0.0, Rotation2d.fromDegrees(90))
-            // Goal end state. You can set a holonomic rotation here. If using a
-            // differential
-            // drivetrain, the rotation will have no effect.
-            );
-
-    pptestpath1.preventFlipping = true;
-    Collections.reverse(Arrays.asList(testPoses));
-    List<Waypoint> pptestWaypoints2 = PathPlannerPath.waypointsFromPoses(testPoses);
-
-    // Create the path using the waypoints created above
-    PathPlannerPath pptestpath2 =
-        new PathPlannerPath(
-            pptestWaypoints2,
-            constraints,
-            null,
-            // The ideal starting state, this is only relevant for pre-planned paths, so can
-            // be null
-            // for on-the-fly paths.
-            new GoalEndState(0.0, Rotation2d.fromDegrees(0))
-            // Goal end state. You can set a holonomic rotation here. If using a
-            // differential
-            // drivetrain, the rotation will have no effect.
-            );
-    pptestpath2.preventFlipping = true;
-    autoChooser.addOption(
-        "PP Path Test",
-        Commands.sequence(
-            new DriveToPose(drive, testPoses[0]),
-            Commands.repeatingSequence(
-                AutoBuilder.followPath(pptestpath1),
-                AutoBuilder.followPath(pptestpath2),
-                Commands.waitSeconds(4))));
-
     // Configure the button bindings
     configureButtonBindings();
+
+    initializeAutos();
   }
 
   /**
@@ -471,6 +356,49 @@ public class RobotContainer {
     }
   }
 
+  protected void registerAuto(AutoWrapper auto) {
+    autos.put(auto.getName(), auto);
+    autoChooser.addOption(auto.getName(), auto.getAutoCommand());
+  }
+
+  public void initializeAutos() {
+    try {
+      registerAuto(new AutoWrapper("SimpleLeft", "Spacing", true, buildSimpleLeftAuto()));
+      registerAuto(new AutoWrapper("SimpleRight", "Spacing", true, buildSimpleRightAuto()));
+      registerAuto(
+          new AutoWrapper(
+              "LeftNeutralDepot", "CollectNeutralTopToDepot", true, buildNeutralCollectDepot()));
+      registerAuto(
+          new AutoWrapper(
+              "RightNeutralHumanPlayer",
+              "CollectNeutralBottomToHumanPlayer",
+              true,
+              buildRightNeutralZoneAuto()));
+      registerAuto(new AutoWrapper("Square", "Square", true, DriveCommands.driveSquare(drive)));
+      registerAuto(
+          new AutoWrapper(
+              "SquareStraight", "SquareStraight", true, DriveCommands.SquareStraight(drive)));
+      registerAuto(
+          new AutoWrapper("SmallSquare", "SmallSquare", true, DriveCommands.SmallSquare(drive)));
+      registerAuto(
+          new AutoWrapper("BlueSquare", "BlueSquare", true, DriveCommands.BlueSquare(drive)));
+      registerAuto(
+          new AutoWrapper(
+              "WheelRadiusCharacterization",
+              null,
+              false,
+              DriveCommands.wheelRadiusCharacterization(drive)));
+      registerAuto(
+          new AutoWrapper(
+              "DriveSimpleFFCharacterization",
+              null,
+              false,
+              DriveCommands.feedforwardCharacterization(drive)));
+    } catch (FileVersionException | IOException | ParseException e) {
+      System.err.println("Error loading auto: " + e.getMessage());
+    }
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -481,25 +409,12 @@ public class RobotContainer {
     if (selectedAutoName == null) {
       return Commands.none();
     }
-    switch (selectedAutoName) {
-      case "Drive square":
-        setPoseFromPathStart("Square");
-        break;
-      case "SquareStraight":
-        setPoseFromPathStart("SquareStraight");
-        break;
-      case "SmallSquare":
-        setPoseFromPathStart("SmallSquare");
-        break;
-      case "BlueSquare":
-        setPoseFromPathStart("BlueSquare");
-        break;
-      case "LeftNeutralZone":
-        setPoseFromPathStart("StartCollectNeutralTopQtr");
-        break;
-      case "LeftNeutralDepot":
-        setPoseFromPathStart("CollectNeutralTopToDepot");
-        break;
+    if (!autos.containsKey(selectedAutoName)) {
+      System.err.println("Selected auto not found: " + selectedAutoName);
+      return Commands.none();
+    }
+    if (autos.get(selectedAutoName).isResetNav()) {
+      setPoseFromPathStart(autos.get(selectedAutoName).getInitialPath());
     }
     return autoChooser.get();
   }
@@ -557,7 +472,7 @@ public class RobotContainer {
     return hubPose;
   }
 
-  public Rotation2d getLadderAngle() {
+  public Rotation2d getLeftLadderAngle() {
     Rotation2d ladderAngle = new Rotation2d();
     Optional<Alliance> currentAlliance = DriverStation.getAlliance();
     if (currentAlliance.isPresent()) {
@@ -567,6 +482,27 @@ public class RobotContainer {
           break;
         case Blue:
           ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+        default:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+      }
+      ;
+    }
+    return ladderAngle;
+  }
+
+  // added Right
+  public Rotation2d getRightLadderAngle() {
+    Rotation2d ladderAngle = new Rotation2d();
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (currentAlliance.isPresent()) {
+      switch (currentAlliance.get()) {
+        case Red:
+          ladderAngle = Rotation2d.fromDegrees(0);
+          break;
+        case Blue:
+          ladderAngle = Rotation2d.fromDegrees(180);
           break;
         default:
           ladderAngle = Rotation2d.fromDegrees(0);
@@ -658,49 +594,40 @@ public class RobotContainer {
     return rotation;
   }
 
-  protected void setPoseFromPathStart(String pathName) {
-    try {
-      System.out.println("Setting pose from path start: " + pathName);
-      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+  protected void setPoseFromPathStart(PathPlannerPath path) {
+    System.out.println("Setting pose from path start: " + path.name);
 
-      List<Waypoint> waypoints;
-      Optional<Pose2d> pose = path.getStartingHolonomicPose();
-      Optional<Alliance> ally = DriverStation.getAlliance();
-      waypoints = path.getWaypoints();
-      Waypoint first = waypoints.get(0);
-      Rotation2d startRotation = Rotation2d.kZero;
-      if (pose.isPresent()) {
-        startRotation = pose.get().getRotation();
-      }
-      if (ally.isPresent()) {
-        if (ally.get() == Alliance.Red) {
-          System.out.println("Flipping start location for red");
-          first = first.flip();
-          if (pose.isPresent()) {
-            startRotation = pose.get().getRotation().plus(Rotation2d.fromDegrees(180));
-          }
+    List<Waypoint> waypoints;
+    Optional<Pose2d> pose = path.getStartingHolonomicPose();
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    waypoints = path.getWaypoints();
+    Waypoint first = waypoints.get(0);
+    Rotation2d startRotation = Rotation2d.kZero;
+    if (pose.isPresent()) {
+      startRotation = pose.get().getRotation();
+    }
+    if (ally.isPresent()) {
+      if (ally.get() == Alliance.Red) {
+        System.out.println("Flipping start location for red");
+        first = first.flip();
+        if (pose.isPresent()) {
+          startRotation = pose.get().getRotation().plus(Rotation2d.fromDegrees(180));
         }
       }
-      if (pose.isPresent()) {
-        drive.setPose(new Pose2d(first.anchor(), startRotation));
-        System.out.println(first.toString());
-        System.out.println("First.anchor(): " + first.anchor().toString());
-        System.out.println("startRotation: " + startRotation.toString());
-      } else {
-        System.out.println("Error getting PathPlanner pose");
+    }
+    if (pose.isPresent()) {
+      drive.setPose(new Pose2d(first.anchor(), startRotation));
+      System.out.println(first.toString());
+      System.out.println("First.anchor(): " + first.anchor().toString());
+      System.out.println("startRotation: " + startRotation.toString());
+    } else {
+      System.out.println("Error getting PathPlanner pose");
+    }
+    if (Robot.isSimulation()) {
+      if (sim != null) {
+        System.out.println("Setting sim pose to " + drive.getPose());
+        sim.getDriveSim().setSimulationWorldPose(drive.getPose());
       }
-      if (Robot.isSimulation()) {
-        if (sim != null) {
-          System.out.println("Setting sim pose to " + drive.getPose());
-          sim.getDriveSim().setSimulationWorldPose(drive.getPose());
-        }
-      }
-    } catch (IOException e) {
-      System.err.println("Path file not found!");
-      e.printStackTrace();
-    } catch (ParseException e) {
-      System.err.println("Path file can't be parsed!");
-      e.printStackTrace();
     }
   }
 
@@ -750,7 +677,58 @@ public class RobotContainer {
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
-            new RotateToAngle(drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)),
+            new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildRightNeutralZoneAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("CollectNeutralBottomToHumanPlayer"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            DriveCommands.buildFollowPath("BlueHumanPlayerStation"),
+            new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildSimpleLeftAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("Spacing"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            DriveCommands.buildFollowPath("ClimbLeftFromCenter"),
+            new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildSimpleRightAuto() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("Spacing"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(4),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            DriveCommands.buildFollowPath("ClimbRightFromCenter"),
+            new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
             new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
             climb.retractCommand());
     return auto;
