@@ -43,7 +43,6 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void periodic() {
-    io.readjustPID();
     io.updateInputs(inputs);
     Logger.processInputs("Shooter/Flywheel/Inputs", inputs);
   }

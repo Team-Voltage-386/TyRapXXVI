@@ -8,11 +8,12 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.util.TuningUtil;
@@ -25,10 +26,14 @@ import org.littletonrobotics.junction.Logger;
  */
 public class FlywheelIOSparkMax implements FlywheelIO {
   // real robot will likely have two motors, use follower
-  private final SparkMax flywheelMotor =
-      new SparkMax(TurretConstants.flywheelCanId, MotorType.kBrushless);
-  private final RelativeEncoder flywheelEncoder = flywheelMotor.getEncoder();
+  private final SparkMax flywheelMotorMaster =
+      new SparkMax(TurretConstants.flywheelMasterCanId, MotorType.kBrushless);
+  private final SparkMax flywheelMotorSlave =
+      new SparkMax(TurretConstants.flywheelSlaveCanId, MotorType.kBrushless);
+  private final RelativeEncoder flywheelEncoder = flywheelMotorMaster.getEncoder();
   private double flywheelSetpoint;
+
+  private double outputVoltage;
 
   private SparkMaxConfig flywheelConfig;
 
@@ -40,6 +45,12 @@ public class FlywheelIOSparkMax implements FlywheelIO {
   TuningUtil threshold = new TuningUtil("/Tuning/flywheel/Threshold", 400);
   TuningUtil rateLimit = new TuningUtil("/Tuning/flywheel/RateLimit", 200);
   SlewRateLimiter filter = new SlewRateLimiter(rateLimit.getValue());
+
+  private PIDController flywheelPID =
+      new PIDController(flywheelKp.getValue(), 0.0, flywheelKd.getValue());
+  private SimpleMotorFeedforward flywheelFeedforward =
+      new SimpleMotorFeedforward(
+          flywheelKs.getValue(), flywheelKv.getValue(), flywheelKa.getValue());
 
   public FlywheelIOSparkMax() {
     flywheelConfig = new SparkMaxConfig();
@@ -78,8 +89,16 @@ public class FlywheelIOSparkMax implements FlywheelIO {
     tryUntilOk(
         5,
         () ->
-            flywheelMotor.configure(
+            flywheelMotorMaster.configure(
                 flywheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+
+    tryUntilOk(
+        5,
+        () ->
+            flywheelMotorSlave.configure(
+                flywheelConfig.follow(flywheelMotorMaster),
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters));
 
     flywheelEncoder.setPosition(0);
   }
@@ -89,62 +108,34 @@ public class FlywheelIOSparkMax implements FlywheelIO {
         .get()
         .ifPresent(
             kp -> {
-              System.out.println("updated turret kp");
-              flywheelConfig.closedLoop.p(kp, ClosedLoopSlot.kSlot1);
-              flywheelMotor.configure(
-                  flywheelConfig,
-                  ResetMode.kNoResetSafeParameters,
-                  PersistMode.kNoPersistParameters);
+              flywheelPID.setP(kp);
             });
     flywheelKd
         .get()
         .ifPresent(
             kd -> {
-              System.out.println("updated turret kd");
-              flywheelConfig.closedLoop.d(kd, ClosedLoopSlot.kSlot1);
-              flywheelMotor.configure(
-                  flywheelConfig,
-                  ResetMode.kNoResetSafeParameters,
-                  PersistMode.kNoPersistParameters);
-            });
-    flywheelKs
-        .get()
-        .ifPresent(
-            ks -> {
-              System.out.println("updated turret ks");
-              flywheelConfig.closedLoop.feedForward.kS(ks).kS(ks, ClosedLoopSlot.kSlot1);
-              flywheelMotor.configure(
-                  flywheelConfig,
-                  ResetMode.kNoResetSafeParameters,
-                  PersistMode.kNoPersistParameters);
-            });
-    flywheelKv
-        .get()
-        .ifPresent(
-            kv -> {
-              System.out.println("updated turret kv");
-              flywheelConfig.closedLoop.feedForward.kV(kv).kV(kv, ClosedLoopSlot.kSlot1);
-              flywheelMotor.configure(
-                  flywheelConfig,
-                  ResetMode.kNoResetSafeParameters,
-                  PersistMode.kNoPersistParameters);
+              flywheelPID.setD(kd);
             });
     flywheelKa
         .get()
         .ifPresent(
             ka -> {
-              System.out.println("updated turret ka");
-              flywheelConfig.closedLoop.feedForward.kA(ka).kA(ka, ClosedLoopSlot.kSlot1);
-              flywheelMotor.configure(
-                  flywheelConfig,
-                  ResetMode.kNoResetSafeParameters,
-                  PersistMode.kNoPersistParameters);
+              flywheelFeedforward =
+                  new SimpleMotorFeedforward(flywheelKs.getValue(), flywheelKv.getValue(), ka);
             });
-    rateLimit
+    flywheelKs
         .get()
         .ifPresent(
-            rl -> {
-              filter = new SlewRateLimiter(rl);
+            ks -> {
+              flywheelFeedforward =
+                  new SimpleMotorFeedforward(ks, flywheelKv.getValue(), flywheelKa.getValue());
+            });
+    flywheelKv
+        .get()
+        .ifPresent(
+            kv -> {
+              flywheelFeedforward =
+                  new SimpleMotorFeedforward(flywheelKs.getValue(), kv, flywheelKa.getValue());
             });
 
     inputs.connected = true;
@@ -152,11 +143,16 @@ public class FlywheelIOSparkMax implements FlywheelIO {
     double velocity = flywheelEncoder.getVelocity();
     Logger.recordOutput(
         "/Shooter/Flywheel/VelocitySetpoint",
-        flywheelMotor.getClosedLoopController().getSetpoint());
+        flywheelMotorMaster.getClosedLoopController().getSetpoint());
     Logger.recordOutput(
-        "/Shooter/Flywheel/AppliedOutput",
-        flywheelMotor.getAppliedOutput() * flywheelMotor.getBusVoltage());
+        "/Shooter/Flywheel/MasterAppliedOutput",
+        flywheelMotorMaster.getAppliedOutput() * flywheelMotorMaster.getBusVoltage());
+    Logger.recordOutput(
+        "/Shooter/Flywheel/SlaveAppliedOutput",
+        flywheelMotorSlave.getAppliedOutput() * flywheelMotorMaster.getBusVoltage());
     Logger.recordOutput("/Shooter/Flywheel/Velocity", velocity);
+    Logger.recordOutput("/Shooter/Flywheel/Current", flywheelMotorMaster.getOutputCurrent());
+    readjustPID();
   }
 
   public void setFlywheelVelocity(double velocityRPM) {
@@ -171,21 +167,14 @@ public class FlywheelIOSparkMax implements FlywheelIO {
 
   // to help the kp value from freaking out at low speeds
   public void readjustPID() {
-    if (flywheelMotor.getEncoder().getVelocity() < threshold.getValue()) {
-      flywheelMotor
-          .getClosedLoopController()
-          .setSetpoint(
-              filter.calculate(flywheelSetpoint), ControlType.kVelocity, ClosedLoopSlot.kSlot0);
-    } else {
-      flywheelMotor
-          .getClosedLoopController()
-          .setSetpoint(
-              filter.calculate(flywheelSetpoint), ControlType.kVelocity, ClosedLoopSlot.kSlot1);
-    }
+    outputVoltage =
+        flywheelFeedforward.calculate(flywheelSetpoint)
+            + flywheelPID.calculate(flywheelEncoder.getVelocity(), flywheelSetpoint);
+    flywheelMotorMaster.setVoltage(outputVoltage);
   }
 
   /** Set the Flywheel to the specific speed. */
   public void testFlywheelVoltage(double volts) {
-    flywheelMotor.setVoltage(volts);
+    flywheelMotorMaster.setVoltage(volts);
   }
 }

@@ -76,7 +76,7 @@ public class RobotContainer {
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.0);
   TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
-  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 100);
+  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 40);
 
   public SimContainer sim;
 
@@ -416,6 +416,9 @@ public class RobotContainer {
       kDriveController
           .start()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
+      kDriveController
+          .back()
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
       //positions for climb alignment, poses are blue side only
       kDriveController
           .rightBumper()
