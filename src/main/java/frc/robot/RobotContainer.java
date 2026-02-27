@@ -394,6 +394,15 @@ public class RobotContainer {
               null,
               false,
               DriveCommands.feedforwardCharacterization(drive)));
+      registerAuto(
+          new AutoWrapper(
+              "RightTwoCollect",
+              "CollectNeutralBottomShoot",
+              true,
+              buildRightNeutralZoneTwoCollect()));
+      registerAuto(
+          new AutoWrapper(
+              "LeftTwoCollect", "CollectNeutralTopShoot", true, buildLeftNeutralZoneTwoCollect()));
     } catch (FileVersionException | IOException | ParseException e) {
       System.err.println("Error loading auto: " + e.getMessage());
     }
@@ -729,6 +738,40 @@ public class RobotContainer {
             turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("ClimbRightFromCenter"),
             new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildRightNeutralZoneTwoCollect() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(7),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            DriveCommands.buildFollowPath("RightSecondCollect"),
+            climb.deployCommand(),
+            new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildLeftNeutralZoneTwoCollect() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(8),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            DriveCommands.buildFollowPath("LeftSecondCollect"),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
             new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
             climb.retractCommand());
     return auto;

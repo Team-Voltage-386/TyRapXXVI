@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
 public class TurretConstants {
-  public static final int turretYawCanId = 52;
+  public static final int turretYawCanId = 48;
   public static final int turretPitchCanId = 45;
   public static final double zeroRotRadians = 0;
 
