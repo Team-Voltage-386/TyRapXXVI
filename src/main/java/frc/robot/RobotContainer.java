@@ -35,6 +35,7 @@ import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoWrapper;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -153,7 +154,14 @@ public class RobotContainer {
                 new ModuleIOSim(mods[2]),
                 new ModuleIOSim(mods[3]));
         // disable vision simulation for performance reasons
-        vis = new Vision(drive::addVisionMeasurement);
+        vis =
+            new Vision(
+                drive::addVisionMeasurement,
+                Stream.of(VisionConstants.cameraConfigs)
+                    .map(
+                        cam ->
+                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
+                    .toArray(VisionIOPhotonVision[]::new));
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
@@ -304,14 +312,37 @@ public class RobotContainer {
       kDriveController
           .back()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
-
+      // positions for climb alignment, poses are blue side only
       kDriveController
           .rightBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+          .onTrue(
+              vis.turnClimbCameraOn()
+                  .andThen(
+                      pathfindToPosition(1.5, 2.555)
+                          .andThen(
+                              new RotateToAngle(
+                                  drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
+                          .andThen(
+                              new DriveToPose(drive, new Pose2d(1.067, 2.555, getLadderAngle())))
+                          .andThen(new DriveDistance2(drive, () -> 0.35, 90).withTimeout(0.3))
+                          .andThen(vis.turnClimbCameraOff()))
+                  .handleInterrupt(
+                      () -> CommandScheduler.getInstance().schedule(vis.turnClimbCameraOff())));
 
       kDriveController
           .leftBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
+          .onTrue(
+              vis.turnClimbCameraOn()
+                  .andThen(
+                      pathfindToPosition(1.5, 4.7)
+                          .andThen(
+                              new RotateToAngle(
+                                  drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
+                          .andThen(new DriveToPose(drive, new Pose2d(1.067, 4.7, getLadderAngle())))
+                          .andThen(new DriveDistance2(drive, () -> 0.35, -90).withTimeout(0.3))
+                          .andThen(vis.turnClimbCameraOff()))
+                  .handleInterrupt(
+                      () -> CommandScheduler.getInstance().schedule(vis.turnClimbCameraOff())));
 
       kManipController
           .povRight()
@@ -530,11 +561,11 @@ public class RobotContainer {
     return new Pose3d(pose, Rotation3d.kZero);
   }
 
-  public void pathfindToPosition(double xPosition, double yPosition) {
+  public Command pathfindToPosition(double xPosition, double yPosition) {
     // Since we are using a holonomic drivetrain, the rotation component of this
     // pose
     // represents the goal holonomic rotation
-    Pose2d targetPose = new Pose2d(xPosition, yPosition, Rotation2d.fromDegrees(180));
+    Pose2d targetPose = new Pose2d(xPosition, yPosition, Rotation2d.fromDegrees(0));
 
     // Create the constraints to use while pathfinding
     PathConstraints constraints =
@@ -547,7 +578,7 @@ public class RobotContainer {
     // 0.0 // Rotation delay distance in meters. This is how far the robot should
     // travel before
     // attempting to rotate.
-    CommandScheduler.getInstance().schedule(pathfindingCommand);
+    return pathfindingCommand;
   }
 
   public void pathfindToPath(String pathName) {
