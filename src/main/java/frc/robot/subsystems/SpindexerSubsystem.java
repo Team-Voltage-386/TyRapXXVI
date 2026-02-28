@@ -16,13 +16,14 @@ import frc.robot.constants.jr.SpindexerConstants;
 
 public class SpindexerSubsystem extends SubsystemBase {
 
-  private final SparkMax spindexer_motor;
+  // private final SparkMax spindexer_motor;
 
   private final SparkMax feeder_motor;
   public boolean feederOn = false;
 
   public SpindexerSubsystem() {
-    spindexer_motor = new SparkMax(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID, MotorType.kBrushless);
+    // spindexer_motor = new SparkMax(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID,
+    // MotorType.kBrushless);
     SparkMaxConfig spindexerConfig = new SparkMaxConfig();
     spindexerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
     spindexerConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
@@ -35,11 +36,11 @@ public class SpindexerSubsystem extends SubsystemBase {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
-    tryUntilOk(
-        5,
-        () ->
-            spindexer_motor.configure(
-                spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+    /*tryUntilOk(
+    5,
+    () ->
+        spindexer_motor.configure(
+            spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)); */
 
     feeder_motor = new SparkMax(SpindexerConstants.FEEDER_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig feederConfig = new SparkMaxConfig();
@@ -64,7 +65,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOn() {
     System.out.println("turning on spindexer");
     feederOn = true;
-    spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
+    // spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
   }
 
   public Command spindexerOnCommand() {
@@ -74,7 +75,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOff() {
     System.out.println("turning off spindexer");
     feederOn = false;
-    spindexer_motor.set(0);
+    // spindexer_motor.set(0);
   }
 
   public Command spindexerOffCommand() {

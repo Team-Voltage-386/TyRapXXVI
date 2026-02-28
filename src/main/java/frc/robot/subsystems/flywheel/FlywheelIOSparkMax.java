@@ -28,8 +28,8 @@ public class FlywheelIOSparkMax implements FlywheelIO {
   // real robot will likely have two motors, use follower
   private final SparkMax flywheelMotorMaster =
       new SparkMax(TurretConstants.flywheelMasterCanId, MotorType.kBrushless);
-  private final SparkMax flywheelMotorSlave =
-      new SparkMax(TurretConstants.flywheelSlaveCanId, MotorType.kBrushless);
+  /*private final SparkMax flywheelMotorSlave =
+  new SparkMax(TurretConstants.flywheelSlaveCanId, MotorType.kBrushless); */
   private final RelativeEncoder flywheelEncoder = flywheelMotorMaster.getEncoder();
   private double flywheelSetpoint;
 
@@ -92,13 +92,13 @@ public class FlywheelIOSparkMax implements FlywheelIO {
             flywheelMotorMaster.configure(
                 flywheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    tryUntilOk(
-        5,
-        () ->
-            flywheelMotorSlave.configure(
-                flywheelConfig.follow(flywheelMotorMaster),
-                ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters));
+    /*tryUntilOk(
+    5,
+    () ->
+        flywheelMotorSlave.configure(
+            flywheelConfig.follow(flywheelMotorMaster),
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters)); */
 
     flywheelEncoder.setPosition(0);
   }
@@ -147,9 +147,9 @@ public class FlywheelIOSparkMax implements FlywheelIO {
     Logger.recordOutput(
         "/Shooter/Flywheel/MasterAppliedOutput",
         flywheelMotorMaster.getAppliedOutput() * flywheelMotorMaster.getBusVoltage());
-    Logger.recordOutput(
-        "/Shooter/Flywheel/SlaveAppliedOutput",
-        flywheelMotorSlave.getAppliedOutput() * flywheelMotorMaster.getBusVoltage());
+    /*Logger.recordOutput(
+    "/Shooter/Flywheel/SlaveAppliedOutput",
+    flywheelMotorSlave.getAppliedOutput() * flywheelMotorMaster.getBusVoltage()); */
     Logger.recordOutput("/Shooter/Flywheel/Velocity", velocity);
     Logger.recordOutput("/Shooter/Flywheel/Current", flywheelMotorMaster.getOutputCurrent());
     readjustPID();
