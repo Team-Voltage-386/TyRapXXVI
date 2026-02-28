@@ -1,0 +1,127 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.948487874465049,
+        "y": 0.6727520759193351
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.0408084883439646,
+        "y": 0.6729004961449088
+      },
+      "isLocked": false,
+      "linkedName": "BlueSideShoot"
+    },
+    {
+      "anchor": {
+        "x": 6.070427960057061,
+        "y": 0.6727520759193351
+      },
+      "prevControl": {
+        "x": 5.110763776187084,
+        "y": 0.663011816806726
+      },
+      "nextControl": {
+        "x": 7.018409587216369,
+        "y": 0.6823737611272676
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.324867469879519,
+        "y": 2.87666265060241
+      },
+      "prevControl": {
+        "x": 6.7273181637331145,
+        "y": 3.3129726955825882
+      },
+      "nextControl": {
+        "x": 5.9710779261454725,
+        "y": 2.4931077602826726
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.953325301204819,
+        "y": 0.6727520759193351
+      },
+      "prevControl": {
+        "x": 6.406909161327622,
+        "y": 1.0948121163541125
+      },
+      "nextControl": {
+        "x": 5.720691648672869,
+        "y": 0.45628632961270443
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.758131241084165,
+        "y": 0.7809272467902997
+      },
+      "prevControl": {
+        "x": 3.424455417920118,
+        "y": 0.5562386840517316
+      },
+      "nextControl": {
+        "x": 2.4080843641830443,
+        "y": 0.898965181471756
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.0827011581205994,
+        "y": 2.6106392358054573
+      },
+      "prevControl": {
+        "x": 1.1771644911010042,
+        "y": 2.3791728695181864
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "BlueRightTower"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 95.71059313749973
+    },
+    {
+      "waypointRelativePos": 3,
+      "rotationDegrees": -179.05643257220711
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 6.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -178.18688059262993
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
