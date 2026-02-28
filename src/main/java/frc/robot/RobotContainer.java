@@ -28,7 +28,7 @@ import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
-import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
+import frc.robot.subsystems.flywheel.FlywheelIOSparkFlex;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkMax;
 import frc.robot.subsystems.intake.IntakeSubsystem;
@@ -120,7 +120,7 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(3));
         }
 
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
+        flywheel = new Flywheel(new FlywheelIOSparkFlex());
 
         shotCalculation = new ShotCalculation(drive);
         turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel, shotCalculation);
@@ -435,10 +435,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(runVolts.getValue());
+                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(0);
                   },
                   () -> false,
                   flywheel));
@@ -450,10 +450,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
+                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
                   },
                   (c) -> {
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
+                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(0);
                   },
                   () -> false,
                   flywheel));
