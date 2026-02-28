@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveDistance2;
+import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.RotateToAngle;
 import frc.robot.constants.jr.DriveConstants;
@@ -321,9 +322,10 @@ public class RobotContainer {
                       pathfindToPosition(1.5, 2.555)
                           .andThen(
                               new RotateToAngle(
-                                  drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
+                                  drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)))
                           .andThen(
-                              new DriveToPose(drive, new Pose2d(1.067, 2.555, getLadderAngle())))
+                              new DriveToPose(
+                                  drive, new Pose2d(1.067, 2.555, getRightLadderAngle())))
                           .andThen(new DriveDistance2(drive, () -> 0.35, 90).withTimeout(0.3))
                           .andThen(vis.turnClimbCameraOff()))
                   .handleInterrupt(
@@ -337,8 +339,9 @@ public class RobotContainer {
                       pathfindToPosition(1.5, 4.7)
                           .andThen(
                               new RotateToAngle(
-                                  drive, () -> getLadderAngle(), Rotation2d.fromDegrees(1)))
-                          .andThen(new DriveToPose(drive, new Pose2d(1.067, 4.7, getLadderAngle())))
+                                  drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)))
+                          .andThen(
+                              new DriveToPose(drive, new Pose2d(1.067, 4.7, getLeftLadderAngle())))
                           .andThen(new DriveDistance2(drive, () -> 0.35, -90).withTimeout(0.3))
                           .andThen(vis.turnClimbCameraOff()))
                   .handleInterrupt(
