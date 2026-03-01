@@ -24,7 +24,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public SpindexerSubsystem() {
     spindexer_motor = new SparkMax(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig spindexerConfig = new SparkMaxConfig();
-    spindexerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
+    spindexerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
     spindexerConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     spindexerConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
     spindexerConfig
@@ -43,7 +43,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
     feeder_motor = new SparkMax(SpindexerConstants.FEEDER_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig feederConfig = new SparkMaxConfig();
-    feederConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
+    feederConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
     feederConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     feederConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
     feederConfig
@@ -64,7 +64,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOn() {
     System.out.println("turning on spindexer");
     feederOn = true;
-    spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
+    spindexer_motor.setVoltage(-SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
   }
 
   public Command spindexerOnCommand() {
@@ -83,7 +83,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void feederOn() {
     System.out.println("turning on feeder");
-    feeder_motor.setVoltage(SpindexerConstants.FEEDER_MOTOR_VOLTAGE);
+    feeder_motor.setVoltage(-SpindexerConstants.FEEDER_MOTOR_VOLTAGE);
   }
 
   public Command feederOnCommand() {

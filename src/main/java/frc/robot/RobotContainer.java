@@ -102,14 +102,14 @@ public class RobotContainer {
       case REAL:
 
         // Real robot, instantiate hardware IO implementations
-        if (DriveConstants.isReefscape) {
+        if (!DriveConstants.isReefscape) {
           drive =
               new Drive(
                   new GyroIOPigeon2(),
-                  new ModuleIOSparkFlexCancoder(0),
-                  new ModuleIOSparkFlexCancoder(1),
-                  new ModuleIOSparkFlexCancoder(2),
-                  new ModuleIOSparkFlexCancoder(3));
+                  new ModuleIOSparkFlexCancoder(0, true, false),
+                  new ModuleIOSparkFlexCancoder(1, true, false),
+                  new ModuleIOSparkFlexCancoder(2, true, false),
+                  new ModuleIOSparkFlexCancoder(3, true, false));
         } else {
           drive =
               new Drive(
@@ -416,7 +416,7 @@ public class RobotContainer {
       kDriveController
           .start()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
-      kDriveController
+      kManipController
           .back()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
 
@@ -429,34 +429,34 @@ public class RobotContainer {
           .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
 
       kManipController
-          .povRight()
-          .whileTrue(
-              new FunctionalCommand(
-                  () -> {},
-                  () -> {
-                    System.out.println("running at " + runVolts.getValue());
-                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(runVolts.getValue());
-                  },
-                  (c) -> {
-                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(0);
-                  },
-                  () -> false,
-                  flywheel));
-
-      kManipController
           .povLeft()
           .whileTrue(
               new FunctionalCommand(
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
+                    climb.testClimbVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((FlywheelIOSparkFlex) flywheel.io).testFlywheelVoltage(0);
+                    climb.testClimbVoltage(0);
                   },
                   () -> false,
-                  flywheel));
+                  climb));
+      kManipController
+          .povRight()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                  },
+                  () -> false,
+                  turret));
+
       kManipController.rightBumper().whileTrue(flywheel.shootCommand(() -> setRPM.getValue()));
       // Manipulator controller bindings
       kManipController.a().onTrue(intake.deployCommand());
@@ -468,6 +468,8 @@ public class RobotContainer {
       kManipController.rightTrigger().onFalse(spindexer.spindexerOffCommand());
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
       kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());
+      kManipController.leftBumper().onTrue(climb.deployCommand());
+      kManipController.rightBumper().onTrue(climb.retractCommand());
     }
   }
 
@@ -706,13 +708,13 @@ public class RobotContainer {
 
   public void runTeleopStart() {
     // Down climb by extending the climber mechanism
-    CommandScheduler.getInstance()
-        .schedule(
-            new SequentialCommandGroup(
-                climb.deployCommand(), new WaitCommand(2), climb.retractCommand()));
+    // CommandScheduler.getInstance()
+    //     .schedule(
+    //         new SequentialCommandGroup(
+    //             climb.deployCommand(), new WaitCommand(2), climb.retractCommand()));
     // Ensure the intake is deployed. This is mainly for simulation testing
     // since the intake should normally be deployed at the start of auto
-    CommandScheduler.getInstance().schedule(intake.deployCommand());
+    // CommandScheduler.getInstance().schedule(intake.deployCommand());
   }
 
   public Command buildLeftNeutralZoneAuto() {
