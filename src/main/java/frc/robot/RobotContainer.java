@@ -459,17 +459,25 @@ public class RobotContainer {
 
       kManipController.rightBumper().whileTrue(flywheel.shootCommand(() -> setRPM.getValue()));
       // Manipulator controller bindings
-      kManipController.a().onTrue(intake.deployCommand());
+      kManipController
+          .a()
+          .onTrue(spindexer.feederReverseCommand())
+          .onFalse(spindexer.feederOffCommand());
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.takeInCommand());
       kManipController.y().onTrue(intake.stopMotorCommand());
 
-      kManipController.rightTrigger().onTrue(spindexer.spindexerOnCommand());
-      kManipController.rightTrigger().onFalse(spindexer.spindexerOffCommand());
+      kManipController
+          .rightTrigger()
+          .onTrue(spindexer.spindexerOnCommand().andThen(spindexer.feederOnCommand()));
+      kManipController
+          .rightTrigger()
+          .onFalse(spindexer.spindexerOffCommand().andThen(spindexer.feederOffCommand()));
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
       kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());
-      kManipController.leftBumper().onTrue(climb.deployCommand());
-      kManipController.rightBumper().onTrue(climb.retractCommand());
+      // kManipController.leftBumper().onTrue(climb.deployCommand());
+
+      // kManipController.rightBumper().onTrue(climb.retractCommand());
     }
   }
 

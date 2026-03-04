@@ -8,7 +8,7 @@ public class TurretConstants {
   public static final int turretPitchCanId = 45;
   public static final double zeroRotRadians = 0;
 
-  public static final double gearRatioPerRot = 1 / ((215 / 68) * 27);
+  public static final double gearRatioPerRot = 1.0 / ((215.0 / 68.0) * 27.0);
 
   public static final double offsetX = -0.16;
   public static final double offsetY = 0.045;
@@ -21,7 +21,7 @@ public class TurretConstants {
   public static final double turretMinHoodAngle = 40;
   public static final double turretHoodAngleRange = turretMaxHoodAngle - turretMinHoodAngle;
 
-  public static final double maxHoodSetpoint = 0.71;
+  public static final double maxHoodSetpoint = 0.92;
 
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.

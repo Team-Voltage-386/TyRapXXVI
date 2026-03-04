@@ -68,7 +68,7 @@ public class TurretIOSparkMax implements TurretIO {
 
     hoodConfig = new SparkMaxConfig();
     hoodConfig.encoder.uvwAverageDepth(4).positionConversionFactor(1).velocityConversionFactor(1);
-    hoodConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0, 0.0, 0.0);
+    hoodConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(hoodKp.getValue(), 0.0, 0.0);
     hoodConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -76,7 +76,7 @@ public class TurretIOSparkMax implements TurretIO {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
-    hoodConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12.0);
+    hoodConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(20).voltageCompensation(12.0);
     hoodConfig.softLimit.forwardSoftLimit(0.74);
     tryUntilOk(
         5,
@@ -167,7 +167,7 @@ public class TurretIOSparkMax implements TurretIO {
             * (TurretConstants.turretMaxHoodAngle - position.getDegrees());
     Logger.recordOutput("/Shooter/Hood/TrueDesiredAngle", position.getDegrees());
     Logger.recordOutput("/Shooter/Hood/CalculatedDesiredAngle", desiredSetpoint);
-    hoodMotor.getClosedLoopController().setSetpoint(desiredSetpoint, ControlType.kPosition);
+    hoodMotor.getClosedLoopController().setSetpoint(-desiredSetpoint, ControlType.kPosition);
     // No pitch control implemented
   }
 

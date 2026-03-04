@@ -190,6 +190,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
         "/Shooter/Flywheel/AppliedOutputFollower",
         flywheelMotorFollower.getAppliedOutput() * flywheelMotorFollower.getBusVoltage());
     Logger.recordOutput("/Shooter/Flywheel/Velocity", velocity);
+    readjustPID();
   }
 
   public void setFlywheelVelocity(double velocityRPM) {
