@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
@@ -34,6 +35,7 @@ public class VisionIOPhotonVision implements VisionIO {
 
   protected final PhotonCamera camera;
   protected final Transform3d robotToCamera;
+  protected boolean useCamera = false;
 
   /**
    * Creates a new VisionIOPhotonVision.
@@ -52,6 +54,13 @@ public class VisionIOPhotonVision implements VisionIO {
     List<PoseObservation> poseObservations = new LinkedList<>();
     for (var result : camera.getAllUnreadResults()) {
       // Update latest target observation
+      List<PhotonTrackedTarget> targets = result.getTargets();
+      for (var target : targets) {
+        int climbTags = target.getFiducialId();
+        if (climbTags == 31 || climbTags == 32 || climbTags == 15 || climbTags == 16) {
+          useCamera = true;
+        } else useCamera = false;
+      }
       if (result.hasTargets()) {
         double zThetaDeg =
             result
@@ -100,6 +109,7 @@ public class VisionIOPhotonVision implements VisionIO {
                 multitagResult.estimatedPose.ambiguity, // Ambiguity
                 multitagResult.fiducialIDsUsed.size(), // Tag count
                 totalTagDistance / result.targets.size(), // Average tag distance
+                useCamera, // Only use camera when the best target is tag 31 or 32 (for climbing)
                 PoseObservationType.PHOTONVISION)); // Observation type
 
       } else if (!result.targets.isEmpty()) { // Single tag result
@@ -126,6 +136,7 @@ public class VisionIOPhotonVision implements VisionIO {
                   target.poseAmbiguity, // Ambiguity
                   1, // Tag count
                   cameraToTarget.getTranslation().getNorm(), // Average tag distance
+                  useCamera,
                   PoseObservationType.PHOTONVISION)); // Observation type
         }
       }
