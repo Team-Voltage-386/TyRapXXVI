@@ -312,7 +312,7 @@ public class RobotContainer {
       kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
 
       kDriveController
-          .start()
+          .back()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
 
       kDriveController.start().onTrue(turret.toggleAutoAimCommand());
