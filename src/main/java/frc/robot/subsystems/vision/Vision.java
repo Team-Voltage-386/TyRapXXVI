@@ -9,6 +9,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
@@ -26,6 +28,7 @@ public class Vision extends SubsystemBase {
   protected double xDistanceMeters = 0.0;
   protected double yDistanceMeters = 0.0;
   protected double zThetaDeg = 0.0;
+  protected boolean climbing = false;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -91,6 +94,9 @@ public class Vision extends SubsystemBase {
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
+                || (!observation.useCamera()
+                    && climbing) // reject pose if we are positioning for climb and camera doesnt
+                // see climb tags
                 || (observation.tagCount() == 1
                     && observation.ambiguity() > VisionConstants.maxAmbiguity)
                 // Cannot be high ambiguity
@@ -185,6 +191,14 @@ public class Vision extends SubsystemBase {
         }
       }
     }
+  }
+
+  public Command turnClimbCameraOff() {
+    return new InstantCommand(() -> climbing = false);
+  }
+
+  public Command turnClimbCameraOn() {
+    return new InstantCommand(() -> climbing = true);
   }
 
   public int getTimeSinceValid() {
