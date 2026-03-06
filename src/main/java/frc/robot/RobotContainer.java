@@ -18,7 +18,6 @@ import frc.robot.commands.DriveDistance2;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.RotateToAngle;
-import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.LightSubsystem;
@@ -35,8 +34,8 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIONull;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoWrapper;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -105,23 +104,13 @@ public class RobotContainer {
       case REAL:
 
         // Real robot, instantiate hardware IO implementations
-        if (DriveConstants.isReefscape) {
-          drive =
-              new Drive(
-                  new GyroIOPigeon2(),
-                  new ModuleIOSparkFlexCancoder(0),
-                  new ModuleIOSparkFlexCancoder(1),
-                  new ModuleIOSparkFlexCancoder(2),
-                  new ModuleIOSparkFlexCancoder(3));
-        } else {
-          drive =
-              new Drive(
-                  new GyroIOPigeon2(),
-                  new ModuleIOSparkMaxCancoder(0),
-                  new ModuleIOSparkMaxCancoder(1),
-                  new ModuleIOSparkMaxCancoder(2),
-                  new ModuleIOSparkMaxCancoder(3));
-        }
+        drive =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOSparkFlexCancoder(0),
+                new ModuleIOSparkFlexCancoder(1),
+                new ModuleIOSparkFlexCancoder(2),
+                new ModuleIOSparkFlexCancoder(3));
 
         flywheel = new Flywheel(new FlywheelIOSparkMax());
 
@@ -159,10 +148,16 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 Stream.of(VisionConstants.cameraConfigs)
-                    .map(
-                        cam ->
-                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
-                    .toArray(VisionIOPhotonVision[]::new));
+                    .map(cam -> new VisionIONull(cam, driveSim::getSimulatedDriveTrainPose))
+                    .toArray(VisionIONull[]::new));
+        /*vis =
+        new Vision(
+            drive::addVisionMeasurement,
+            Stream.of(VisionConstants.cameraConfigs)
+                .map(
+                    cam ->
+                        new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
+                .toArray(VisionIOPhotonVision[]::new));*/
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
