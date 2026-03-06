@@ -324,8 +324,7 @@ public class RobotContainer {
                               new RotateToAngle(
                                   drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)))
                           .andThen(
-                              new DriveToPose(
-                                  drive, new Pose2d(1.067, 2.555, getRightLadderAngle())))
+                              new DriveToPose(drive, new Pose2d(1.067, 2.555, getRightLadderAngle())))
                           .andThen(new DriveDistance2(drive, () -> 0.35, 90).withTimeout(0.3))
                           .andThen(vis.turnClimbCameraOff()))
                   .handleInterrupt(
@@ -340,8 +339,7 @@ public class RobotContainer {
                           .andThen(
                               new RotateToAngle(
                                   drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)))
-                          .andThen(
-                              new DriveToPose(drive, new Pose2d(1.067, 4.7, getLeftLadderAngle())))
+                          .andThen(new DriveToPose(drive, new Pose2d(1.067, 4.7, getLeftLadderAngle())))
                           .andThen(new DriveDistance2(drive, () -> 0.35, -90).withTimeout(0.3))
                           .andThen(vis.turnClimbCameraOff()))
                   .handleInterrupt(
