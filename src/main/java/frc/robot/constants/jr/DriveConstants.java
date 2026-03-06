@@ -178,7 +178,7 @@ public final class DriveConstants {
       rotationPID = new PIDConstants(4.5, 1.0, 0.0);
 
       // Meters/Sec
-      maxSpeed = 2.5;
+      maxSpeed = 3.5;
 
       odometryFrequency = 100.0;
 
