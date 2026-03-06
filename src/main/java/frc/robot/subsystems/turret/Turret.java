@@ -69,6 +69,18 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> autoAimEnabled = false);
   }
 
+  public boolean isAutoAimEnabled() {
+    return autoAimEnabled;
+  }
+
+  public void toggleAutoAim() {
+    autoAimEnabled = !autoAimEnabled;
+  }
+
+  public Command toggleAutoAimCommand() {
+    return runOnce(() -> toggleAutoAim());
+  }
+
   public void aimAtTarget(Pose3d targetPose) {
     shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d());
     Pose2d turretFieldPos = shotCalculation.getParameters().lookaheadPose();

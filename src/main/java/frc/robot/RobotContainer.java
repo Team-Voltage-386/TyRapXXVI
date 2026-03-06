@@ -398,10 +398,13 @@ public class RobotContainer {
       kDriveController
           .rightTrigger()
           .whileTrue(
-              turret
-                  .aimAtCommand(() -> getHubPose3d())
-                  .alongWith(spindexer.feederOnCommand())
-                  .alongWith(spindexer.spindexerOnCommand()));
+              new ConditionalCommand(
+                  turret
+                      .aimAtCommand(() -> getHubPose3d())
+                      .alongWith(spindexer.feederOnCommand())
+                      .alongWith(spindexer.spindexerOnCommand()),
+                  flywheel.shootCommand(() -> setRPM.getValue()),
+                  () -> turret.isAutoAimEnabled()));
 
       kDriveController
           .rightTrigger()
@@ -409,13 +412,17 @@ public class RobotContainer {
               new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
                   .alongWith(
                       turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
-                  .alongWith(spindexer.feederOffCommand())
-                  .alongWith(spindexer.spindexerOffCommand()));
+                  .alongWith(spindexer.spindexerOffCommand())
+                  .andThen(new WaitCommand(.5))
+                  .andThen(spindexer.feederOffCommand()));
       kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
 
       kDriveController
           .start()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
+
+      kDriveController.start().onTrue(turret.toggleAutoAimCommand());
+
       kManipController
           .back()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
@@ -472,7 +479,11 @@ public class RobotContainer {
           .onTrue(spindexer.spindexerOnCommand().andThen(spindexer.feederOnCommand()));
       kManipController
           .rightTrigger()
-          .onFalse(spindexer.spindexerOffCommand().andThen(spindexer.feederOffCommand()));
+          .onFalse(
+              spindexer
+                  .spindexerOffCommand()
+                  .andThen(new WaitCommand(0.5))
+                  .andThen(spindexer.feederOffCommand()));
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
       kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());
       // kManipController.leftBumper().onTrue(climb.deployCommand());

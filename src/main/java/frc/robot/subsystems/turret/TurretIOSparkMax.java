@@ -68,7 +68,10 @@ public class TurretIOSparkMax implements TurretIO {
 
     hoodConfig = new SparkMaxConfig();
     hoodConfig.encoder.uvwAverageDepth(4).positionConversionFactor(1).velocityConversionFactor(1);
-    hoodConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(hoodKp.getValue(), 0.0, 0.0);
+    hoodConfig
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pid(hoodKp.getValue(), 0.0, 0.0);
     hoodConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
