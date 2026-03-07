@@ -38,6 +38,10 @@ public class IntakeSubsystem extends SubsystemBase {
     return intakeIO.isMotorStalled();
   }
 
+  public void testDeployVoltage(double voltage) {
+    intakeIO.testDeployVoltage(voltage);
+  }
+
   @Override
   public void periodic() {
     intakeIO.updateInputs(this.inputs);

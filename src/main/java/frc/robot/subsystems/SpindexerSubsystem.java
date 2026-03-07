@@ -63,7 +63,6 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void spindexerOn() {
     System.out.println("turning on spindexer");
-    feederOn = true;
     spindexer_motor.setVoltage(-SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
   }
 
@@ -73,7 +72,6 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void spindexerOff() {
     System.out.println("turning off spindexer");
-    feederOn = false;
     spindexer_motor.set(0);
   }
 
@@ -83,6 +81,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void feederOn() {
     System.out.println("turning on feeder");
+    feederOn = true;
     feeder_motor.setVoltage(-SpindexerConstants.FEEDER_MOTOR_VOLTAGE);
   }
 
@@ -101,6 +100,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void feederOff() {
     System.out.println("turning off feeder");
+    feederOn = false;
     feeder_motor.set(0);
   }
 

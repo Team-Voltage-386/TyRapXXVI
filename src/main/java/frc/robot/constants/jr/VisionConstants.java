@@ -64,8 +64,6 @@ public final class VisionConstants {
   public static final double driveOffsetMaxVel;
   public static final double driveOffsetAngleErrorRadians;
   public static final double driveOffsetRangeMThreshold;
-  // Camera Positioning
-  public static final double cameraOffsetForwardM;
 
   static {
     if (DriveConstants.isReefscape) {
@@ -147,17 +145,43 @@ public final class VisionConstants {
       driveOffsetMaxVel = 1.5;
       driveOffsetAngleErrorRadians = 0.015;
       driveOffsetRangeMThreshold = 0.02;
-      // Camera Positioning
-      cameraOffsetForwardM = 0.19;
     } else {
+      // Rebuilt
       maxAmbiguity = 0.3;
 
       maxZError = 0.75;
+      // 0.7366 front to back meters 0.6096 side to side
 
       cameraConfigs =
           new CameraConfig[] {
             new CameraConfig(
-                "camera_0", new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0)))
+                "frontleft",
+                new Transform3d(
+                    0.076,
+                    0.363,
+                    0.512,
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(90)))),
+            new CameraConfig(
+                "frontright",
+                new Transform3d(
+                    0.125,
+                    -0.343,
+                    0.512,
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(0)))),
+            new CameraConfig(
+                "backleft",
+                new Transform3d(
+                    -0.325,
+                    0.318,
+                    0.512,
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(180)))),
+            new CameraConfig(
+                "backright",
+                new Transform3d(
+                    -0.279,
+                    -0.363,
+                    0.512,
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(270)))),
           };
 
       cameraStdDevFactors = new double[] {1.0};
@@ -201,8 +225,6 @@ public final class VisionConstants {
       driveOffsetMaxVel = 1.5;
       driveOffsetAngleErrorRadians = 0.015;
       driveOffsetRangeMThreshold = 0.02;
-      // Camera Positioning
-      cameraOffsetForwardM = 0.19;
     }
   }
 }

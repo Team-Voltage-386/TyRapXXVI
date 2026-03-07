@@ -1,7 +1,5 @@
 package frc.robot.subsystems.flywheel;
 
-import static edu.wpi.first.units.Units.RPM;
-
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -17,7 +15,7 @@ public class Flywheel extends SubsystemBase {
   public Flywheel(FlywheelIO io) {
     this.io = io;
 
-    io.setFlywheelVelocity(100);
+    io.setFlywheelVelocity(0);
   }
 
   public Command shootCommand(Supplier<Double> RPM) {
@@ -39,6 +37,10 @@ public class Flywheel extends SubsystemBase {
 
   public double getFlywheelVelocity() {
     return io.getFlywheelVelocity();
+  }
+
+  public void testFlywheelVoltage(double volts) {
+    io.testFlywheelVoltage(volts);
   }
 
   @Override

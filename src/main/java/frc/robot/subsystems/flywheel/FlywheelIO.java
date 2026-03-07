@@ -38,4 +38,6 @@ public interface FlywheelIO {
   }
 
   default void readjustPID() {}
+
+  default void testFlywheelVoltage(double volts) {}
 }

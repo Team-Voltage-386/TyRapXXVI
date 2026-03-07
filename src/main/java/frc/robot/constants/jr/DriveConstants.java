@@ -202,10 +202,10 @@ public final class DriveConstants {
       driveGearbox = DCMotor.getNEO(1);
       turnGearbox = DCMotor.getNEO(1);
 
-      trackWidth = 0.6;
-      wheelBase = 0.53;
+      trackWidth = 0.302 * 2;
+      wheelBase = 0.264 * 2;
 
-      robotMassKg = 24.088;
+      robotMassKg = 68.0;
       robotMOI = 6.883;
       wheelCOF = 1.2;
 
@@ -218,12 +218,6 @@ public final class DriveConstants {
             new Rotation2d(1.155 + Math.PI),
             new Rotation2d(2.826)
           };
-
-      // new Rotation2d(-0.070563),
-
-      // new Rotation2d(-0.859029),
-      // new Rotation2d(-1.98190),
-      // new Rotation2d(2.825593)
 
       driveCanIds = new int[] {10, 16, 12, 15}; // Front Left, Front Right, Back Left, Back Right
 

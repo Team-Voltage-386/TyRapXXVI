@@ -255,8 +255,7 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     if (turret != null) {
-      System.out.println("running at " + runVolts.getValue());
-      kDriveController
+      /*kDriveController
           .povRight()
           .whileTrue(
               new FunctionalCommand(
@@ -269,7 +268,7 @@ public class RobotContainer {
                     ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
                   },
                   () -> false,
-                  flywheel));
+                  turret));
 
       kDriveController
           .povLeft()
@@ -284,7 +283,37 @@ public class RobotContainer {
                     ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
                   },
                   () -> false,
-                  flywheel));
+                  turret)); */
+
+      kDriveController
+          .povRight()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + runVolts.getValue());
+                    intake.testDeployVoltage(runVolts.getValue());
+                  },
+                  (c) -> {
+                    intake.testDeployVoltage(0);
+                  },
+                  () -> false,
+                  intake));
+
+      kDriveController
+          .povLeft()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + -runVolts.getValue());
+                    intake.testDeployVoltage(-runVolts.getValue());
+                  },
+                  (c) -> {
+                    intake.testDeployVoltage(0);
+                  },
+                  () -> false,
+                  intake));
 
       kDriveController.povUp().onTrue(turret.manualIncrimentPitch(Rotation2d.fromDegrees(.5)));
       kDriveController.povDown().onTrue(turret.manualIncrimentPitch(Rotation2d.fromDegrees(-.5)));
@@ -331,7 +360,8 @@ public class RobotContainer {
                               new RotateToAngle(
                                   drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)))
                           .andThen(
-                              new DriveToPose(drive, new Pose2d(1.067, 2.555, getRightLadderAngle())))
+                              new DriveToPose(
+                                  drive, new Pose2d(1.067, 2.555, getRightLadderAngle())))
                           .andThen(new DriveDistance2(drive, () -> 0.35, 90).withTimeout(0.3))
                           .andThen(vis.turnClimbCameraOff()))
                   .handleInterrupt(
@@ -346,7 +376,8 @@ public class RobotContainer {
                           .andThen(
                               new RotateToAngle(
                                   drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)))
-                          .andThen(new DriveToPose(drive, new Pose2d(1.067, 4.7, getLeftLadderAngle())))
+                          .andThen(
+                              new DriveToPose(drive, new Pose2d(1.067, 4.7, getLeftLadderAngle())))
                           .andThen(new DriveDistance2(drive, () -> 0.35, -90).withTimeout(0.3))
                           .andThen(vis.turnClimbCameraOff()))
                   .handleInterrupt(
@@ -372,8 +403,36 @@ public class RobotContainer {
               new FunctionalCommand(
                   () -> {},
                   () -> {
+                    System.out.println("running at " + -1 * runVolts.getValue());
+                    climb.testClimbVoltage(-1 * runVolts.getValue());
+                  },
+                  (c) -> {
+                    climb.testClimbVoltage(0);
+                  },
+                  () -> false,
+                  climb));
+      kManipController
+          .povUp()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
                     System.out.println("running at " + runVolts.getValue());
                     ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                  },
+                  (c) -> {
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                  },
+                  () -> false,
+                  turret));
+      kManipController
+          .povDown()
+          .whileTrue(
+              new FunctionalCommand(
+                  () -> {},
+                  () -> {
+                    System.out.println("running at " + -1 * runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-1 * runVolts.getValue());
                   },
                   (c) -> {
                     ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
@@ -717,9 +776,7 @@ public class RobotContainer {
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(3),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret
-                .disableAutoAimCommand()
-                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
             new RotateToAngle(drive, () -> Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(2)),
             climb.retractCommand());

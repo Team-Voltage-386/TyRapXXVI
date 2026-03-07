@@ -34,4 +34,6 @@ public interface IntakeIO {
   public void reverse();
 
   public boolean isMotorStalled();
+
+  public void testDeployVoltage(double voltage);
 }

@@ -24,6 +24,7 @@ public class Turret extends SubsystemBase {
   private boolean autoAimEnabled = false;
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
+  private Rotation2d calculatedPitch;
 
   public Turret(
       TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel, ShotCalculation shotCalculation) {
@@ -31,8 +32,9 @@ public class Turret extends SubsystemBase {
     this.dtPose = dtPose;
     this.flywheel = flywheel;
     this.shotCalculation = shotCalculation;
+    this.calculatedPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
 
-    io.setTurretPitch(Rotation2d.fromDegrees(62));
+    io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
     io.setTurretYaw(Rotation2d.kZero);
   }
 
@@ -86,13 +88,14 @@ public class Turret extends SubsystemBase {
     Pose2d turretFieldPos = shotCalculation.getParameters().lookaheadPose();
     Translation3d turretFieldTrans =
         new Translation3d(
-            turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.59);
+            turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.336);
     Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
 
     double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
-    io.setTurretPitch(new Rotation2d(shotCalculation.getParameters().hoodAngle()));
+    calculatedPitch = new Rotation2d(shotCalculation.getParameters().hoodAngle());
+    io.setTurretPitch(calculatedPitch);
     io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
-
+    Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
     double shooterWheelRPM =
         shotCalculation.getParameters().flywheelSpeed()
             / TurretConstants.turretRPMToMetersPerSecond;
@@ -123,8 +126,6 @@ public class Turret extends SubsystemBase {
 
     if (autoAimEnabled) {
       aimAtTarget(currentTargetPose);
-    } else {
-      flywheel.setFlywheelSpeed(0);
     }
 
     io.updateInputs(inputs);
