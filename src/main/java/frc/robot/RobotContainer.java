@@ -444,7 +444,8 @@ public class RobotContainer {
           .onFalse(spindexer.feederOffCommand());
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.takeInCommand());
-      kManipController.y().onTrue(intake.stopMotorCommand());
+      kManipController.x().onFalse(intake.stopMotorCommand());
+      kManipController.y().onTrue(intake.deployCommand());
 
       kManipController
           .rightTrigger()
