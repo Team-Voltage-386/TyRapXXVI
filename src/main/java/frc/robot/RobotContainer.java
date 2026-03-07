@@ -318,10 +318,7 @@ public class RobotContainer {
           .rightTrigger()
           .whileTrue(
               new ConditionalCommand(
-                  turret
-                      .aimAtCommand(() -> getHubPose3d())
-                      .alongWith(spindexer.feederOnCommand())
-                      .alongWith(spindexer.spindexerOnCommand()),
+                  turret.aimAtCommand(() -> getHubPose3d()),
                   flywheel.shootCommand(),
                   () -> turret.isAutoAimEnabled()));
 
@@ -341,7 +338,8 @@ public class RobotContainer {
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
 
       kDriveController.start().onTrue(turret.toggleAutoAimCommand());
-
+      // kManipController.start().onTrue(vis.preferHubTagsOn());
+      // kManipController.start().onFalse(vis.preferHubTagsOff());
       kManipController
           .back()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
@@ -436,7 +434,13 @@ public class RobotContainer {
                   () -> false,
                   turret));
 
-      kManipController.rightBumper().whileTrue(flywheel.shootCommand());
+      kManipController
+          .rightBumper()
+          .whileTrue(
+              new ConditionalCommand(
+                  turret.aimAtCommand(() -> getHubPose3d()),
+                  flywheel.shootCommand(),
+                  () -> turret.isAutoAimEnabled()));
       // Manipulator controller bindings
       kManipController
           .a()

@@ -3,6 +3,7 @@ package frc.robot.subsystems.turret;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.subsystems.flywheel.Flywheel;
 import java.util.function.Supplier;
@@ -17,7 +18,7 @@ public class Turret extends SubsystemBase {
   private final Pose3d[] turretVisual = new Pose3d[2];
 
   private final Supplier<Pose2d> dtPose;
-  private Pose3d currentTargetPose = new Pose3d();
+  private Pose3d currentTargetPose = new Pose3d(Constants.blueHubPose, Rotation3d.kZero);
   private final Flywheel flywheel;
   private ShotCalculation shotCalculation;
 
@@ -77,6 +78,10 @@ public class Turret extends SubsystemBase {
 
   public void toggleAutoAim() {
     autoAimEnabled = !autoAimEnabled;
+    System.out.println("autoaim: " + autoAimEnabled);
+    if (!autoAimEnabled) {
+      flywheel.setFlywheelSpeed(0);
+    }
   }
 
   public Command toggleAutoAimCommand() {
@@ -96,9 +101,7 @@ public class Turret extends SubsystemBase {
     io.setTurretPitch(calculatedPitch);
     io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
-    double shooterWheelRPM =
-        shotCalculation.getParameters().flywheelSpeed()
-            / TurretConstants.turretRPMToMetersPerSecond;
+    double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
     flywheel.setFlywheelSpeed(shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
     shotCalculation.clearLaunchingParameters();

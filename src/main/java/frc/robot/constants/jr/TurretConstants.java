@@ -14,7 +14,7 @@ public class TurretConstants {
   public static final double offsetY = -.099;
   public static final Translation2d turretPosition = new Translation2d(offsetX, offsetY);
 
-  public static final double turretMaxAngleRot = Units.degreesToRotations(120);
+  public static final double turretMaxAngleRot = Units.degreesToRotations(70);
   public static final double turretMinAngleRot = -turretMaxAngleRot;
 
   public static final double turretMaxHoodAngle = 62;
