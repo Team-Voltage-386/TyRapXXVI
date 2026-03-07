@@ -157,6 +157,8 @@ public class FlywheelIOSparkMax implements FlywheelIO {
         "/Shooter/Flywheel/AppliedOutput",
         flywheelMotor.getAppliedOutput() * flywheelMotor.getBusVoltage());
     Logger.recordOutput("/Shooter/Flywheel/Velocity", velocity);
+    Logger.recordOutput("/Shooter/Flywheel/Current", flywheelMotor.getOutputCurrent());
+
   }
 
   public void setFlywheelVelocity(double velocityRPM) {
