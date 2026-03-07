@@ -22,18 +22,23 @@ import org.littletonrobotics.junction.Logger;
  * Physics sim implementation of turret IO.
  * <p>
  * Also includes the shooter functionality for simplicity.
+ * This function has outdated comments, for use with crescendo bot. TODO: Update comments to rebuilt?
  */
 public class TurretIOSim implements TurretIO, Simulatable {
 
   private Rotation2d turretYaw = new Rotation2d();
   private Rotation2d turretPitch = new Rotation2d();
-  boolean flywheelShooting = true;
+
+  boolean flywheelShooting = false;
 
   private final Supplier<Pose2d> dtPose;
   private final Supplier<ChassisSpeeds> speedSupplier;
+  private final double maxErrorAngleYaw = Math.toRadians(5); // In degrees, converted to radians
+  private final double maxErrorAnglePitch = Math.toRadians(5); // In degrees, converted to radians.
+  private final double maxErrorVelocity = 100; // In RPM
+  private final IntakeIOSim intakeIOSim;
   private final SpindexerSubsystem spindexerSubsystem;
   private final Flywheel flywheel;
-  private final IntakeIOSim intakeIOSim;
 
   public TurretIOSim(
       Supplier<Pose2d> pose3dSupplier,
@@ -43,9 +48,30 @@ public class TurretIOSim implements TurretIO, Simulatable {
       IntakeIOSim intakeIOSim) {
     this.dtPose = pose3dSupplier;
     this.speedSupplier = speedSupplier;
+    this.intakeIOSim = intakeIOSim;
     this.spindexerSubsystem = spindexer;
     this.flywheel = flywheel;
-    this.intakeIOSim = intakeIOSim;
+  }
+
+  private double randomOffsetAngleYaw(boolean randomBothWays) {
+    if (randomBothWays) {
+      return (2 * Math.random() * maxErrorAngleYaw) - maxErrorAngleYaw;
+    }
+    return Math.random() * maxErrorAngleYaw;
+  }
+
+  private double randomOffsetAnglePitch(boolean randomBothWays) {
+    if (randomBothWays) {
+      return (2 * Math.random() * maxErrorAnglePitch) - maxErrorAnglePitch;
+    }
+    return Math.random() * maxErrorAnglePitch;
+  }
+
+  private double randomOffsetVelocity(boolean randomBothWays) {
+    if (randomBothWays) {
+      return (2 * Math.random() * maxErrorVelocity) - maxErrorVelocity;
+    }
+    return Math.random() * maxErrorVelocity;
   }
 
   public void updateInputs(TurretIOInputs inputs) {
@@ -57,8 +83,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
-    turretYaw = new Rotation2d(position.getRadians());
-    Logger.recordOutput("Shooter/Turret/TurretYaw", turretYaw);
+    turretYaw = new Rotation2d(MathUtil.clamp(position.getRadians(), -Math.PI, Math.PI));
   }
 
   /* Set the turret pitch to the specified position. */
@@ -68,6 +93,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
   }
 
   protected int tickCount = 0;
+  private double calculatedVelocity;
 
   @Override
   public void simulationSubTick(int i) {
@@ -75,6 +101,11 @@ public class TurretIOSim implements TurretIO, Simulatable {
         && i == 0
         && ++tickCount % 10 == 0
         && this.intakeIOSim.getBallCount() > 0) {
+      calculatedVelocity =
+          (flywheel.getFlywheelVelocity() - randomOffsetVelocity(true))
+              * TurretConstants.turretRPMToMetersPerSecond
+              * 1.1;
+      Logger.recordOutput("Simulation/Shooter/calculatedVelocity", calculatedVelocity);
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
               new RebuiltFuelOnFly(
@@ -93,18 +124,18 @@ public class TurretIOSim implements TurretIO, Simulatable {
                           .get()
                           .getRotation()
                           // Add the shooter’s rotation
-                          .plus(turretYaw),
+                          .plus(turretYaw)
+                          .plus(new Rotation2d(randomOffsetAngleYaw(true))),
                       // Initial height of the flying note
                       Meter.of(0.559),
                       // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                       // at 6000
                       // RPM
-                      MetersPerSecond.of(
-                          flywheel.getFlywheelVelocity()
-                              * 1.1
-                              * TurretConstants.turretRPMToMetersPerSecond),
+                      MetersPerSecond.of(calculatedVelocity),
                       // The angle at which the note is launched
-                      turretPitch.getMeasure())
+                      turretPitch
+                          .getMeasure()
+                          .minus(new Rotation2d(randomOffsetAnglePitch(true)).getMeasure()))
                   // Set the target center to the Crescendo Speaker of the current alliance
                   .withTargetPosition(
                       () ->
@@ -127,7 +158,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                           Logger.recordOutput(
                               "Shooter/Simulation/FuelProjectileUnsuccessfulShot",
                               pose3ds.toArray(Pose3d[]::new)))
-                  .disableBecomesGamePieceOnFieldAfterTouchGround();
+                  .enableBecomesGamePieceOnFieldAfterTouchGround();
       SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
       this.intakeIOSim.removeBall();
     }

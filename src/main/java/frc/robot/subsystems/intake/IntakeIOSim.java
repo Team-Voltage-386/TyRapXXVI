@@ -7,6 +7,7 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Inches;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.constants.jr.IntakeConstants;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.drivesims.AbstractDriveTrainSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -24,6 +25,7 @@ public class IntakeIOSim implements IntakeIO {
   // the mechanism root node
   LoggedMechanismRoot2d root = mech.getRoot("Intake", 0.66, 0.1);
   LoggedMechanismLigament2d intakeMechanism;
+  Rotation2d currentSetPoint = Rotation2d.fromDegrees(90);
 
   /** Creates a new SimIntakeSubsystem. */
   public IntakeIOSim(AbstractDriveTrainSimulation driveTrainSimulation) {
@@ -49,14 +51,14 @@ public class IntakeIOSim implements IntakeIO {
     System.out.println("deploying intake mechanism");
     this.isDeployed = true;
     this.intakeSimulation.startIntake();
-    intakeMechanism.setAngle(Rotation2d.fromDegrees(0));
+    currentSetPoint = IntakeConstants.extendedAngle;
   }
 
   public void retract() {
     System.out.println("retracting intake mechanism");
     this.isDeployed = false;
     this.intakeSimulation.stopIntake();
-    intakeMechanism.setAngle(Rotation2d.fromDegrees(90));
+    currentSetPoint = IntakeConstants.retractedAngle;
   }
 
   public void takeIn() {
@@ -92,7 +94,15 @@ public class IntakeIOSim implements IntakeIO {
     inputs.connected = true;
     inputs.deployed = this.isDeployed;
     inputs.intakingState = this.intakingState;
-
+    if (currentSetPoint == IntakeConstants.extendedAngle) {
+      if (intakeMechanism.getAngle() > IntakeConstants.extendedAngle.getDegrees()) {
+        intakeMechanism.setAngle(intakeMechanism.getAngle() - (IntakeConstants.speed / 50));
+      }
+    } else {
+      if (intakeMechanism.getAngle() < IntakeConstants.retractedAngle.getDegrees()) {
+        intakeMechanism.setAngle(intakeMechanism.getAngle() + (IntakeConstants.speed / 50));
+      }
+    }
     Logger.recordOutput("Intake/BallCount", this.intakeSimulation.getGamePiecesAmount());
     Logger.recordOutput("Intake/Mech", mech);
   }

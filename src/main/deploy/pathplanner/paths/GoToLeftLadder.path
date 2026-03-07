@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.207261055634806,
-        "y": 7.451043890865955
+        "x": 3.4830555555555556,
+        "y": 7.421133333333334
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.8809101288446617,
-        "y": 7.452532056299341
+        "x": 3.0497111111111117,
+        "y": 7.007944444444445
       },
       "isLocked": false,
-      "linkedName": "BlueTopShotFar"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.7278054567022547,
-        "y": 6.0
+        "x": 0.9266723813657414,
+        "y": 4.829281105324074
       },
       "prevControl": {
-        "x": 1.7097860332454977,
-        "y": 5.890737664361748
+        "x": 1.0784993806134475,
+        "y": 5.027897726731843
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BlueDepot"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,12 +42,12 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.332667339934469
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0.0,
+    "velocity": 0,
     "rotation": 0.0
   },
   "useDefaultConstraints": true
