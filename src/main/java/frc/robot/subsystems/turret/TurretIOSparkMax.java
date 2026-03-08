@@ -57,6 +57,7 @@ public class TurretIOSparkMax implements TurretIO {
         .appliedOutputPeriodMs(20)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
+    yawConfig.inverted(true);
 
     tryUntilOk(
         5,

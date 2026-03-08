@@ -75,7 +75,6 @@ public class RobotContainer {
   private ShotCalculation shotCalculation;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.0);
-  TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
   TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 40);
 
   public SimContainer sim;
@@ -189,9 +188,6 @@ public class RobotContainer {
         intake = new IntakeSubsystem(intakeIOSim);
         climb = new ClimbSubsystem();
 
-        // ElevatorIOSim elevatorSim = new ElevatorIOSim();
-        // simContainer.registerSimulator(elevatorSim);
-        // elevator = new Elevator(elevatorSim);
         break;
 
       default:
@@ -329,11 +325,8 @@ public class RobotContainer {
           .rightTrigger()
           .whileTrue(
               new ConditionalCommand(
-                  turret
-                      .aimAtCommand(() -> getHubPose3d())
-                      .alongWith(spindexer.feederOnCommand())
-                      .alongWith(spindexer.spindexerOnCommand()),
-                  flywheel.shootCommand(() -> setRPM.getValue()),
+                  turret.aimAtCommand(() -> getHubPose3d()),
+                  flywheel.shootCommand(),
                   () -> turret.isAutoAimEnabled()));
 
       kDriveController
@@ -352,7 +345,8 @@ public class RobotContainer {
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
 
       kDriveController.start().onTrue(turret.toggleAutoAimCommand());
-
+      // kManipController.start().onTrue(vis.preferHubTagsOn());
+      // kManipController.start().onFalse(vis.preferHubTagsOff());
       kManipController
           .back()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
@@ -447,7 +441,13 @@ public class RobotContainer {
                   () -> false,
                   turret));
 
-      kManipController.rightBumper().whileTrue(flywheel.shootCommand(() -> setRPM.getValue()));
+      kManipController
+          .rightBumper()
+          .whileTrue(
+              new ConditionalCommand(
+                  turret.aimAtCommand(() -> getHubPose3d()),
+                  flywheel.shootCommand(),
+                  () -> turret.isAutoAimEnabled()));
       // Manipulator controller bindings
       kManipController
           .a()
@@ -455,7 +455,8 @@ public class RobotContainer {
           .onFalse(spindexer.feederOffCommand());
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.takeInCommand());
-      kManipController.y().onTrue(intake.stopMotorCommand());
+      kManipController.x().onFalse(intake.stopMotorCommand());
+      kManipController.y().onTrue(intake.deployCommand());
 
       kManipController
           .rightTrigger()

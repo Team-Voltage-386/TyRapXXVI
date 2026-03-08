@@ -43,7 +43,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
     feeder_motor = new SparkMax(SpindexerConstants.FEEDER_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig feederConfig = new SparkMaxConfig();
-    feederConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(60).voltageCompensation(12.0);
+    feederConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(80).voltageCompensation(12.0);
     feederConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     feederConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
     feederConfig

@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.constants.jr.IntakeConstants;
@@ -42,8 +43,12 @@ public class IntakeIOSparkMax implements IntakeIO {
 
     deploy_motor = new SparkMax(IntakeConstants.DEPLOY_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig deployConfig = new SparkMaxConfig();
-    deployConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
+    deployConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
     deployConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
+    deployConfig.softLimit.forwardSoftLimitEnabled(false);
+    deployConfig.softLimit.reverseSoftLimitEnabled(false);
+    deployConfig.limitSwitch.forwardLimitSwitchTriggerBehavior(Behavior.kKeepMovingMotor);
+    deployConfig.limitSwitch.reverseLimitSwitchTriggerBehavior(Behavior.kKeepMovingMotor);
     deployConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -103,7 +108,7 @@ public class IntakeIOSparkMax implements IntakeIO {
   }
 
   public void testDeployVoltage(double voltage) {
-    if (voltage > 0) {
+    /*if (voltage > 0) {
       if (deploy_motor.getEncoder().getPosition() > -IntakeConstants.EXTENDED_DEPLOY_POSITION) {
         voltage = 0;
       }
@@ -113,7 +118,8 @@ public class IntakeIOSparkMax implements IntakeIO {
       }
     } else {
       deploy_motor.setVoltage(voltage);
-    }
+    }*/
+    deploy_motor.setVoltage(voltage);
   }
 
   public void updateInputs(IntakeIOInputs inputs) {
@@ -128,5 +134,7 @@ public class IntakeIOSparkMax implements IntakeIO {
                 ? IntakingState.REVERSE
                 : IntakingState.STOPPED;
     Logger.recordOutput("Intake/DeployMotor/Position", deploy_motor.getEncoder().getPosition());
+    Logger.recordOutput(
+        "Intake/DeployMotor/AbsolutePosition", deploy_motor.getAbsoluteEncoder().getPosition());
   }
 }
