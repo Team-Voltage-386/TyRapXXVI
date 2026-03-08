@@ -20,9 +20,9 @@ public class DriveToPose extends Command {
   private final PathPlannerTrajectoryState goalState;
 
   // Meters
-  private static final double distanceTolerance = 0.1;
+  private static final double distanceTolerance = 0.03;
   // Radians
-  private static final double angleTolerance = Math.toRadians(5);
+  private static final double angleTolerance = Math.toRadians(1);
   // Meters per second and radians per second
   private static final double speedTolerance = 0.1;
 

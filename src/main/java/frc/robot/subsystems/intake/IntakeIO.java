@@ -36,4 +36,6 @@ public interface IntakeIO {
   public boolean isDeployed();
 
   public boolean isMotorStalled();
+
+  public void testDeployVoltage(double voltage);
 }

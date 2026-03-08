@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveDistance2;
+import frc.robot.commands.DriveToPose;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.RotateToAngle;
 import frc.robot.constants.jr.DriveConstants;
@@ -25,7 +26,7 @@ import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
-import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
+import frc.robot.subsystems.flywheel.FlywheelIOSparkFlex;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkMax;
 import frc.robot.subsystems.intake.IntakeSubsystem;
@@ -35,6 +36,7 @@ import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoWrapper;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -73,7 +75,6 @@ public class RobotContainer {
   private ShotCalculation shotCalculation;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.0);
-  TuningUtil setRPM = new TuningUtil("/Tuning/Flywheel/TestSetRPM", 100);
   TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 40);
 
   public SimContainer sim;
@@ -103,14 +104,14 @@ public class RobotContainer {
       case REAL:
 
         // Real robot, instantiate hardware IO implementations
-        if (DriveConstants.isReefscape) {
+        if (!DriveConstants.isReefscape) {
           drive =
               new Drive(
                   new GyroIOPigeon2(),
-                  new ModuleIOSparkFlexCancoder(0),
-                  new ModuleIOSparkFlexCancoder(1),
-                  new ModuleIOSparkFlexCancoder(2),
-                  new ModuleIOSparkFlexCancoder(3));
+                  new ModuleIOSparkFlexCancoder(0, true, false),
+                  new ModuleIOSparkFlexCancoder(1, true, false),
+                  new ModuleIOSparkFlexCancoder(2, true, false),
+                  new ModuleIOSparkFlexCancoder(3, true, false));
         } else {
           drive =
               new Drive(
@@ -121,10 +122,19 @@ public class RobotContainer {
                   new ModuleIOSparkMaxCancoder(3));
         }
 
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
+        flywheel = new Flywheel(new FlywheelIOSparkFlex());
 
         shotCalculation = new ShotCalculation(drive);
-        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel, shotCalculation);
+        spindexer = new SpindexerSubsystem();
+        turret =
+            new Turret(
+                new TurretIOSparkMax(),
+                drive::getPose,
+                flywheel,
+                shotCalculation,
+                spindexer::isFeederOn,
+                this::isInAllianceArea,
+                this::verticalHalfOfField);
 
         vis =
             new Vision(
@@ -135,7 +145,7 @@ public class RobotContainer {
 
         intake = new IntakeSubsystem(new IntakeIOSparkMax());
         climb = new ClimbSubsystem();
-        spindexer = new SpindexerSubsystem();
+
         break;
 
       case SIM:
@@ -153,12 +163,18 @@ public class RobotContainer {
                 new ModuleIOSim(mods[2]),
                 new ModuleIOSim(mods[3]));
         // disable vision simulation for performance reasons
-        vis = new Vision(drive::addVisionMeasurement);
+        vis =
+            new Vision(
+                drive::addVisionMeasurement,
+                Stream.of(VisionConstants.cameraConfigs)
+                    .map(
+                        cam ->
+                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
+                    .toArray(VisionIOPhotonVision[]::new));
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
         IntakeIOSim intakeIOSim = new IntakeIOSim(driveSim);
-
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
@@ -168,14 +184,19 @@ public class RobotContainer {
                 intakeIOSim);
         sim.registerSimulator(turretIo);
         shotCalculation = new ShotCalculation(drive);
-        turret = new Turret(turretIo, drive::getPose, flywheel, shotCalculation);
+        turret =
+            new Turret(
+                turretIo,
+                drive::getPose,
+                flywheel,
+                shotCalculation,
+                spindexer::isFeederOn,
+                this::isInAllianceArea,
+                this::verticalHalfOfField);
 
         intake = new IntakeSubsystem(intakeIOSim);
         climb = new ClimbSubsystem();
 
-        // ElevatorIOSim elevatorSim = new ElevatorIOSim();
-        // simContainer.registerSimulator(elevatorSim);
-        // elevator = new Elevator(elevatorSim);
         break;
 
       default:
@@ -252,11 +273,35 @@ public class RobotContainer {
     // climb right
     kDriveController
         .start()
-        .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+        .onTrue(
+            vis.turnClimbCameraOn()
+                .andThen(
+                    pathfindToPosition(1.5, 2.555)
+                        .andThen(
+                            new RotateToAngle(
+                                drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)))
+                        .andThen(
+                            new DriveToPose(drive, new Pose2d(1.067, 2.555, getRightLadderAngle())))
+                        .andThen(new DriveDistance2(drive, () -> 0.35, 90).withTimeout(0.3))
+                        .andThen(vis.turnClimbCameraOff()))
+                .handleInterrupt(
+                    () -> CommandScheduler.getInstance().schedule(vis.turnClimbCameraOff())));
     // climb left
     kDriveController
         .back()
-        .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
+        .onTrue(
+            vis.turnClimbCameraOn()
+                .andThen(
+                    pathfindToPosition(1.5, 4.7)
+                        .andThen(
+                            new RotateToAngle(
+                                drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)))
+                        .andThen(
+                            new DriveToPose(drive, new Pose2d(1.067, 4.7, getLeftLadderAngle())))
+                        .andThen(new DriveDistance2(drive, () -> 0.35, -90).withTimeout(0.3))
+                        .andThen(vis.turnClimbCameraOff()))
+                .handleInterrupt(
+                    () -> CommandScheduler.getInstance().schedule(vis.turnClimbCameraOff())));
 
     // run intake
     kDriveController.rightTrigger().whileTrue(intake.takeInCommand());
@@ -270,32 +315,24 @@ public class RobotContainer {
                 intake.retractCommand(), intake.deployCommand(), () -> intake.isDeployed()));
 
     // Manipulator controller bindings
+
     // reverse spindexer
-    kManipController.a().onTrue(spindexer.reverseCommand());
+    kManipController.a().onTrue(spindexer.reverseCommand()).onFalse(spindexer.spindexerOffCommand());
 
     // Shoot/pass command
     kManipController
         .rightTrigger()
-        .whileTrue(
-            new ConditionalCommand(
-                        turret.aimAtCommand(() -> getHubPose3d())
-                    .alongWith(spindexer.feederOnCommand())
-                    .alongWith(spindexer.spindexerOnCommand()),
-                new InstantCommand(() -> flywheel.setFlywheelSpeed(2300))
-                    .alongWith(new PrintCommand("ate")),
-                () -> turret.isAutoAimEnabled()));
+        .whileTrue(spindexer.feederOnCommand().alongWith(spindexer.spindexerOnCommand()));
 
     kManipController
         .rightTrigger()
-        .onFalse(
-            new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
-                .alongWith(
-                    turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
-                .alongWith(spindexer.feederOffCommand())
-                .alongWith(spindexer.spindexerOffCommand()));
+        .onFalse(spindexer.spindexerOffCommand()
+                .andThen(new WaitCommand(.5))
+                .andThen(spindexer.feederOffCommand()));
+                
+    // Shoot/pass command
+    kManipController.start().onTrue(turret.toggleAutoAimCommand());
 
-    kManipController.back().onTrue(turret.toggleAutoAimCommand());
-    kManipController.start().onTrue(new InstantCommand(() -> hubActivity.toggleHub()));
     // manual turret and hood control
     turret.setDefaultCommand(
         turret.manualShooterControlCommand(
@@ -353,6 +390,15 @@ public class RobotContainer {
               null,
               false,
               DriveCommands.feedforwardCharacterization(drive)));
+      registerAuto(
+          new AutoWrapper(
+              "RightTwoCollect",
+              "CollectNeutralBottomShoot",
+              true,
+              buildRightNeutralZoneTwoCollect()));
+      registerAuto(
+          new AutoWrapper(
+              "LeftTwoCollect", "CollectNeutralTopShoot", true, buildLeftNeutralZoneTwoCollect()));
     } catch (FileVersionException | IOException | ParseException e) {
       System.err.println("Error loading auto: " + e.getMessage());
     }
@@ -477,16 +523,15 @@ public class RobotContainer {
     return new Pose3d(getHubPose(), Rotation3d.kZero);
   }
 
-
   public Pose3d getPose3d(Translation3d pose) {
     return new Pose3d(pose, Rotation3d.kZero);
   }
 
-  public void pathfindToPosition(double xPosition, double yPosition) {
+  public Command pathfindToPosition(double xPosition, double yPosition) {
     // Since we are using a holonomic drivetrain, the rotation component of this
     // pose
     // represents the goal holonomic rotation
-    Pose2d targetPose = new Pose2d(xPosition, yPosition, Rotation2d.fromDegrees(180));
+    Pose2d targetPose = new Pose2d(xPosition, yPosition, Rotation2d.fromDegrees(0));
 
     // Create the constraints to use while pathfinding
     PathConstraints constraints =
@@ -499,7 +544,7 @@ public class RobotContainer {
     // 0.0 // Rotation delay distance in meters. This is how far the robot should
     // travel before
     // attempting to rotate.
-    CommandScheduler.getInstance().schedule(pathfindingCommand);
+    return pathfindingCommand;
   }
 
   public void pathfindToPath(String pathName) {
@@ -538,6 +583,29 @@ public class RobotContainer {
 
   public boolean isHubActive() {
     return hubActivity.hubIsActive();
+  }
+
+  public boolean isInAllianceArea() {
+
+    double currentXPos = drive.getPose().getX();
+
+    var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+
+    if (alliance == DriverStation.Alliance.Blue) {
+      return currentXPos < 4.625594;
+    }
+    return currentXPos > 11.915394;
+  }
+
+  // true = standing at blue looking toward red -> right
+  //       standing at red looking toward blue -> left
+  //       (between y of 0 and 4.034536 meters is false)
+  public boolean verticalHalfOfField() {
+    double currentYPos = drive.getPose().getY();
+    if (currentYPos < 4.034536) {
+      return false;
+    }
+    return true;
   }
 
   public HubActivity getHubActivityCommand() {
@@ -594,13 +662,13 @@ public class RobotContainer {
 
   public void runTeleopStart() {
     // Down climb by extending the climber mechanism
-    CommandScheduler.getInstance()
-        .schedule(
-            new SequentialCommandGroup(
-                climb.deployCommand(), new WaitCommand(2), climb.retractCommand()));
+    // CommandScheduler.getInstance()
+    //     .schedule(
+    //         new SequentialCommandGroup(
+    //             climb.deployCommand(), new WaitCommand(2), climb.retractCommand()));
     // Ensure the intake is deployed. This is mainly for simulation testing
     // since the intake should normally be deployed at the start of auto
-    CommandScheduler.getInstance().schedule(intake.deployCommand());
+    // CommandScheduler.getInstance().schedule(intake.deployCommand());
   }
 
   public Command buildLeftNeutralZoneAuto() {
@@ -616,9 +684,7 @@ public class RobotContainer {
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(3),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret
-                .disableAutoAimCommand()
-                .alongWith(intake.retractCommand(), climb.deployCommand()),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
             new RotateToAngle(drive, () -> Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(2)),
             climb.retractCommand());
@@ -690,6 +756,40 @@ public class RobotContainer {
             turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
             DriveCommands.buildFollowPath("ClimbRightFromCenter"),
             new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildRightNeutralZoneTwoCollect() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(7),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            DriveCommands.buildFollowPath("RightSecondCollect"),
+            climb.deployCommand(),
+            new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
+            climb.retractCommand());
+    return auto;
+  }
+
+  public Command buildLeftNeutralZoneTwoCollect() {
+    Command auto =
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(8),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            DriveCommands.buildFollowPath("LeftSecondCollect"),
+            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
             new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
             climb.retractCommand());
     return auto;

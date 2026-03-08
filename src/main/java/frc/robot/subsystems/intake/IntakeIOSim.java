@@ -93,6 +93,10 @@ public class IntakeIOSim implements IntakeIO {
         this.intakeSimulation.getGamePiecesAmount() - 1);
   }
 
+  public void testDeployVoltage(double voltage) {
+    // Not implemented in simulation
+  }
+
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.connected = true;

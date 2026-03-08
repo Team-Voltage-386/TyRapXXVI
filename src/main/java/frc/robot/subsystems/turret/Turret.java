@@ -1,8 +1,10 @@
 package frc.robot.subsystems.turret;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.subsystems.flywheel.Flywheel;
 import java.util.function.Supplier;
@@ -17,28 +19,42 @@ public class Turret extends SubsystemBase {
   private final Pose3d[] turretVisual = new Pose3d[2];
 
   private final Supplier<Pose2d> dtPose;
-  private Pose3d currentTargetPose = new Pose3d();
+  private Pose3d currentTargetPose = new Pose3d(Constants.blueHubPose, Rotation3d.kZero);
   private final Flywheel flywheel;
   private ShotCalculation shotCalculation;
 
   public boolean autoAimEnabled = false;
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
+  private Rotation2d calculatedPitch;
+  private Supplier<Boolean> isShootingSupplier;
+  private Supplier<Boolean> isInAlliance;
+  private Supplier<Boolean> verticalHalfofField;
   private Rotation2d manualYaw = inputs.turretYaw;
 
   public Turret(
-      TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel, ShotCalculation shotCalculation) {
+      TurretIO io,
+      Supplier<Pose2d> dtPose,
+      Flywheel flywheel,
+      ShotCalculation shotCalculation,
+      Supplier<Boolean> isShootingSupplier,
+      Supplier<Boolean> isInAlliance,
+      Supplier<Boolean> verticalHalfofField) {
     this.io = io;
     this.dtPose = dtPose;
     this.flywheel = flywheel;
     this.shotCalculation = shotCalculation;
+    this.calculatedPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
+    this.isShootingSupplier = isShootingSupplier;
+    this.isInAlliance = isInAlliance;
+    this.verticalHalfofField = verticalHalfofField;
 
-    io.setTurretPitch(Rotation2d.fromDegrees(62));
+    io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
     io.setTurretYaw(Rotation2d.kZero);
   }
 
   public void manualIncrementYaw(Rotation2d deltaYaw) {
-    
+
     manualYaw = manualYaw.plus(deltaYaw);
     if (manualYaw.getRotations() > TurretConstants.turretMaxAngleRot) {
       manualYaw = Rotation2d.fromRotations(TurretConstants.turretMaxAngleRot);
@@ -64,10 +80,10 @@ public class Turret extends SubsystemBase {
         () -> {
           double pitchDelta = pitchInput.get();
           double yawDelta = yawInput.get();
-          if (Math.abs(pitchDelta) > 0.1) {
+          if (Math.abs(pitchDelta) > 0.1 && !autoAimEnabled) {
             manualIncrementPitch(Rotation2d.fromDegrees(pitchDelta));
           }
-          if (Math.abs(yawDelta) > 0.1) {
+          if (Math.abs(yawDelta) > 0.1 && !autoAimEnabled) {
             manualIncrementYaw(Rotation2d.fromDegrees(yawDelta));
           }
         });
@@ -97,23 +113,40 @@ public class Turret extends SubsystemBase {
     return autoAimEnabled;
   }
 
+  public void toggleAutoAim() {
+    autoAimEnabled = !autoAimEnabled;
+    System.out.println("autoaim: " + autoAimEnabled);
+    if (!autoAimEnabled) {
+      flywheel.setFlywheelSpeed(0);
+    }
+  }
+
+  public Command toggleAutoAimCommand() {
+    return runOnce(() -> toggleAutoAim());
+  }
+
   public void aimAtTarget(Pose3d targetPose) {
     shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d());
     Pose2d turretFieldPos = shotCalculation.getParameters().lookaheadPose();
     Translation3d turretFieldTrans =
         new Translation3d(
-            turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.59);
+            turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.336);
     Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
 
     double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
-    io.setTurretPitch(new Rotation2d(shotCalculation.getParameters().hoodAngle()));
-    io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
+    calculatedPitch = new Rotation2d(shotCalculation.getParameters().hoodAngle());
+    if (isShootingSupplier.get()) {
+      io.setTurretPitch(calculatedPitch);
+    } else {
+      io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
+    }
 
-    double shooterWheelRPM =
-        shotCalculation.getParameters().flywheelSpeed()
-            / TurretConstants.turretRPMToMetersPerSecond;
+    io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
+    Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
+    double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
     flywheel.setFlywheelSpeed(shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
+    Logger.recordOutput("Shooter/Turret/currentTargetPose", targetPose);
     shotCalculation.clearLaunchingParameters();
   }
 
@@ -134,21 +167,37 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
   }
 
-  public void toggleAutoAim() {
-    autoAimEnabled = !autoAimEnabled;
-  }
-
-  public Command toggleAutoAimCommand() {
-    return runOnce(() -> toggleAutoAim());
+  public void setTarget() {
+    var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    if (this.isInAlliance.get()) {
+      if (alliance == DriverStation.Alliance.Blue) {
+        currentTargetPose = Constants.blueHubPose3d;
+      } else {
+        currentTargetPose = Constants.redHubPose3d;
+      }
+    } else {
+      if (alliance == DriverStation.Alliance.Blue) {
+        if (this.verticalHalfofField.get()) {
+          currentTargetPose = Constants.blueLeftCornerPose3d;
+        } else {
+          currentTargetPose = Constants.blueRightCornerPose3d;
+        }
+      } else {
+        if (this.verticalHalfofField.get()) {
+          currentTargetPose = Constants.redRightCornerPose3d;
+        } else {
+          currentTargetPose = Constants.redLeftCornerPose3d;
+        }
+      }
+    }
   }
 
   @Override
   public void periodic() {
 
     if (autoAimEnabled) {
+      setTarget();
       aimAtTarget(currentTargetPose);
-    } else {
-      flywheel.setFlywheelSpeed(0);
     }
 
     io.updateInputs(inputs);
