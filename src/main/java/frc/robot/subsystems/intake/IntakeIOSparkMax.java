@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.constants.jr.IntakeConstants;
 import org.littletonrobotics.junction.Logger;
@@ -23,8 +24,8 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public IntakeIOSparkMax() {
     retrieval_motor = new SparkFlex(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
-    SparkMaxConfig retrievalConfig = new SparkMaxConfig();
-    retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
+    SparkFlexConfig retrievalConfig = new SparkFlexConfig();
+    retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(60).voltageCompensation(12.0);
     retrievalConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     retrievalConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
     retrievalConfig
@@ -108,7 +109,7 @@ public class IntakeIOSparkMax implements IntakeIO {
   }
 
   public void testDeployVoltage(double voltage) {
-    if (voltage > 0) {
+    /*if (voltage > 0) {
       if (deploy_motor.getEncoder().getPosition() >= IntakeConstants.RETRACTED_DEPLOY_POSITION) {
         voltage = 0;
       }
@@ -116,9 +117,9 @@ public class IntakeIOSparkMax implements IntakeIO {
       if (deploy_motor.getEncoder().getPosition() <= IntakeConstants.EXTENDED_DEPLOY_POSITION) {
         voltage = 0;
       }
-    } else {
-      deploy_motor.setVoltage(voltage);
-    }
+    } else { */
+    deploy_motor.setVoltage(voltage);
+    // }
   }
 
   public void updateInputs(IntakeIOInputs inputs) {
