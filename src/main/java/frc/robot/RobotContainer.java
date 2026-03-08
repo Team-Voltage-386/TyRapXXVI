@@ -132,7 +132,9 @@ public class RobotContainer {
                 drive::getPose,
                 flywheel,
                 shotCalculation,
-                spindexer::isFeederOn);
+                spindexer::isFeederOn,
+                this::isInAllianceArea,
+                this::verticalHalfOfField);
 
         vis =
             new Vision(
@@ -183,7 +185,14 @@ public class RobotContainer {
         sim.registerSimulator(turretIo);
         shotCalculation = new ShotCalculation(drive);
         turret =
-            new Turret(turretIo, drive::getPose, flywheel, shotCalculation, spindexer::isFeederOn);
+            new Turret(
+                turretIo,
+                drive::getPose,
+                flywheel,
+                shotCalculation,
+                spindexer::isFeederOn,
+                this::isInAllianceArea,
+                this::verticalHalfOfField);
 
         intake = new IntakeSubsystem(intakeIOSim);
         climb = new ClimbSubsystem();
@@ -706,6 +715,29 @@ public class RobotContainer {
 
   public boolean isHubActive() {
     return hubActivity.hubIsActive();
+  }
+
+  public boolean isInAllianceArea() {
+
+    double currentXPos = drive.getPose().getX();
+
+    var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+
+    if (alliance == DriverStation.Alliance.Blue) {
+      return currentXPos < 4.625594;
+    }
+    return currentXPos > 11.915394;
+  }
+
+  // true = standing at blue looking toward red -> right
+  //       standing at red looking toward blue -> left
+  //       (between y of 0 and 4.034536 meters is false)
+  public boolean verticalHalfOfField() {
+    double currentYPos = drive.getPose().getY();
+    if (currentYPos < 4.034536) {
+      return false;
+    }
+    return true;
   }
 
   public HubActivity getHubActivityCommand() {
