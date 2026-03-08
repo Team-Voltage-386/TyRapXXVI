@@ -25,14 +25,20 @@ public class Turret extends SubsystemBase {
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
   private Rotation2d calculatedPitch;
+  private Supplier<Boolean> isShootingSupplier;
 
   public Turret(
-      TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel, ShotCalculation shotCalculation) {
+      TurretIO io,
+      Supplier<Pose2d> dtPose,
+      Flywheel flywheel,
+      ShotCalculation shotCalculation,
+      Supplier<Boolean> isShootingSupplier) {
     this.io = io;
     this.dtPose = dtPose;
     this.flywheel = flywheel;
     this.shotCalculation = shotCalculation;
     this.calculatedPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
+    this.isShootingSupplier = isShootingSupplier;
 
     io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
     io.setTurretYaw(Rotation2d.kZero);
@@ -93,7 +99,12 @@ public class Turret extends SubsystemBase {
 
     double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
     calculatedPitch = new Rotation2d(shotCalculation.getParameters().hoodAngle());
-    io.setTurretPitch(calculatedPitch);
+    if (isShootingSupplier.get()) {
+      io.setTurretPitch(calculatedPitch);
+    } else {
+      io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
+    }
+
     io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
     double shooterWheelRPM =

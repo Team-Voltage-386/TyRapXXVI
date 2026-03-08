@@ -108,6 +108,10 @@ public class SpindexerSubsystem extends SubsystemBase {
     return Commands.runOnce(() -> feederOff());
   }
 
+  public boolean isFeederOn() {
+    return feederOn;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

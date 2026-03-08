@@ -126,7 +126,14 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOSparkFlex());
 
         shotCalculation = new ShotCalculation(drive);
-        turret = new Turret(new TurretIOSparkMax(), drive::getPose, flywheel, shotCalculation);
+        spindexer = new SpindexerSubsystem();
+        turret =
+            new Turret(
+                new TurretIOSparkMax(),
+                drive::getPose,
+                flywheel,
+                shotCalculation,
+                spindexer::isFeederOn);
 
         vis =
             new Vision(
@@ -137,7 +144,7 @@ public class RobotContainer {
 
         intake = new IntakeSubsystem(new IntakeIOSparkMax());
         climb = new ClimbSubsystem();
-        spindexer = new SpindexerSubsystem();
+
         break;
 
       case SIM:
@@ -167,7 +174,6 @@ public class RobotContainer {
 
         flywheel = new Flywheel(new FlywheelIOSim());
         IntakeIOSim intakeIOSim = new IntakeIOSim(driveSim);
-
         TurretIOSim turretIo =
             new TurretIOSim(
                 driveSim::getSimulatedDriveTrainPose,
@@ -177,7 +183,8 @@ public class RobotContainer {
                 intakeIOSim);
         sim.registerSimulator(turretIo);
         shotCalculation = new ShotCalculation(drive);
-        turret = new Turret(turretIo, drive::getPose, flywheel, shotCalculation);
+        turret =
+            new Turret(turretIo, drive::getPose, flywheel, shotCalculation, spindexer::isFeederOn);
 
         intake = new IntakeSubsystem(intakeIOSim);
         climb = new ClimbSubsystem();
