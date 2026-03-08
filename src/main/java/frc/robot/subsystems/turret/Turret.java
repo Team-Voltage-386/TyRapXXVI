@@ -1,6 +1,7 @@
 package frc.robot.subsystems.turret;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -27,24 +28,29 @@ public class Turret extends SubsystemBase {
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
   private Rotation2d calculatedPitch;
   private Supplier<Boolean> isShootingSupplier;
+  private Supplier<Boolean> isInAlliance;
+  private Supplier<Boolean> verticalHalfofField;
 
   public Turret(
       TurretIO io,
       Supplier<Pose2d> dtPose,
       Flywheel flywheel,
       ShotCalculation shotCalculation,
-      Supplier<Boolean> isShootingSupplier) {
+      Supplier<Boolean> isShootingSupplier,
+      Supplier<Boolean> isInAlliance,
+      Supplier<Boolean> verticalHalfofField) {
     this.io = io;
     this.dtPose = dtPose;
     this.flywheel = flywheel;
     this.shotCalculation = shotCalculation;
     this.calculatedPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
     this.isShootingSupplier = isShootingSupplier;
+    this.isInAlliance = isInAlliance;
+    this.verticalHalfofField = verticalHalfofField;
 
     io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
     io.setTurretYaw(Rotation2d.kZero);
   }
-  
 
   public Command manualIncrimentPitch(Rotation2d deltaPitch) {
     return runOnce(
@@ -116,6 +122,7 @@ public class Turret extends SubsystemBase {
     double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
     flywheel.setFlywheelSpeed(shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
+    Logger.recordOutput("Shooter/Turret/currentTargetPose", targetPose);
     shotCalculation.clearLaunchingParameters();
   }
 
@@ -136,10 +143,36 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
   }
 
+  public void setTarget() {
+    var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    if (this.isInAlliance.get()) {
+      if (alliance == DriverStation.Alliance.Blue) {
+        currentTargetPose = Constants.blueHubPose3d;
+      } else {
+        currentTargetPose = Constants.redHubPose3d;
+      }
+    } else {
+      if (alliance == DriverStation.Alliance.Blue) {
+        if (this.verticalHalfofField.get()) {
+          currentTargetPose = Constants.blueLeftCornerPose3d;
+        } else {
+          currentTargetPose = Constants.blueRightCornerPose3d;
+        }
+      } else {
+        if (this.verticalHalfofField.get()) {
+          currentTargetPose = Constants.redRightCornerPose3d;
+        } else {
+          currentTargetPose = Constants.redLeftCornerPose3d;
+        }
+      }
+    }
+  }
+
   @Override
   public void periodic() {
 
     if (autoAimEnabled) {
+      setTarget();
       aimAtTarget(currentTargetPose);
     }
 
