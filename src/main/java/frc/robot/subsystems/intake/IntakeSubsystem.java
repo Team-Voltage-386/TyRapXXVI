@@ -14,6 +14,10 @@ public class IntakeSubsystem extends SubsystemBase {
     this.inputs = new IntakeIO.IntakeIOInputs();
   }
 
+  public boolean isDeployed() {
+    return intakeIO.isDeployed();
+  }
+
   public Command deployCommand() {
     return Commands.runOnce(() -> intakeIO.deploy());
   }

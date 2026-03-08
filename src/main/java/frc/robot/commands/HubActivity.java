@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.LightSubsystem;
@@ -81,6 +82,8 @@ public class HubActivity extends Command {
     } else {
       LightSubsystem.changeAllLEDColor(255, 0, 0);
     }
+    SmartDashboard.putNumber("Match Time", Timer.getMatchTime());
+    SmartDashboard.putBoolean("Active hub", hubIsActive);
   }
 
   // Called once the command ends or is interrupted.
@@ -101,6 +104,10 @@ public class HubActivity extends Command {
 
   public boolean hubIsActive() {
     return hubIsActive;
+  }
+
+  public void toggleHub() {
+    hubIsActive = !hubIsActive;
   }
 
   public void setIsAhead(boolean setTo) {

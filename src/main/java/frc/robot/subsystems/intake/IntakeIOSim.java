@@ -76,6 +76,10 @@ public class IntakeIOSim implements IntakeIO {
     this.intakingState = IntakingState.REVERSE;
   }
 
+  public boolean isDeployed() {
+    return this.isDeployed;
+  }
+
   public boolean isMotorStalled() {
     return false;
   }

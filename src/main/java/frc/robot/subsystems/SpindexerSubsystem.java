@@ -67,6 +67,16 @@ public class SpindexerSubsystem extends SubsystemBase {
     spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
   }
 
+  public void spindexerReverse() {
+    System.out.println("reversing spindexer");
+    feederOn = true;
+    spindexer_motor.setVoltage(-SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
+  }
+
+  public Command reverseCommand() {
+    return Commands.runOnce(() -> spindexerReverse());
+  }
+
   public Command spindexerOnCommand() {
     return Commands.runOnce(() -> spindexerOn());
   }
@@ -74,7 +84,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOff() {
     System.out.println("turning off spindexer");
     feederOn = false;
-    spindexer_motor.set(0);
+    spindexer_motor.setVoltage(0);
   }
 
   public Command spindexerOffCommand() {

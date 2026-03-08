@@ -21,9 +21,10 @@ public class Turret extends SubsystemBase {
   private final Flywheel flywheel;
   private ShotCalculation shotCalculation;
 
-  private boolean autoAimEnabled = false;
+  public boolean autoAimEnabled = false;
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
+  private Rotation2d manualYaw = inputs.turretYaw;
 
   public Turret(
       TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel, ShotCalculation shotCalculation) {
@@ -36,16 +37,39 @@ public class Turret extends SubsystemBase {
     io.setTurretYaw(Rotation2d.kZero);
   }
 
-  public Command manualIncrimentPitch(Rotation2d deltaPitch) {
-    return runOnce(
+  public void manualIncrementYaw(Rotation2d deltaYaw) {
+    
+    manualYaw = manualYaw.plus(deltaYaw);
+    if (manualYaw.getRotations() > TurretConstants.turretMaxAngleRot) {
+      manualYaw = Rotation2d.fromRotations(TurretConstants.turretMaxAngleRot);
+    } else if (manualYaw.getRotations() < TurretConstants.turretMinAngleRot) {
+      manualYaw = Rotation2d.fromRotations(TurretConstants.turretMinAngleRot);
+    }
+    io.setTurretYaw(manualYaw);
+  }
+
+  public void manualIncrementPitch(Rotation2d deltaPitch) {
+    manualPitch = manualPitch.plus(deltaPitch);
+    if (manualPitch.getDegrees() > TurretConstants.turretMaxHoodAngle) {
+      manualPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
+    } else if (manualPitch.getDegrees() < TurretConstants.turretMinHoodAngle) {
+      manualPitch = Rotation2d.fromDegrees(TurretConstants.turretMinHoodAngle);
+    }
+    io.setTurretPitch(manualPitch);
+  }
+
+  public Command manualShooterControlCommand(
+      Supplier<Double> pitchInput, Supplier<Double> yawInput) {
+    return run(
         () -> {
-          manualPitch = manualPitch.plus(deltaPitch);
-          if (manualPitch.getDegrees() > TurretConstants.turretMaxHoodAngle) {
-            manualPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
-          } else if (manualPitch.getDegrees() < TurretConstants.turretMinHoodAngle) {
-            manualPitch = Rotation2d.fromDegrees(TurretConstants.turretMinHoodAngle);
+          double pitchDelta = pitchInput.get();
+          double yawDelta = yawInput.get();
+          if (Math.abs(pitchDelta) > 0.1) {
+            manualIncrementPitch(Rotation2d.fromDegrees(pitchDelta));
           }
-          io.setTurretPitch(manualPitch);
+          if (Math.abs(yawDelta) > 0.1) {
+            manualIncrementYaw(Rotation2d.fromDegrees(yawDelta));
+          }
         });
   }
 
@@ -67,6 +91,10 @@ public class Turret extends SubsystemBase {
 
   public Command disableAutoAimCommand() {
     return runOnce(() -> autoAimEnabled = false);
+  }
+
+  public boolean isAutoAimEnabled() {
+    return autoAimEnabled;
   }
 
   public void aimAtTarget(Pose3d targetPose) {
@@ -104,6 +132,14 @@ public class Turret extends SubsystemBase {
 
   public Command adjustPitch(Supplier<Double> pitchDeg) {
     return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
+  }
+
+  public void toggleAutoAim() {
+    autoAimEnabled = !autoAimEnabled;
+  }
+
+  public Command toggleAutoAimCommand() {
+    return runOnce(() -> toggleAutoAim());
   }
 
   @Override

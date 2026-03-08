@@ -17,6 +17,7 @@ public class IntakeIOSparkMax implements IntakeIO {
   private final SparkMax retrieval_motor;
 
   private final SparkMax deploy_motor;
+  private boolean deployed = false;
 
   public IntakeIOSparkMax() {
     retrieval_motor = new SparkMax(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -64,6 +65,7 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void deploy() {
     System.out.println("deploying intake mechanism");
+    deployed = true;
     deploy_motor
         .getClosedLoopController()
         .setSetpoint(IntakeConstants.EXTENDED_DEPLOY_POSITION, ControlType.kPosition);
@@ -71,9 +73,14 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void retract() {
     System.out.println("retracting intake mechanism");
+    deployed = false;
     deploy_motor
         .getClosedLoopController()
         .setSetpoint(IntakeConstants.RETRACTED_DEPLOY_POSITION, ControlType.kPosition);
+  }
+
+  public boolean isDeployed() {
+    return deployed;
   }
 
   public void takeIn() {

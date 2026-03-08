@@ -213,6 +213,7 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    // Driver controller bindings
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -245,115 +246,73 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    if (turret != null) {
-      System.out.println("running at " + runVolts.getValue());
-      kDriveController
-          .povRight()
-          .whileTrue(
-              new FunctionalCommand(
-                  () -> {},
-                  () -> {
-                    System.out.println("running at " + runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(runVolts.getValue());
-                  },
-                  (c) -> {
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
-                  },
-                  () -> false,
-                  flywheel));
+    // reverse intake motors
+    kDriveController.b().onTrue(intake.reverseCommand()).onFalse(intake.stopMotorCommand());
 
-      kDriveController
-          .povLeft()
-          .whileTrue(
-              new FunctionalCommand(
-                  () -> {},
-                  () -> {
-                    System.out.println("running at " + -runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(-runVolts.getValue());
-                  },
-                  (c) -> {
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
-                  },
-                  () -> false,
-                  flywheel));
+    // climb right
+    kDriveController
+        .start()
+        .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+    // climb left
+    kDriveController
+        .back()
+        .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
 
-      kDriveController.povUp().onTrue(turret.manualIncrimentPitch(Rotation2d.fromDegrees(.5)));
-      kDriveController.povDown().onTrue(turret.manualIncrimentPitch(Rotation2d.fromDegrees(-.5)));
+    // run intake
+    kDriveController.rightTrigger().whileTrue(intake.takeInCommand());
 
-      kDriveController
-          .rightTrigger()
-          .whileTrue(
-              turret
-                  .aimAtCommand(() -> getHubPose3d())
-                  .alongWith(spindexer.feederOnCommand())
-                  .alongWith(spindexer.spindexerOnCommand()));
+    // raise/lower intake
+    // kDriveController.rightBumper().onTrue(intake.deployCommand()).onFalse(intake.retractCommand());
+    kDriveController
+        .leftBumper()
+        .onTrue(
+            new ConditionalCommand(
+                intake.retractCommand(), intake.deployCommand(), () -> intake.isDeployed()));
 
-      kDriveController
-          .rightTrigger()
-          .onFalse(
-              new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
-                  .alongWith(
-                      turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
-                  .alongWith(spindexer.feederOffCommand())
-                  .alongWith(spindexer.spindexerOffCommand()));
-      kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
+    // Manipulator controller bindings
+    // reverse spindexer
+    kManipController.a().onTrue(spindexer.reverseCommand());
 
-      kDriveController
-          .start()
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
-      kDriveController
-          .back()
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
+    // Shoot/pass command
+    kManipController
+        .rightTrigger()
+        .whileTrue(
+            new ConditionalCommand(
+                        turret.aimAtCommand(() -> getHubPose3d())
+                    .alongWith(spindexer.feederOnCommand())
+                    .alongWith(spindexer.spindexerOnCommand()),
+                new InstantCommand(() -> flywheel.setFlywheelSpeed(2300))
+                    .alongWith(new PrintCommand("ate")),
+                () -> turret.isAutoAimEnabled()));
 
-      kDriveController
-          .rightBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromBottom"), drive));
+    kManipController
+        .rightTrigger()
+        .onFalse(
+            new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
+                .alongWith(
+                    turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
+                .alongWith(spindexer.feederOffCommand())
+                .alongWith(spindexer.spindexerOffCommand()));
 
-      kDriveController
-          .leftBumper()
-          .onTrue(new InstantCommand(() -> pathfindToPath("AlignTowerFromTop"), drive));
+    kManipController.back().onTrue(turret.toggleAutoAimCommand());
+    kManipController.start().onTrue(new InstantCommand(() -> hubActivity.toggleHub()));
+    // manual turret and hood control
+    turret.setDefaultCommand(
+        turret.manualShooterControlCommand(
+            () -> -kManipController.getRightY(), () -> -kManipController.getLeftX()));
 
-      kManipController
-          .povRight()
-          .whileTrue(
-              new FunctionalCommand(
-                  () -> {},
-                  () -> {
-                    System.out.println("running at " + runVolts.getValue());
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(runVolts.getValue());
-                  },
-                  (c) -> {
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
-                  },
-                  () -> false,
-                  flywheel));
+    // manual climb
+    kManipController.povUp().onTrue(climb.deployCommand());
+    kManipController.povDown().onTrue(climb.retractCommand());
 
-      kManipController
-          .povLeft()
-          .whileTrue(
-              new FunctionalCommand(
-                  () -> {},
-                  () -> {
-                    System.out.println("running at " + runVolts.getValue());
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(-runVolts.getValue());
-                  },
-                  (c) -> {
-                    ((FlywheelIOSparkMax) flywheel.io).testFlywheelVoltage(0);
-                  },
-                  () -> false,
-                  flywheel));
-      kManipController.rightBumper().whileTrue(flywheel.shootCommand(() -> setRPM.getValue()));
-      // Manipulator controller bindings
-      kManipController.a().onTrue(intake.deployCommand());
-      kManipController.b().onTrue(intake.retractCommand());
-      kManipController.x().onTrue(intake.takeInCommand());
-      kManipController.y().onTrue(intake.stopMotorCommand());
+    // testing
+    // kDriveController
+    //     .b()
+    //     .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
+    // kDriveController
+    //     .y()
+    //     .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
 
-      kManipController.rightTrigger().onTrue(spindexer.spindexerOnCommand());
-      kManipController.rightTrigger().onFalse(spindexer.spindexerOffCommand());
-      kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
-      kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());
-    }
   }
 
   protected void registerAuto(AutoWrapper auto) {
@@ -496,6 +455,7 @@ public class RobotContainer {
   public Rotation2d getRightLadderAngle() {
     Rotation2d ladderAngle = new Rotation2d();
     Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+
     if (currentAlliance.isPresent()) {
       switch (currentAlliance.get()) {
         case Red:
@@ -516,6 +476,7 @@ public class RobotContainer {
   public Pose3d getHubPose3d() {
     return new Pose3d(getHubPose(), Rotation3d.kZero);
   }
+
 
   public Pose3d getPose3d(Translation3d pose) {
     return new Pose3d(pose, Rotation3d.kZero);

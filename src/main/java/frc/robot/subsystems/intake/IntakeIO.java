@@ -33,5 +33,7 @@ public interface IntakeIO {
 
   public void reverse();
 
+  public boolean isDeployed();
+
   public boolean isMotorStalled();
 }
