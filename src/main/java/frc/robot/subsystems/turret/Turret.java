@@ -3,6 +3,7 @@ package frc.robot.subsystems.turret;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.subsystems.flywheel.Flywheel;
 import java.util.function.Supplier;
@@ -17,22 +18,30 @@ public class Turret extends SubsystemBase {
   private final Pose3d[] turretVisual = new Pose3d[2];
 
   private final Supplier<Pose2d> dtPose;
-  private Pose3d currentTargetPose = new Pose3d();
+  private Pose3d currentTargetPose = new Pose3d(Constants.blueHubPose, Rotation3d.kZero);
   private final Flywheel flywheel;
   private ShotCalculation shotCalculation;
 
   private boolean autoAimEnabled = false;
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
+  private Rotation2d calculatedPitch;
+  private Supplier<Boolean> isShootingSupplier;
 
   public Turret(
-      TurretIO io, Supplier<Pose2d> dtPose, Flywheel flywheel, ShotCalculation shotCalculation) {
+      TurretIO io,
+      Supplier<Pose2d> dtPose,
+      Flywheel flywheel,
+      ShotCalculation shotCalculation,
+      Supplier<Boolean> isShootingSupplier) {
     this.io = io;
     this.dtPose = dtPose;
     this.flywheel = flywheel;
     this.shotCalculation = shotCalculation;
+    this.calculatedPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
+    this.isShootingSupplier = isShootingSupplier;
 
-    io.setTurretPitch(Rotation2d.fromDegrees(62));
+    io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
     io.setTurretYaw(Rotation2d.kZero);
   }
   
@@ -70,21 +79,41 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> autoAimEnabled = false);
   }
 
+  public boolean isAutoAimEnabled() {
+    return autoAimEnabled;
+  }
+
+  public void toggleAutoAim() {
+    autoAimEnabled = !autoAimEnabled;
+    System.out.println("autoaim: " + autoAimEnabled);
+    if (!autoAimEnabled) {
+      flywheel.setFlywheelSpeed(0);
+    }
+  }
+
+  public Command toggleAutoAimCommand() {
+    return runOnce(() -> toggleAutoAim());
+  }
+
   public void aimAtTarget(Pose3d targetPose) {
     shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d());
     Pose2d turretFieldPos = shotCalculation.getParameters().lookaheadPose();
     Translation3d turretFieldTrans =
         new Translation3d(
-            turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.59);
+            turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.336);
     Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
 
     double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
-    io.setTurretPitch(new Rotation2d(shotCalculation.getParameters().hoodAngle()));
-    io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
+    calculatedPitch = new Rotation2d(shotCalculation.getParameters().hoodAngle());
+    if (isShootingSupplier.get()) {
+      io.setTurretPitch(calculatedPitch);
+    } else {
+      io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
+    }
 
-    double shooterWheelRPM =
-        shotCalculation.getParameters().flywheelSpeed()
-            / TurretConstants.turretRPMToMetersPerSecond;
+    io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
+    Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
+    double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
     flywheel.setFlywheelSpeed(shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
     shotCalculation.clearLaunchingParameters();
@@ -112,8 +141,6 @@ public class Turret extends SubsystemBase {
 
     if (autoAimEnabled) {
       aimAtTarget(currentTargetPose);
-    } else {
-      flywheel.setFlywheelSpeed(0);
     }
 
     io.updateInputs(inputs);

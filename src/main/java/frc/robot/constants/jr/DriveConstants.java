@@ -6,11 +6,10 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 
 public final class DriveConstants {
 
-  public static final boolean isReefscape = true;
+  public static final boolean isReefscape = false;
 
   // prevent instantiation
   private DriveConstants() {}
@@ -115,10 +114,7 @@ public final class DriveConstants {
 
       zeroRotations =
           new Rotation2d[] {
-            new Rotation2d(0.8268 + Math.PI),
-            new Rotation2d(0.158),
-            new Rotation2d(2.269),
-            new Rotation2d(1.101 + Math.PI)
+            new Rotation2d(2.8), new Rotation2d(2.27), new Rotation2d(1.094), new Rotation2d(-0.08)
           };
 
       driveCanIds = new int[] {2, 4, 6, 8}; // Front Left, Front Right, Back Left, Back Right
@@ -201,15 +197,15 @@ public final class DriveConstants {
       driveDistanceProp = 3;
       driveDistanceThreshold = 0.02;
     } else {
-      wheelRadiusMeters = 0.048;
+      wheelRadiusMeters = 0.040;
       driveMotorReduction = 6.12; // MAXSwerve with 14 pinion teeth and 22 spur teeth
       driveGearbox = DCMotor.getNEO(1);
       turnGearbox = DCMotor.getNEO(1);
 
-      trackWidth = Units.inchesToMeters(24.75);
-      wheelBase = Units.inchesToMeters(24.75);
+      trackWidth = 0.302 * 2;
+      wheelBase = 0.264 * 2;
 
-      robotMassKg = 24.088;
+      robotMassKg = 68.0;
       robotMOI = 6.883;
       wheelCOF = 1.2;
 
@@ -217,14 +213,17 @@ public final class DriveConstants {
 
       zeroRotations =
           new Rotation2d[] {
-            new Rotation2d(2.8), new Rotation2d(2.27), new Rotation2d(1.094), new Rotation2d(-0.08)
+            new Rotation2d(3.085 + Math.PI),
+            new Rotation2d(-0.86),
+            new Rotation2d(1.155 + Math.PI),
+            new Rotation2d(2.826)
           };
 
-      driveCanIds = new int[] {6, 52, 7, 2}; // Front Left, Front Right, Back Left, Back Right
+      driveCanIds = new int[] {10, 16, 12, 15}; // Front Left, Front Right, Back Left, Back Right
 
-      turnCanIds = new int[] {5, 8, 4, 3};
+      turnCanIds = new int[] {47, 44, 21, 20};
 
-      turnCancoderIds = new int[] {11, 12, 10, 9};
+      turnCancoderIds = new int[] {9, 12, 10, 11};
 
       driveCurrentLimit = 60;
 

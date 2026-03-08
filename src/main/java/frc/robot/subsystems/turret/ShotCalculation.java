@@ -56,26 +56,22 @@ public class ShotCalculation {
     maxDistance = 6.7;
     phaseDelay = 0.03; // figure this out idk ask chief delphi
 
-    // launchHoodAngleMap.put(1.5, Rotation2d.fromDegrees(67.5)); max is 62 degrees
-    launchHoodAngleMap.put(2.5, Rotation2d.fromDegrees(61.1));
-    launchHoodAngleMap.put(3.5, Rotation2d.fromDegrees(56.67));
-    launchHoodAngleMap.put(4.5, Rotation2d.fromDegrees(56.0));
-    launchHoodAngleMap.put(6.5, Rotation2d.fromDegrees(54.1));
-    launchHoodAngleMap.put(6.7, Rotation2d.fromDegrees(55.8));
+    // max is 62 degrees
+    launchHoodAngleMap.put(1.602, Rotation2d.fromDegrees(62.0));
+    launchHoodAngleMap.put(2.602, Rotation2d.fromDegrees(57.0));
+    launchHoodAngleMap.put(3.602, Rotation2d.fromDegrees(53.0));
+    launchHoodAngleMap.put(4.602, Rotation2d.fromDegrees(51.0));
 
-    launchFlywheelSpeedMap.put(1.5, 5.65); // these are in m/s
-    launchFlywheelSpeedMap.put(2.5, 6.34);
-    launchFlywheelSpeedMap.put(3.5, 7.0);
-    launchFlywheelSpeedMap.put(4.5, 7.66);
-    launchFlywheelSpeedMap.put(5.5, 8.25);
-    launchFlywheelSpeedMap.put(6.7, 9.0);
+    launchFlywheelSpeedMap.put(1.602, 2262.0); // RPM
+    launchFlywheelSpeedMap.put(2.602, 2400.0);
+    launchFlywheelSpeedMap.put(3.602, 2650.0);
+    launchFlywheelSpeedMap.put(4.602, 2925.0);
 
-    timeOfFlightMap.put(1.5, 0.69);
-    timeOfFlightMap.put(2.5, 0.81);
-    timeOfFlightMap.put(3.5, 0.91);
-    timeOfFlightMap.put(4.5, 1.05);
-    timeOfFlightMap.put(5.5, 1.13);
-    timeOfFlightMap.put(6.7, 1.32);
+    timeOfFlightMap.put(1.669, 0.88);
+    timeOfFlightMap.put(2.233, 0.9275);
+    timeOfFlightMap.put(2.823, 1.007);
+    timeOfFlightMap.put(3.782, 1.057);
+    timeOfFlightMap.put(4.75, 1.167);
   }
 
   public ShotCalculation(Drive dt) {

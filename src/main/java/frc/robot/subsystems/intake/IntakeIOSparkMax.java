@@ -2,26 +2,27 @@ package frc.robot.subsystems.intake;
 
 import static frc.robot.util.SparkUtil.*;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.constants.jr.IntakeConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeIOSparkMax implements IntakeIO {
 
-  private final SparkMax retrieval_motor;
+  private final SparkFlex retrieval_motor;
 
   private final SparkMax deploy_motor;
 
   public IntakeIOSparkMax() {
-    retrieval_motor = new SparkMax(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
+    retrieval_motor = new SparkFlex(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig retrievalConfig = new SparkMaxConfig();
     retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
     retrievalConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
@@ -42,8 +43,12 @@ public class IntakeIOSparkMax implements IntakeIO {
 
     deploy_motor = new SparkMax(IntakeConstants.DEPLOY_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig deployConfig = new SparkMaxConfig();
-    deployConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(10).voltageCompensation(12.0);
+    deployConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
     deployConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
+    deployConfig.softLimit.forwardSoftLimitEnabled(false);
+    deployConfig.softLimit.reverseSoftLimitEnabled(false);
+    deployConfig.limitSwitch.forwardLimitSwitchTriggerBehavior(Behavior.kKeepMovingMotor);
+    deployConfig.limitSwitch.reverseLimitSwitchTriggerBehavior(Behavior.kKeepMovingMotor);
     deployConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -102,6 +107,20 @@ public class IntakeIOSparkMax implements IntakeIO {
     retract();
   }
 
+  public void testDeployVoltage(double voltage) {
+    if (voltage > 0) {
+      if (deploy_motor.getEncoder().getPosition() >= IntakeConstants.RETRACTED_DEPLOY_POSITION) {
+        voltage = 0;
+      }
+    } else if (voltage < 0) {
+      if (deploy_motor.getEncoder().getPosition() <= IntakeConstants.EXTENDED_DEPLOY_POSITION) {
+        voltage = 0;
+      }
+    } else {
+      deploy_motor.setVoltage(voltage);
+    }
+  }
+
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.connected = true;
     Logger.recordOutput("/Intake/Deploy/Current", deploy_motor.getOutputCurrent());
@@ -115,5 +134,8 @@ public class IntakeIOSparkMax implements IntakeIO {
             : retrieval_motor.getAppliedOutput() < -0.1
                 ? IntakingState.REVERSE
                 : IntakingState.STOPPED;
+    Logger.recordOutput("Intake/DeployMotor/Position", deploy_motor.getEncoder().getPosition());
+    Logger.recordOutput(
+        "Intake/DeployMotor/AbsolutePosition", deploy_motor.getAbsoluteEncoder().getPosition());
   }
 }

@@ -75,7 +75,7 @@ public class ModuleIOSparkFlexCancoder implements ModuleIO {
   private SparkFlexConfig driveConfig;
   private SparkMaxConfig turnConfig;
 
-  public ModuleIOSparkFlexCancoder(int module) {
+  public ModuleIOSparkFlexCancoder(int module, boolean turnInverted, boolean driveInverted) {
     zeroRotation = DriveConstants.zeroRotations[module];
     driveSpark = new SparkFlex(DriveConstants.driveCanIds[module], MotorType.kBrushless);
     turnSpark = new SparkMax(DriveConstants.turnCanIds[module], MotorType.kBrushless);
@@ -88,7 +88,7 @@ public class ModuleIOSparkFlexCancoder implements ModuleIO {
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(DriveConstants.driveCurrentLimit)
         .voltageCompensation(12.0)
-        .inverted(false);
+        .inverted(turnInverted);
     driveConfig
         .encoder
         .positionConversionFactor(DriveConstants.driveEncoderPositionFactor)
@@ -118,7 +118,7 @@ public class ModuleIOSparkFlexCancoder implements ModuleIO {
     // Configure turn motor
     turnConfig = new SparkMaxConfig();
     turnConfig
-        .inverted(DriveConstants.turnInverted)
+        .inverted(turnInverted)
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(DriveConstants.turnCurrentLimit)
         .voltageCompensation(12.0);

@@ -43,7 +43,7 @@ public class FlywheelIOSparkMax implements FlywheelIO {
   TuningUtil flywheelKs = new TuningUtil("/Tuning/flywheel/flywheelKs", TurretConstants.flywheelKs);
   TuningUtil flywheelKa = new TuningUtil("/Tuning/flywheel/flywheelKa", TurretConstants.flywheelKa);
   TuningUtil threshold = new TuningUtil("/Tuning/flywheel/Threshold", 400);
-  TuningUtil rateLimit = new TuningUtil("/Tuning/flywheel/RateLimit", 200);
+  TuningUtil rateLimit = new TuningUtil("/Tuning/flywheel/RateLimit", 1000);
   SlewRateLimiter filter = new SlewRateLimiter(rateLimit.getValue());
 
   private PIDController flywheelPID =
