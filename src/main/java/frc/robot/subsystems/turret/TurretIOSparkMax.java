@@ -134,11 +134,14 @@ public class TurretIOSparkMax implements TurretIO {
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
+    
     Logger.recordOutput("/Shooter/Turret/Setpoint", setpoint);
     Logger.recordOutput("/Shooter/Turret/AppliedOutput", yawMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Turret/Velocity", velocity);
+    Logger.recordOutput("/Shooter/Turret/Current", yawMotor.getOutputCurrent());
     Logger.recordOutput("/Shooter/Hood/AppliedOutput", hoodMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Hood/Setpoint", hoodsetpoint);
+    Logger.recordOutput("/Shooter/Hood/Current", hoodMotor.getOutputCurrent());
     Logger.recordOutput("/Shooter/Hood/position", hoodMotor.getEncoder().getPosition());
   }
 

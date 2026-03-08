@@ -2,6 +2,8 @@ package frc.robot.subsystems.intake;
 
 import static frc.robot.util.SparkUtil.*;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -124,6 +126,8 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.connected = true;
+    Logger.recordOutput("/Intake/Deploy/Current", deploy_motor.getOutputCurrent());
+    Logger.recordOutput("/Intake/Retrieval/Current", retrieval_motor.getOutputCurrent());
     inputs.deployed =
         Math.abs(deploy_motor.getEncoder().getPosition() - IntakeConstants.EXTENDED_DEPLOY_POSITION)
             < 5;
