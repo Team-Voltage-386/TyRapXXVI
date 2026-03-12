@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.util.TuningUtil;
@@ -36,10 +37,15 @@ public class TurretIOSparkMax implements TurretIO {
   private final SparkMaxConfig yawConfig;
   private final SparkMaxConfig hoodConfig;
 
+  // Turret Limit Input
+  DigitalInput turretLimitInput = new DigitalInput(9);
+
   TuningUtil yawKp = new TuningUtil("/Tuning/turret/yawKp", 0.0);
   TuningUtil yawKd = new TuningUtil("/Tuning/turret/yawKd", 0.0);
   TuningUtil hoodKp = new TuningUtil("/Tuning/turret/hoodKp", 0.9);
   TuningUtil hoodKd = new TuningUtil("/Tuning/turret/hoodKd", 0.0);
+  TuningUtil turretRightLimit = new TuningUtil("/Tuning/turret/rightLimit", 0);
+  TuningUtil turretLeftLimit = new TuningUtil("/Tuning/turret/leftLimit", 0);
 
   public TurretIOSparkMax() {
     yawConfig = new SparkMaxConfig();
@@ -131,6 +137,8 @@ public class TurretIOSparkMax implements TurretIO {
     inputs.connected = true;
     inputs.turretYaw = Rotation2d.fromRotations(yawEncoder.getPosition());
     inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
+    inputs.turretLimitTrue = !turretLimitInput.get();
+
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
@@ -139,6 +147,7 @@ public class TurretIOSparkMax implements TurretIO {
     Logger.recordOutput("/Shooter/Turret/AppliedOutput", yawMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Turret/Velocity", velocity);
     Logger.recordOutput("/Shooter/Turret/Current", yawMotor.getOutputCurrent());
+    Logger.recordOutput("/Shooter/Turret/LimitSwitchTrue", inputs.turretLimitTrue);
     Logger.recordOutput("/Shooter/Hood/AppliedOutput", hoodMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Hood/Setpoint", hoodsetpoint);
     Logger.recordOutput("/Shooter/Hood/Current", hoodMotor.getOutputCurrent());

@@ -12,6 +12,7 @@ public interface TurretIO {
     public boolean connected = false;
     public Rotation2d turretYaw = new Rotation2d();
     public Rotation2d turretPitch = new Rotation2d();
+    public boolean turretLimitTrue = false;
   }
 
   default void updateInputs(TurretIOInputs inputs) {}
@@ -21,4 +22,6 @@ public interface TurretIO {
 
   /* Set the turret pitch to the specified position. */
   default void setTurretPitch(Rotation2d position) {}
+
+  default void testTurretVoltage(double volts) {}
 }

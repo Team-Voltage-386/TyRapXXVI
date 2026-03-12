@@ -97,6 +97,11 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  // Stops the Turret Yaw
+  public void stopTurretYaw() {
+    io.testTurretVoltage(0);
+  }
+
   public Command toggleAutoAimCommand() {
     return runOnce(() -> toggleAutoAim());
   }
@@ -171,7 +176,9 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
 
-    if (autoAimEnabled) {
+    if (inputs.turretLimitTrue) {
+      stopTurretYaw();
+    } else if (autoAimEnabled) {
       setTarget();
       aimAtTarget(currentTargetPose);
     }
