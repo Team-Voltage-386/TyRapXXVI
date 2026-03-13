@@ -117,7 +117,9 @@ public class Turret extends SubsystemBase {
       io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
     }
 
-    io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
+    double desiredTurretYaw =
+        Rotation2d.fromRadians(yaw).getDegrees() - turretFieldPos.getRotation().getDegrees();
+    io.setTurretYaw(limitTurretYaw(desiredTurretYaw));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
     double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
     flywheel.setFlywheelSpeed(shooterWheelRPM);
@@ -165,6 +167,41 @@ public class Turret extends SubsystemBase {
           currentTargetPose = Constants.redLeftCornerPose3d;
         }
       }
+    }
+  }
+
+  public double zeroTo360(double angle) {
+    double result = angle % 360;
+    if (result < 0) {
+      result += 360;
+    }
+    return result;
+  }
+
+  public double getAngleDifference(double targetAngle, double currentAngle) {
+    double diff = zeroTo360(targetAngle) - zeroTo360(currentAngle);
+    if (diff > 180) {
+      diff -= 360;
+    } else if (diff < -180) {
+      diff += 360;
+    }
+    return diff;
+  }
+
+  protected Rotation2d limitTurretYaw(double desiredYawDeg) {
+    double desiredYaw360 = zeroTo360(desiredYawDeg);
+    // Check if the desired yaw is within the dead zone
+    if (Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneCenterDeg))
+        < (TurretConstants.turretDeadZoneHalfWidthDeg)) {
+      // If it is, snap to the nearest edge of the dead zone
+      if (Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneStartDeg))
+          < Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneEndDeg))) {
+        return TurretConstants.turretDeadZoneStartRot;
+      } else {
+        return TurretConstants.turretDeadZoneEndRot;
+      }
+    } else {
+      return Rotation2d.fromDegrees(desiredYaw360);
     }
   }
 

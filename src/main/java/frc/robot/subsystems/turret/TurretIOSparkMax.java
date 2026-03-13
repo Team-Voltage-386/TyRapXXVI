@@ -65,7 +65,7 @@ public class TurretIOSparkMax implements TurretIO {
             yawMotor.configure(
                 yawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    yawEncoder.setPosition(0);
+    setYawZero();
 
     hoodConfig = new SparkMaxConfig();
     hoodConfig.encoder.uvwAverageDepth(4).positionConversionFactor(1).velocityConversionFactor(1);
@@ -129,7 +129,10 @@ public class TurretIOSparkMax implements TurretIO {
             });
 
     inputs.connected = true;
-    inputs.turretYaw = Rotation2d.fromRotations(yawEncoder.getPosition());
+    Rotation2d yawTurretCenter = Rotation2d.fromRotations(yawEncoder.getPosition());
+
+    Logger.recordOutput("/Shooter/Turret/ActualYawTurretCtr", yawTurretCenter);
+    inputs.turretYaw = yawTurretCenter.minus(TurretConstants.turretCenterOffsetRot);
     inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
@@ -148,14 +151,37 @@ public class TurretIOSparkMax implements TurretIO {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
+    double desiredPositionDeg = position.getDegrees();
+    Logger.recordOutput("/Shooter/Turret/DesiredAngleRobotCtr", position);
+    Rotation2d offsetPos =
+        Rotation2d.fromDegrees(
+            minus180To180(desiredPositionDeg + TurretConstants.turretCenterOffsetDeg));
     double desiredAngle =
-        MathUtil.clamp(position.getRotations(), turretMinAngleRot, turretMaxAngleRot);
+        MathUtil.clamp(offsetPos.getRotations(), turretMinAngleRot, turretMaxAngleRot);
 
-    Logger.recordOutput("/Shooter/Turret/DesiredAngle", Rotation2d.fromRotations(desiredAngle));
+    Logger.recordOutput(
+        "/Shooter/Turret/DesiredAngleTurretCtr", Rotation2d.fromRotations(desiredAngle));
 
     yawMotor
         .getClosedLoopController()
         .setSetpoint(desiredAngle, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+  }
+
+  public double zeroTo360(double angle) {
+    double result = angle % 360;
+    if (result < 0) {
+      result += 360;
+    }
+    return result;
+  }
+
+  public double minus180To180(double angleDeg) {
+    double angle360 = zeroTo360(angleDeg);
+    if (angle360 > 180) {
+      return angle360 - 360;
+    } else {
+      return angle360;
+    }
   }
 
   public void testTurretVoltage(double volts) {
@@ -180,7 +206,8 @@ public class TurretIOSparkMax implements TurretIO {
 
   public void setYawZero() {
     System.out.println("turret encoder zeroed");
-    yawEncoder.setPosition(0);
+    yawEncoder.setPosition(
+        -1.0 * Rotation2d.fromDegrees(TurretConstants.turretCenterOffsetDeg).getRotations());
   }
 
   public void setHoodZero() {

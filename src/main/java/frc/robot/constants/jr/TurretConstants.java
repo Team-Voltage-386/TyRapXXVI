@@ -1,7 +1,7 @@
 package frc.robot.constants.jr;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 
 public class TurretConstants {
   public static final int turretYawCanId = 48;
@@ -14,7 +14,22 @@ public class TurretConstants {
   public static final double offsetY = -.099;
   public static final Translation2d turretPosition = new Translation2d(offsetX, offsetY);
 
-  public static final double turretMaxAngleRot = Units.degreesToRotations(70);
+  public static final double turretCenterOffsetDeg = 50.0;
+  public static final Rotation2d turretCenterOffsetRot =
+      Rotation2d.fromDegrees(turretCenterOffsetDeg);
+  public static final double turretDeadZoneCenterDeg = 130.0;
+  public static final double turretDeadZoneWidthDeg = 20.0;
+  public static final double turretDeadZoneHalfWidthDeg = turretDeadZoneWidthDeg / 2.0;
+  public static final double turretDeadZoneStartDeg =
+      turretDeadZoneCenterDeg - turretDeadZoneHalfWidthDeg;
+  public static final Rotation2d turretDeadZoneStartRot =
+      Rotation2d.fromDegrees(turretDeadZoneStartDeg);
+  public static final double turretDeadZoneEndDeg =
+      turretDeadZoneCenterDeg + turretDeadZoneHalfWidthDeg;
+  public static final Rotation2d turretDeadZoneEndRot =
+      Rotation2d.fromDegrees(turretDeadZoneEndDeg);
+  public static final double turretMaxAngleRot =
+      Rotation2d.kPi.minus(Rotation2d.fromDegrees(turretDeadZoneHalfWidthDeg)).getRotations();
   public static final double turretMinAngleRot = -turretMaxAngleRot;
 
   public static final double turretMaxHoodAngle = 62;
