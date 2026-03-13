@@ -94,7 +94,9 @@ public class Vision extends SubsystemBase {
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
-                || (!observation.useCamera() && climbing)
+                || (!observation.useCamera()
+                    && climbing) // reject pose if we are positioning for climb and camera doesnt
+                // see climb tags
                 || (observation.tagCount() == 1
                     && observation.ambiguity() > VisionConstants.maxAmbiguity)
                 // Cannot be high ambiguity
