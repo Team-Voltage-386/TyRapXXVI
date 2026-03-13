@@ -20,7 +20,6 @@ import frc.robot.commands.HubActivity;
 import frc.robot.commands.RotateToAngle;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.VisionConstants;
-import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
@@ -70,7 +69,7 @@ public class RobotContainer {
   private Flywheel flywheel;
   private Turret turret;
   private final IntakeSubsystem intake;
-  private final ClimbSubsystem climb;
+  // private final ClimbSubsystem climb;
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
@@ -144,7 +143,7 @@ public class RobotContainer {
                     .toArray(VisionIOPhotonVision[]::new));
 
         intake = new IntakeSubsystem(new IntakeIOSparkMax());
-        climb = new ClimbSubsystem();
+        // climb = new ClimbSubsystem();
 
         break;
 
@@ -195,7 +194,7 @@ public class RobotContainer {
                 this::verticalHalfOfField);
 
         intake = new IntakeSubsystem(intakeIOSim);
-        climb = new ClimbSubsystem();
+        // climb = new ClimbSubsystem();
 
         break;
 
@@ -210,7 +209,7 @@ public class RobotContainer {
                 new ModuleIO() {});
         vis = new Vision(drive::addVisionMeasurement);
         intake = new IntakeSubsystem(null);
-        climb = new ClimbSubsystem();
+        // climb = new ClimbSubsystem();
         spindexer = new SpindexerSubsystem();
         break;
     }
@@ -393,7 +392,7 @@ public class RobotContainer {
                   .handleInterrupt(
                       () -> CommandScheduler.getInstance().schedule(vis.turnClimbCameraOff())));
 
-      kManipController
+      /*kManipController
           .povLeft()
           .whileTrue(
               new FunctionalCommand(
@@ -420,7 +419,7 @@ public class RobotContainer {
                     climb.testClimbVoltage(0);
                   },
                   () -> false,
-                  climb));
+                  climb));*/
       kManipController
           .povUp()
           .whileTrue(
@@ -816,10 +815,9 @@ public class RobotContainer {
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(3),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            turret.disableAutoAimCommand(),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
-            new RotateToAngle(drive, () -> Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(2)),
-            climb.retractCommand());
+            new RotateToAngle(drive, () -> Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(2)));
     return auto;
   }
 
@@ -834,11 +832,10 @@ public class RobotContainer {
             DriveCommands.buildFollowPath("DepotSlowCollect"),
             new WaitCommand(5),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            turret.disableAutoAimCommand(),
             DriveCommands.buildFollowPath("AlignTowerFromDepot"),
             new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
-            climb.retractCommand());
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
     return auto;
   }
 
@@ -851,11 +848,10 @@ public class RobotContainer {
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(4),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            turret.disableAutoAimCommand(),
             DriveCommands.buildFollowPath("BlueHumanPlayerStation"),
             new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
-            climb.retractCommand());
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
     return auto;
   }
 
@@ -868,11 +864,10 @@ public class RobotContainer {
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(4),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            turret.disableAutoAimCommand(),
             DriveCommands.buildFollowPath("ClimbLeftFromCenter"),
             new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
-            climb.retractCommand());
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
     return auto;
   }
 
@@ -885,11 +880,10 @@ public class RobotContainer {
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(4),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            turret.disableAutoAimCommand(),
             DriveCommands.buildFollowPath("ClimbRightFromCenter"),
             new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
-            climb.retractCommand());
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
     return auto;
   }
 
@@ -903,10 +897,8 @@ public class RobotContainer {
             new WaitCommand(7),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             DriveCommands.buildFollowPath("RightSecondCollect"),
-            climb.deployCommand(),
             new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
-            climb.retractCommand());
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
     return auto;
   }
 
@@ -920,10 +912,9 @@ public class RobotContainer {
             new WaitCommand(8),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             DriveCommands.buildFollowPath("LeftSecondCollect"),
-            turret.disableAutoAimCommand().alongWith(climb.deployCommand()),
+            turret.disableAutoAimCommand(),
             new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4),
-            climb.retractCommand());
+            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
     return auto;
   }
 }

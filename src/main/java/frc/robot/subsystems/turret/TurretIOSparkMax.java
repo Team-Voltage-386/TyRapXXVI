@@ -64,6 +64,7 @@ public class TurretIOSparkMax implements TurretIO {
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
     yawConfig.inverted(true);
+    // yawConfig.absoluteEncoder.velocityConversionFactor(gearRatioPerRot);
 
     tryUntilOk(
         5,
@@ -141,6 +142,8 @@ public class TurretIOSparkMax implements TurretIO {
     inputs.turretYaw = yawTurretCenter.minus(TurretConstants.turretCenterOffsetRot);
     inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
     inputs.turretLimitTrue = !turretLimitInput.get();
+    Logger.recordOutput(
+        "/Shooter/Turret/ExternalEncoderYaw", yawMotor.getAlternateEncoder().getPosition() * 360.0);
 
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();

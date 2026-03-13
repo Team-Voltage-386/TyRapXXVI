@@ -208,6 +208,10 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
 
   // to help the kp value from freaking out at low speeds
   public void readjustPID() {
+    if (flywheelSetpoint == 0) {
+      flywheelMotor.setVoltage(0);
+      return;
+    }
     if (flywheelMotor.getEncoder().getVelocity() < threshold.getValue()) {
       flywheelMotor
           .getClosedLoopController()

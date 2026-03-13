@@ -14,11 +14,11 @@ public class TurretConstants {
   public static final double offsetY = -.099;
   public static final Translation2d turretPosition = new Translation2d(offsetX, offsetY);
 
-  public static final double turretCenterOffsetDeg = 50.0;
+  public static final double turretCenterOffsetDeg = 0;
   public static final Rotation2d turretCenterOffsetRot =
       Rotation2d.fromDegrees(turretCenterOffsetDeg);
-  public static final double turretDeadZoneCenterDeg = 130.0;
-  public static final double turretDeadZoneWidthDeg = 20.0;
+  public static final double turretDeadZoneCenterDeg = 180.0;
+  public static final double turretDeadZoneWidthDeg = 0.1;
   public static final double turretDeadZoneHalfWidthDeg = turretDeadZoneWidthDeg / 2.0;
   public static final double turretDeadZoneStartDeg =
       turretDeadZoneCenterDeg - turretDeadZoneHalfWidthDeg;
