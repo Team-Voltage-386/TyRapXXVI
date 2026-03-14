@@ -33,11 +33,9 @@ public class TurretIOSparkMax implements TurretIO {
   private final SparkMax hoodMotor =
       new SparkMax(TurretConstants.turretPitchCanId, MotorType.kBrushless);
 
-  private final RelativeEncoder yawEncoder = yawMotor.getAlternateEncoder();
+  private final RelativeEncoder yawEncoder = yawMotor.getEncoder();
   private final SparkMaxConfig yawConfig;
   private final SparkMaxConfig hoodConfig;
-
-  private static final int kCPR = 8192;
 
   // Turret Limit Input
   DigitalInput turretLimitInput = new DigitalInput(9);
@@ -54,15 +52,12 @@ public class TurretIOSparkMax implements TurretIO {
   public TurretIOSparkMax() {
     yawConfig = new SparkMaxConfig();
     yawConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12.0);
-    /*yawConfig
-    .encoder
-    .uvwAverageDepth(2)
-    .positionConversionFactor(gearRatioPerRot)
-    .velocityConversionFactor(gearRatioPerRot); */
     yawConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-        .pid(7.5, 0.0, 4.0);
+        .encoder
+        .uvwAverageDepth(2)
+        .positionConversionFactor(gearRatioPerRot)
+        .velocityConversionFactor(gearRatioPerRot);
+    yawConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(7.5, 0.0, 4.0);
     yawConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -71,11 +66,6 @@ public class TurretIOSparkMax implements TurretIO {
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
     yawConfig.inverted(true);
-    yawConfig.alternateEncoder.countsPerRevolution(kCPR);
-    yawConfig
-        .alternateEncoder
-        .velocityConversionFactor(gearRatioPerRot)
-        .positionConversionFactor(gearRatioPerRot);
 
     tryUntilOk(
         5,
@@ -154,10 +144,6 @@ public class TurretIOSparkMax implements TurretIO {
     inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
     inputs.turretLimitTrue = !turretLimitInput.get();
 
-    Logger.recordOutput(
-        "/Shooter/Turret/InternalEncoderYaw",
-        Rotation2d.fromRotations(yawMotor.getEncoder().getPosition()));
-
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
@@ -176,13 +162,24 @@ public class TurretIOSparkMax implements TurretIO {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
-    double desiredPositionDeg = position.getDegrees();
     Logger.recordOutput("/Shooter/Turret/DesiredAngleRobotCtr", position);
-    Rotation2d offsetPos =
-        Rotation2d.fromDegrees(
-            minus180To180(desiredPositionDeg + TurretConstants.turretCenterOffsetDeg));
+    double wrappedPositionDeg = position.getDegrees();
+    if (position.getRotations() > TurretConstants.turretMaxAngleRot) {
+      System.out.println("Wrapping angle around negative");
+      wrappedPositionDeg = wrappedPositionDeg - 360.0;
+    } else if (position.getRotations() < TurretConstants.turretMinAngleRot) {
+      System.out.println("Wrapping angle around positive");
+      wrappedPositionDeg = wrappedPositionDeg + 360.0;
+    }
+    Logger.recordOutput("/Shooter/Turret/DesiredAngleWrapped", wrappedPositionDeg);
+    Logger.recordOutput(
+        "/Shooter/Turret/DesiredAngleWrappedRot",
+        Rotation2d.fromDegrees(wrappedPositionDeg).getRotations());
     double desiredAngle =
-        MathUtil.clamp(offsetPos.getRotations(), turretMinAngleRot, turretMaxAngleRot);
+        MathUtil.clamp(
+            Rotation2d.fromDegrees(wrappedPositionDeg).getRotations(),
+            TurretConstants.turretMinAngleRot,
+            TurretConstants.turretMaxAngleRot);
 
     Logger.recordOutput(
         "/Shooter/Turret/DesiredAngleTurretCtr", Rotation2d.fromRotations(desiredAngle));
@@ -232,7 +229,7 @@ public class TurretIOSparkMax implements TurretIO {
   public void setYawZero() {
     System.out.println("turret encoder zeroed");
     yawEncoder.setPosition(
-        -1.0 * Rotation2d.fromDegrees(TurretConstants.turretCenterOffsetDeg).getRotations());
+        Rotation2d.fromDegrees(TurretConstants.turretCenterOffsetDeg).getRotations());
   }
 
   public void setHoodZero() {

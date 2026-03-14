@@ -52,7 +52,6 @@ public class Turret extends SubsystemBase {
     this.triggerSupplier = triggerSupplier;
 
     io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
-    io.setTurretYaw(Rotation2d.kZero);
   }
 
   public Command manualIncrimentPitch(Rotation2d deltaPitch) {
@@ -151,6 +150,10 @@ public class Turret extends SubsystemBase {
 
   public Command adjustPitch(Supplier<Double> pitchDeg) {
     return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
+  }
+
+  public Command adjustYaw(Supplier<Double> yawDeg) {
+    return runOnce(() -> io.setTurretYaw(Rotation2d.fromDegrees(yawDeg.get())));
   }
 
   public void setTarget() {

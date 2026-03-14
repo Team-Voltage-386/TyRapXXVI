@@ -14,11 +14,11 @@ public class TurretConstants {
   public static final double offsetY = -.099;
   public static final Translation2d turretPosition = new Translation2d(offsetX, offsetY);
 
-  public static final double turretCenterOffsetDeg = 0;
+  public static final double turretCenterOffsetDeg = 0.0;
   public static final Rotation2d turretCenterOffsetRot =
       Rotation2d.fromDegrees(turretCenterOffsetDeg);
-  public static final double turretDeadZoneCenterDeg = 180.0;
-  public static final double turretDeadZoneWidthDeg = 0.1;
+  public static final double turretDeadZoneCenterDeg = 36.5;
+  public static final double turretDeadZoneWidthDeg = 20.0;
   public static final double turretDeadZoneHalfWidthDeg = turretDeadZoneWidthDeg / 2.0;
   public static final double turretDeadZoneStartDeg =
       turretDeadZoneCenterDeg - turretDeadZoneHalfWidthDeg;
@@ -28,9 +28,8 @@ public class TurretConstants {
       turretDeadZoneCenterDeg + turretDeadZoneHalfWidthDeg;
   public static final Rotation2d turretDeadZoneEndRot =
       Rotation2d.fromDegrees(turretDeadZoneEndDeg);
-  public static final double turretMaxAngleRot =
-      Rotation2d.kPi.minus(Rotation2d.fromDegrees(turretDeadZoneHalfWidthDeg)).getRotations();
-  public static final double turretMinAngleRot = -turretMaxAngleRot;
+  public static final double turretMaxAngleRot = 0.075;
+  public static final double turretMinAngleRot = -.875;
 
   public static final double turretMaxHoodAngle = 62;
   public static final Rotation2d turretMaxHoodRot = Rotation2d.fromDegrees(turretMaxHoodAngle);

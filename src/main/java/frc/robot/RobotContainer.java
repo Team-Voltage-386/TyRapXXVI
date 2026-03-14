@@ -390,13 +390,7 @@ public class RobotContainer {
                   () -> false,
                   turret));
 
-      kManipController
-          .rightBumper()
-          .whileTrue(
-              new ConditionalCommand(
-                  turret.aimAtCommand(() -> getHubPose3d()),
-                  flywheel.shootCommand(),
-                  () -> turret.isAutoAimEnabled()));
+      kManipController.rightBumper().onTrue(turret.adjustYaw(setDegrees::getValue));
       // Manipulator controller bindings
       kManipController
           .a()
