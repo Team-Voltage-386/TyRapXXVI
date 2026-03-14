@@ -33,9 +33,11 @@ public class TurretIOSparkMax implements TurretIO {
   private final SparkMax hoodMotor =
       new SparkMax(TurretConstants.turretPitchCanId, MotorType.kBrushless);
 
-  private final RelativeEncoder yawEncoder = yawMotor.getEncoder();
+  private final RelativeEncoder yawEncoder = yawMotor.getAlternateEncoder();
   private final SparkMaxConfig yawConfig;
   private final SparkMaxConfig hoodConfig;
+
+  private static final int kCPR = 8192;
 
   // Turret Limit Input
   DigitalInput turretLimitInput = new DigitalInput(9);
@@ -46,16 +48,21 @@ public class TurretIOSparkMax implements TurretIO {
   TuningUtil hoodKd = new TuningUtil("/Tuning/turret/hoodKd", 0.0);
   TuningUtil turretRightLimit = new TuningUtil("/Tuning/turret/rightLimit", 0);
   TuningUtil turretLeftLimit = new TuningUtil("/Tuning/turret/leftLimit", 0);
+  protected boolean clockwiseLimitHit = false;
+  protected boolean counterclockwiseLimitHit = false;
 
   public TurretIOSparkMax() {
     yawConfig = new SparkMaxConfig();
     yawConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12.0);
+    /*yawConfig
+    .encoder
+    .uvwAverageDepth(2)
+    .positionConversionFactor(gearRatioPerRot)
+    .velocityConversionFactor(gearRatioPerRot); */
     yawConfig
-        .encoder
-        .uvwAverageDepth(2)
-        .positionConversionFactor(gearRatioPerRot)
-        .velocityConversionFactor(gearRatioPerRot);
-    yawConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(7.5, 0.0, 4.0);
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
+        .pid(7.5, 0.0, 4.0);
     yawConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -64,7 +71,11 @@ public class TurretIOSparkMax implements TurretIO {
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
     yawConfig.inverted(true);
-    // yawConfig.absoluteEncoder.velocityConversionFactor(gearRatioPerRot);
+    yawConfig.alternateEncoder.countsPerRevolution(kCPR);
+    yawConfig
+        .alternateEncoder
+        .velocityConversionFactor(gearRatioPerRot)
+        .positionConversionFactor(gearRatioPerRot);
 
     tryUntilOk(
         5,
@@ -142,8 +153,10 @@ public class TurretIOSparkMax implements TurretIO {
     inputs.turretYaw = yawTurretCenter.minus(TurretConstants.turretCenterOffsetRot);
     inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
     inputs.turretLimitTrue = !turretLimitInput.get();
+
     Logger.recordOutput(
-        "/Shooter/Turret/ExternalEncoderYaw", yawMotor.getAlternateEncoder().getPosition() * 360.0);
+        "/Shooter/Turret/InternalEncoderYaw",
+        Rotation2d.fromRotations(yawMotor.getEncoder().getPosition()));
 
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();

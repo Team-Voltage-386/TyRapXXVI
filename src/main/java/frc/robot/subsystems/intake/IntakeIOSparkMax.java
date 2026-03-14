@@ -29,7 +29,7 @@ public class IntakeIOSparkMax implements IntakeIO {
   public IntakeIOSparkMax() {
     retrieval_motor = new SparkFlex(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkFlexConfig retrievalConfig = new SparkFlexConfig();
-    retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(60).voltageCompensation(12.0);
+    retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(90).voltageCompensation(12.0);
     retrievalConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     retrievalConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
     retrievalConfig

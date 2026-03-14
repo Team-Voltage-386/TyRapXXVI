@@ -33,7 +33,9 @@ public class TurretConstants {
   public static final double turretMinAngleRot = -turretMaxAngleRot;
 
   public static final double turretMaxHoodAngle = 62;
+  public static final Rotation2d turretMaxHoodRot = Rotation2d.fromDegrees(turretMaxHoodAngle);
   public static final double turretMinHoodAngle = 40;
+  public static final Rotation2d turretMinHoodRot = Rotation2d.fromDegrees(turretMinHoodAngle);
   public static final double turretHoodAngleRange = turretMaxHoodAngle - turretMinHoodAngle;
 
   public static final double maxHoodSetpoint = 0.92;
@@ -52,6 +54,8 @@ public class TurretConstants {
   public static final double flywheelKs = 0.1515;
   public static final double flywheelKv = 0.001774;
   public static final double flywheelKa = 0.006;
+  public static final double manualShotSpeedRpm = 2270.0;
+  public static final double manualTriggerOnThreshold = 0.15;
 
   public static final double shooterWheelRadiusMeters = 0.05;
 
