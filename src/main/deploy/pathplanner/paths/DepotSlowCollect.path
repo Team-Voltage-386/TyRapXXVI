@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5562633451957297,
-        "y": 6.0
+        "x": 1.6324679029957196,
+        "y": 5.943452211126962
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3062633451957275,
-        "y": 6.0
+        "x": 1.3824679029957174,
+        "y": 5.943452211126962
       },
       "isLocked": false,
       "linkedName": "DepotOffset"
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.8,
+    "maxVelocity": 0.4,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

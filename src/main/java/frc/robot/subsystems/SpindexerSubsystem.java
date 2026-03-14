@@ -87,7 +87,8 @@ public class SpindexerSubsystem extends SubsystemBase {
   }
 
   public void feederReverse() {
-    System.out.println("turning on feeder");
+    System.out.println("reversing feeder");
+    spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
     feeder_motor.setVoltage(SpindexerConstants.FEEDER_MOTOR_VOLTAGE);
   }
 

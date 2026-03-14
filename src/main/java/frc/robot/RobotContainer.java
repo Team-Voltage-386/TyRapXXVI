@@ -799,13 +799,17 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("Spacing"),
+            new WaitCommand(.5),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(3),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            intake.takeInCommand(),
             DriveCommands.buildFollowPath("DepotFromCenter"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
-            new WaitCommand(8),
+            new WaitCommand(4),
+            intake.stopMotorCommand(),
+            new WaitCommand(4),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             turret.disableAutoAimCommand());
     return auto;
@@ -817,6 +821,7 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("Spacing"),
+            new WaitCommand(1),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(5),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
