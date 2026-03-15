@@ -389,13 +389,10 @@ public class RobotContainer {
       kManipController.rightBumper().onTrue(turret.adjustYaw(setDegrees::getValue));
       kManipController.start().onTrue(turret.toggleAutoAimCommand().alongWith(vis.toggleHubTags()));
       // Manipulator controller bindings
+      kManipController.a().onTrue(spindexer.feederReverseCommand());
       kManipController
           .a()
-          .whileTrue(
-              Commands.startEnd(
-                  () -> spindexer.feederReverseCommand(),
-                  () -> spindexer.feederOffCommand(),
-                  spindexer));
+          .onFalse(spindexer.feederOffCommand().alongWith(spindexer.spindexerOffCommand()));
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.reverseCommand());
       kManipController.x().onFalse(intake.stopMotorCommand());
@@ -861,11 +858,12 @@ public class RobotContainer {
             new WaitCommand(0.5),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
+            new WaitCommand(1.0),
             spindexer
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(8),
+            new WaitCommand(6),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),
