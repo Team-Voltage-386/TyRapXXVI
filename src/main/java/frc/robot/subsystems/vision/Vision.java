@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.util.TuningUtil;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -29,6 +30,10 @@ public class Vision extends SubsystemBase {
   protected double yDistanceMeters = 0.0;
   protected double zThetaDeg = 0.0;
   protected boolean climbing = false;
+  protected boolean preferHub = false;
+
+  TuningUtil lineStdDev = new TuningUtil("Tuning/Vision/linearStdDev", 0.2);
+  TuningUtil angleStdDev = new TuningUtil("Tuning/Vision/angularStdDev", 0.3);
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -94,7 +99,10 @@ public class Vision extends SubsystemBase {
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
-                || (!observation.useCamera() && climbing)
+                || (!observation.useCamera()
+                    && climbing) // reject pose if we are positioning for climb and camera doesnt
+                // see climb tags
+                || (!observation.favorHubTags() && preferHub)
                 || (observation.tagCount() == 1
                     && observation.ambiguity() > VisionConstants.maxAmbiguity)
                 // Cannot be high ambiguity
@@ -123,8 +131,8 @@ public class Vision extends SubsystemBase {
         // Calculate standard deviations
         double stdDevFactor =
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-        double linearStdDev = VisionConstants.linearStdDevBaseline * stdDevFactor;
-        double angularStdDev = VisionConstants.angularStdDevBaseline * stdDevFactor;
+        double linearStdDev = lineStdDev.getValue() * stdDevFactor;
+        double angularStdDev = angleStdDev.getValue() * stdDevFactor;
         if (observation.type() == PoseObservationType.MEGATAG_2) {
           linearStdDev *= VisionConstants.linearStdDevMegatag2Factor;
           angularStdDev *= VisionConstants.angularStdDevMegatag2Factor;
@@ -191,12 +199,16 @@ public class Vision extends SubsystemBase {
     }
   }
 
-  public Command turnClimbCameraOff() {
-    return new InstantCommand(() -> climbing = false);
+  public Command preferHubTagsOn() {
+    return new InstantCommand(() -> preferHub = true);
   }
 
-  public Command turnClimbCameraOn() {
-    return new InstantCommand(() -> climbing = true);
+  public Command preferHubTagsOff() {
+    return new InstantCommand(() -> preferHub = false);
+  }
+
+  public Command toggleHubTags() {
+    return new InstantCommand(() -> preferHub = !preferHub);
   }
 
   public int getTimeSinceValid() {
