@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.util.TuningUtil;
-
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -33,8 +32,8 @@ public class Vision extends SubsystemBase {
   protected boolean climbing = false;
   protected boolean preferHub = false;
 
-  TuningUtil lineStdDev = new TuningUtil("Tuning/Vision/linearStdDev", 0.02);
-  TuningUtil angleStdDev = new TuningUtil("Tuning/Vision/angularStdDev", 0.06);
+  TuningUtil lineStdDev = new TuningUtil("Tuning/Vision/linearStdDev", 0.2);
+  TuningUtil angleStdDev = new TuningUtil("Tuning/Vision/angularStdDev", 0.3);
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -206,6 +205,10 @@ public class Vision extends SubsystemBase {
 
   public Command preferHubTagsOff() {
     return new InstantCommand(() -> preferHub = false);
+  }
+
+  public Command toggleHubTags() {
+    return new InstantCommand(() -> preferHub = !preferHub);
   }
 
   public int getTimeSinceValid() {

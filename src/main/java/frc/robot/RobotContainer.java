@@ -351,8 +351,6 @@ public class RobotContainer {
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setHoodZero()));
 
       kDriveController.start().onTrue(turret.toggleAutoAimCommand());
-      kManipController.start().onTrue(vis.preferHubTagsOn());
-      kManipController.start().onFalse(vis.preferHubTagsOff());
       kManipController
           .back()
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setYawZero()));
@@ -389,7 +387,7 @@ public class RobotContainer {
                   turret));
 
       kManipController.rightBumper().onTrue(turret.adjustYaw(setDegrees::getValue));
-      kManipController.start().onTrue(turret.toggleAutoAimCommand());
+      kManipController.start().onTrue(turret.toggleAutoAimCommand().alongWith(vis.toggleHubTags()));
       // Manipulator controller bindings
       kManipController
           .a()
@@ -406,7 +404,6 @@ public class RobotContainer {
       kManipController
           .rightTrigger()
           .onTrue(spindexer.spindexerOnCommand().andThen(spindexer.feederOnCommand()));
-          
       kManipController
           .rightTrigger()
           .onFalse(
