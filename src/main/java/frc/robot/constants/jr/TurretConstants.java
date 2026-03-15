@@ -28,15 +28,15 @@ public class TurretConstants {
       turretDeadZoneCenterDeg + turretDeadZoneHalfWidthDeg;
   public static final Rotation2d turretDeadZoneEndRot =
       Rotation2d.fromDegrees(turretDeadZoneEndDeg);
-  public static final double turretMaxAngleRot = 0.075;
-  public static final double turretMinAngleRot = -.875;
+  public static final double turretMaxAngleRot = 0.065;
+  public static final double turretMinAngleRot = -.865;
 
   public static final double turretMaxRotationSpeedDegPerSec = 180.0;
   public static final double turretMaxRotationSpeedRotPerSec =
       turretMaxRotationSpeedDegPerSec / 360.0;
   public static final double turretMaxAccelDps2 = 360.0;
   public static final double turretMaxAccelRotPerSec2 = turretMaxAccelDps2 / 360.0;
-  public static final double maxYawVoltage = 3.0;
+  public static final double maxYawVoltage = 4.0;
 
   public static final double turretMaxHoodAngle = 62;
   public static final Rotation2d turretMaxHoodRot = Rotation2d.fromDegrees(turretMaxHoodAngle);
@@ -49,7 +49,7 @@ public class TurretConstants {
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.
   public static final double turretKs = 0.5; // volts
-  public static final double turretYawKp = 10.0; // volts per rotation
+  public static final double turretYawKp = 13.0; // volts per rotation
   public static final double turretYawKd = 0.0; // volts per rotation per second
 
   // This is found by running the motor at an arbitrary voltage (e.g., 3.3V) and measuring the

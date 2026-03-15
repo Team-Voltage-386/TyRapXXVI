@@ -74,7 +74,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
         .primaryEncoderPositionPeriodMs(100)
         .primaryEncoderVelocityAlwaysOn(true)
         .primaryEncoderVelocityPeriodMs(20)
-        .appliedOutputPeriodMs(20)
+        .appliedOutputPeriodMs(5)
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
     flywheelConfig.inverted(true);
