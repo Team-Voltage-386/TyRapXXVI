@@ -31,7 +31,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command reverseCommand() {
-    return Commands.startEnd(() -> intakeIO.reverse(), () -> intakeIO.stopMotor());
+    return Commands.runOnce(() -> intakeIO.reverse());
   }
 
   public boolean isMotorStalled() {

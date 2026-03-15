@@ -1,7 +1,7 @@
 package frc.robot.constants.jr;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 
 public class TurretConstants {
   public static final int turretYawCanId = 48;
@@ -14,11 +14,27 @@ public class TurretConstants {
   public static final double offsetY = -.099;
   public static final Translation2d turretPosition = new Translation2d(offsetX, offsetY);
 
-  public static final double turretMaxAngleRot = Units.degreesToRotations(70);
-  public static final double turretMinAngleRot = -turretMaxAngleRot;
+  public static final double turretCenterOffsetDeg = 0.0;
+  public static final Rotation2d turretCenterOffsetRot =
+      Rotation2d.fromDegrees(turretCenterOffsetDeg);
+  public static final double turretDeadZoneCenterDeg = 36.5;
+  public static final double turretDeadZoneWidthDeg = 20.0;
+  public static final double turretDeadZoneHalfWidthDeg = turretDeadZoneWidthDeg / 2.0;
+  public static final double turretDeadZoneStartDeg =
+      turretDeadZoneCenterDeg - turretDeadZoneHalfWidthDeg;
+  public static final Rotation2d turretDeadZoneStartRot =
+      Rotation2d.fromDegrees(turretDeadZoneStartDeg);
+  public static final double turretDeadZoneEndDeg =
+      turretDeadZoneCenterDeg + turretDeadZoneHalfWidthDeg;
+  public static final Rotation2d turretDeadZoneEndRot =
+      Rotation2d.fromDegrees(turretDeadZoneEndDeg);
+  public static final double turretMaxAngleRot = 0.075;
+  public static final double turretMinAngleRot = -.875;
 
   public static final double turretMaxHoodAngle = 62;
+  public static final Rotation2d turretMaxHoodRot = Rotation2d.fromDegrees(turretMaxHoodAngle);
   public static final double turretMinHoodAngle = 40;
+  public static final Rotation2d turretMinHoodRot = Rotation2d.fromDegrees(turretMinHoodAngle);
   public static final double turretHoodAngleRange = turretMaxHoodAngle - turretMinHoodAngle;
 
   public static final double maxHoodSetpoint = 0.92;
@@ -37,6 +53,8 @@ public class TurretConstants {
   public static final double flywheelKs = 0.1515;
   public static final double flywheelKv = 0.001774;
   public static final double flywheelKa = 0.006;
+  public static final double manualShotSpeedRpm = 2270.0;
+  public static final double manualTriggerOnThreshold = 0.15;
 
   public static final double shooterWheelRadiusMeters = 0.05;
 

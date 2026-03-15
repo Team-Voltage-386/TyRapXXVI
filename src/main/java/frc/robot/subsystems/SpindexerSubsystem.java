@@ -5,10 +5,10 @@ import static frc.robot.util.SparkUtil.*;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,14 +16,15 @@ import frc.robot.constants.jr.SpindexerConstants;
 
 public class SpindexerSubsystem extends SubsystemBase {
 
-  private final SparkMax spindexer_motor;
+  private final SparkFlex spindexer_motor;
 
-  private final SparkMax feeder_motor;
+  private final SparkFlex feeder_motor;
   public boolean feederOn = false;
 
   public SpindexerSubsystem() {
-    spindexer_motor = new SparkMax(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID, MotorType.kBrushless);
-    SparkMaxConfig spindexerConfig = new SparkMaxConfig();
+    spindexer_motor =
+        new SparkFlex(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID, MotorType.kBrushless);
+    SparkFlexConfig spindexerConfig = new SparkFlexConfig();
     spindexerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
     spindexerConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     spindexerConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
@@ -41,8 +42,8 @@ public class SpindexerSubsystem extends SubsystemBase {
             spindexer_motor.configure(
                 spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    feeder_motor = new SparkMax(SpindexerConstants.FEEDER_MOTOR_CAN_ID, MotorType.kBrushless);
-    SparkMaxConfig feederConfig = new SparkMaxConfig();
+    feeder_motor = new SparkFlex(SpindexerConstants.FEEDER_MOTOR_CAN_ID, MotorType.kBrushless);
+    SparkFlexConfig feederConfig = new SparkFlexConfig();
     feederConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(80).voltageCompensation(12.0);
     feederConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     feederConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
@@ -86,7 +87,8 @@ public class SpindexerSubsystem extends SubsystemBase {
   }
 
   public void feederReverse() {
-    System.out.println("turning on feeder");
+    System.out.println("reversing feeder");
+    spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
     feeder_motor.setVoltage(SpindexerConstants.FEEDER_MOTOR_VOLTAGE);
   }
 

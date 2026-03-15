@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.0666080958406698,
-        "y": 4.881008541483275
+        "x": 1.6324679029957196,
+        "y": 5.943452211126962
       },
       "prevControl": {
-        "x": 1.5687989656690149,
-        "y": 4.877203592649648
+        "x": 2.1346587728240647,
+        "y": 5.939647262293335
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BlueLeftTower"
+      "linkedName": "DepotOffset"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.15534666844687
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,

@@ -14,6 +14,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.constants.jr.IntakeConstants;
+import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeIOSparkMax implements IntakeIO {
@@ -21,11 +22,14 @@ public class IntakeIOSparkMax implements IntakeIO {
   private final SparkFlex retrieval_motor;
 
   private final SparkMax deploy_motor;
+  TuningUtil intakeVoltageTuneable =
+      new TuningUtil("/Tuning/intake/voltage", IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE);
+  double intakeVoltage = IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE;
 
   public IntakeIOSparkMax() {
     retrieval_motor = new SparkFlex(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkFlexConfig retrievalConfig = new SparkFlexConfig();
-    retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(60).voltageCompensation(12.0);
+    retrievalConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(90).voltageCompensation(12.0);
     retrievalConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     retrievalConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
     retrievalConfig
@@ -86,7 +90,7 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void takeIn() {
     System.out.println("taking in balls");
-    retrieval_motor.setVoltage(IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE);
+    retrieval_motor.setVoltage(intakeVoltage);
   }
 
   public void stopMotor() {
@@ -96,7 +100,7 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void reverse() {
     System.out.println("Reversing motor");
-    retrieval_motor.setVoltage(IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE * -1);
+    retrieval_motor.setVoltage(intakeVoltage * -1);
   }
 
   public boolean isMotorStalled() {
@@ -138,5 +142,12 @@ public class IntakeIOSparkMax implements IntakeIO {
     Logger.recordOutput("Intake/DeployMotor/Position", deploy_motor.getEncoder().getPosition());
     Logger.recordOutput(
         "Intake/DeployMotor/AbsolutePosition", deploy_motor.getAbsoluteEncoder().getPosition());
+
+    intakeVoltageTuneable.get().ifPresent(this::setIntakeVoltage);
+  }
+
+  public void setIntakeVoltage(double voltage) {
+    System.out.println("updated intake voltage to " + voltage);
+    intakeVoltage = voltage;
   }
 }

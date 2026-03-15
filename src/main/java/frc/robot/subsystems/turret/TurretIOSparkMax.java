@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.util.TuningUtil;
@@ -36,10 +37,17 @@ public class TurretIOSparkMax implements TurretIO {
   private final SparkMaxConfig yawConfig;
   private final SparkMaxConfig hoodConfig;
 
+  // Turret Limit Input
+  DigitalInput turretLimitInput = new DigitalInput(9);
+
   TuningUtil yawKp = new TuningUtil("/Tuning/turret/yawKp", 0.0);
   TuningUtil yawKd = new TuningUtil("/Tuning/turret/yawKd", 0.0);
   TuningUtil hoodKp = new TuningUtil("/Tuning/turret/hoodKp", 0.9);
   TuningUtil hoodKd = new TuningUtil("/Tuning/turret/hoodKd", 0.0);
+  TuningUtil turretRightLimit = new TuningUtil("/Tuning/turret/rightLimit", 0);
+  TuningUtil turretLeftLimit = new TuningUtil("/Tuning/turret/leftLimit", 0);
+  protected boolean clockwiseLimitHit = false;
+  protected boolean counterclockwiseLimitHit = false;
 
   public TurretIOSparkMax() {
     yawConfig = new SparkMaxConfig();
@@ -65,7 +73,7 @@ public class TurretIOSparkMax implements TurretIO {
             yawMotor.configure(
                 yawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    yawEncoder.setPosition(0);
+    setYawZero();
 
     hoodConfig = new SparkMaxConfig();
     hoodConfig.encoder.uvwAverageDepth(4).positionConversionFactor(1).velocityConversionFactor(1);
@@ -129,8 +137,13 @@ public class TurretIOSparkMax implements TurretIO {
             });
 
     inputs.connected = true;
-    inputs.turretYaw = Rotation2d.fromRotations(yawEncoder.getPosition());
+    Rotation2d yawTurretCenter = Rotation2d.fromRotations(yawEncoder.getPosition());
+
+    Logger.recordOutput("/Shooter/Turret/ActualYawTurretCtr", yawTurretCenter);
+    inputs.turretYaw = yawTurretCenter.minus(TurretConstants.turretCenterOffsetRot);
     inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
+    inputs.turretLimitTrue = !turretLimitInput.get();
+
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
@@ -139,6 +152,7 @@ public class TurretIOSparkMax implements TurretIO {
     Logger.recordOutput("/Shooter/Turret/AppliedOutput", yawMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Turret/Velocity", velocity);
     Logger.recordOutput("/Shooter/Turret/Current", yawMotor.getOutputCurrent());
+    Logger.recordOutput("/Shooter/Turret/LimitSwitchTrue", inputs.turretLimitTrue);
     Logger.recordOutput("/Shooter/Hood/AppliedOutput", hoodMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Hood/Setpoint", hoodsetpoint);
     Logger.recordOutput("/Shooter/Hood/Current", hoodMotor.getOutputCurrent());
@@ -148,14 +162,48 @@ public class TurretIOSparkMax implements TurretIO {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
+    Logger.recordOutput("/Shooter/Turret/DesiredAngleRobotCtr", position);
+    double wrappedPositionDeg = position.getDegrees();
+    if (position.getRotations() > TurretConstants.turretMaxAngleRot) {
+      System.out.println("Wrapping angle around negative");
+      wrappedPositionDeg = wrappedPositionDeg - 360.0;
+    } else if (position.getRotations() < TurretConstants.turretMinAngleRot) {
+      System.out.println("Wrapping angle around positive");
+      wrappedPositionDeg = wrappedPositionDeg + 360.0;
+    }
+    Logger.recordOutput("/Shooter/Turret/DesiredAngleWrapped", wrappedPositionDeg);
+    Logger.recordOutput(
+        "/Shooter/Turret/DesiredAngleWrappedRot",
+        Rotation2d.fromDegrees(wrappedPositionDeg).getRotations());
     double desiredAngle =
-        MathUtil.clamp(position.getRotations(), turretMinAngleRot, turretMaxAngleRot);
+        MathUtil.clamp(
+            Rotation2d.fromDegrees(wrappedPositionDeg).getRotations(),
+            TurretConstants.turretMinAngleRot,
+            TurretConstants.turretMaxAngleRot);
 
-    Logger.recordOutput("/Shooter/Turret/DesiredAngle", Rotation2d.fromRotations(desiredAngle));
+    Logger.recordOutput(
+        "/Shooter/Turret/DesiredAngleTurretCtr", Rotation2d.fromRotations(desiredAngle));
 
     yawMotor
         .getClosedLoopController()
         .setSetpoint(desiredAngle, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+  }
+
+  public double zeroTo360(double angle) {
+    double result = angle % 360;
+    if (result < 0) {
+      result += 360;
+    }
+    return result;
+  }
+
+  public double minus180To180(double angleDeg) {
+    double angle360 = zeroTo360(angleDeg);
+    if (angle360 > 180) {
+      return angle360 - 360;
+    } else {
+      return angle360;
+    }
   }
 
   public void testTurretVoltage(double volts) {
@@ -180,7 +228,8 @@ public class TurretIOSparkMax implements TurretIO {
 
   public void setYawZero() {
     System.out.println("turret encoder zeroed");
-    yawEncoder.setPosition(0);
+    yawEncoder.setPosition(
+        Rotation2d.fromDegrees(TurretConstants.turretCenterOffsetDeg).getRotations());
   }
 
   public void setHoodZero() {

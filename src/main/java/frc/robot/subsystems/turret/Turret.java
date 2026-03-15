@@ -30,6 +30,7 @@ public class Turret extends SubsystemBase {
   private Supplier<Boolean> isShootingSupplier;
   private Supplier<Boolean> isInAlliance;
   private Supplier<Boolean> verticalHalfofField;
+  private Supplier<Double> triggerSupplier;
 
   public Turret(
       TurretIO io,
@@ -38,7 +39,8 @@ public class Turret extends SubsystemBase {
       ShotCalculation shotCalculation,
       Supplier<Boolean> isShootingSupplier,
       Supplier<Boolean> isInAlliance,
-      Supplier<Boolean> verticalHalfofField) {
+      Supplier<Boolean> verticalHalfofField,
+      Supplier<Double> triggerSupplier) {
     this.io = io;
     this.dtPose = dtPose;
     this.flywheel = flywheel;
@@ -47,9 +49,9 @@ public class Turret extends SubsystemBase {
     this.isShootingSupplier = isShootingSupplier;
     this.isInAlliance = isInAlliance;
     this.verticalHalfofField = verticalHalfofField;
+    this.triggerSupplier = triggerSupplier;
 
     io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
-    io.setTurretYaw(Rotation2d.kZero);
   }
 
   public Command manualIncrimentPitch(Rotation2d deltaPitch) {
@@ -97,6 +99,11 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  // Stops the Turret Yaw
+  public void stopTurretYaw() {
+    io.testTurretVoltage(0);
+  }
+
   public Command toggleAutoAimCommand() {
     return runOnce(() -> toggleAutoAim());
   }
@@ -114,10 +121,12 @@ public class Turret extends SubsystemBase {
     if (isShootingSupplier.get()) {
       io.setTurretPitch(calculatedPitch);
     } else {
-      io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
+      io.setTurretPitch(TurretConstants.turretMaxHoodRot);
     }
 
-    io.setTurretYaw(new Rotation2d(yaw).minus(turretFieldPos.getRotation()));
+    double desiredTurretYaw =
+        Rotation2d.fromRadians(yaw).getDegrees() - turretFieldPos.getRotation().getDegrees();
+    io.setTurretYaw(limitTurretYaw(desiredTurretYaw));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
     double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
     flywheel.setFlywheelSpeed(shooterWheelRPM);
@@ -141,6 +150,10 @@ public class Turret extends SubsystemBase {
 
   public Command adjustPitch(Supplier<Double> pitchDeg) {
     return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
+  }
+
+  public Command adjustYaw(Supplier<Double> yawDeg) {
+    return runOnce(() -> io.setTurretYaw(Rotation2d.fromDegrees(yawDeg.get())));
   }
 
   public void setTarget() {
@@ -168,12 +181,57 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  public double zeroTo360(double angle) {
+    double result = angle % 360;
+    if (result < 0) {
+      result += 360;
+    }
+    return result;
+  }
+
+  public double getAngleDifference(double targetAngle, double currentAngle) {
+    double diff = zeroTo360(targetAngle) - zeroTo360(currentAngle);
+    if (diff > 180) {
+      diff -= 360;
+    } else if (diff < -180) {
+      diff += 360;
+    }
+    return diff;
+  }
+
+  protected Rotation2d limitTurretYaw(double desiredYawDeg) {
+    double desiredYaw360 = zeroTo360(desiredYawDeg);
+    // Check if the desired yaw is within the dead zone
+    if (Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneCenterDeg))
+        < (TurretConstants.turretDeadZoneHalfWidthDeg)) {
+      // If it is, snap to the nearest edge of the dead zone
+      if (Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneStartDeg))
+          < Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneEndDeg))) {
+        return TurretConstants.turretDeadZoneStartRot;
+      } else {
+        return TurretConstants.turretDeadZoneEndRot;
+      }
+    } else {
+      return Rotation2d.fromDegrees(desiredYaw360);
+    }
+  }
+
   @Override
   public void periodic() {
 
-    if (autoAimEnabled) {
+    if (inputs.turretLimitTrue) {
+      stopTurretYaw();
+    } else if (autoAimEnabled) {
       setTarget();
       aimAtTarget(currentTargetPose);
+    } else if (triggerSupplier.get() > TurretConstants.manualTriggerOnThreshold) {
+      // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
+      // and set the hood to the max angle for close range shots
+      io.setTurretPitch(TurretConstants.turretMaxHoodRot);
+      flywheel.setFlywheelSpeed(TurretConstants.manualShotSpeedRpm);
+    } else {
+      io.setTurretPitch(TurretConstants.turretMaxHoodRot);
+      flywheel.setFlywheelSpeed(0);
     }
 
     io.updateInputs(inputs);
