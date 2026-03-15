@@ -28,8 +28,9 @@ public class TurretConstants {
       turretDeadZoneCenterDeg + turretDeadZoneHalfWidthDeg;
   public static final Rotation2d turretDeadZoneEndRot =
       Rotation2d.fromDegrees(turretDeadZoneEndDeg);
-  public static final double turretMaxAngleRot = 0.065;
-  public static final double turretMinAngleRot = -.865;
+  public static final double turretYawLimitMarginRot = 0.01; // Margin to prevent hitting the limit switche
+  public static final double turretMaxAngleRot = 0.075 - turretYawLimitMarginRot; // Maximum counter clockwise rotation in rotations
+  public static final double turretMinAngleRot = -.875 + turretYawLimitMarginRot; // Maximum clockwise rotation in rotations
 
   public static final double turretMaxRotationSpeedDegPerSec = 180.0;
   public static final double turretMaxRotationSpeedRotPerSec =
