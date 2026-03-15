@@ -182,11 +182,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double zeroTo360(double angle) {
-    double result = angle % 360;
-    if (result < 0) {
-      result += 360;
-    }
-    return result;
+    return (angle + 360.0) % 360;
   }
 
   public double getAngleDifference(double targetAngle, double currentAngle) {
