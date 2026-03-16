@@ -428,35 +428,6 @@ public class RobotContainer {
       registerAuto(new AutoWrapper("BackUpAndShoot", "Spacing", true, buildSimpleRightAuto()));
       registerAuto(
           new AutoWrapper(
-              "LeftNeutralDepot", "CollectNeutralTopToDepot", true, buildNeutralCollectDepot()));
-      registerAuto(
-          new AutoWrapper(
-              "RightNeutralHumanPlayer",
-              "CollectNeutralBottomToHumanPlayer",
-              true,
-              buildRightNeutralZoneAuto()));
-      registerAuto(new AutoWrapper("Square", "Square", true, DriveCommands.driveSquare(drive)));
-      registerAuto(
-          new AutoWrapper(
-              "SquareStraight", "SquareStraight", true, DriveCommands.SquareStraight(drive)));
-      registerAuto(
-          new AutoWrapper("SmallSquare", "SmallSquare", true, DriveCommands.SmallSquare(drive)));
-      registerAuto(
-          new AutoWrapper("BlueSquare", "BlueSquare", true, DriveCommands.BlueSquare(drive)));
-      registerAuto(
-          new AutoWrapper(
-              "WheelRadiusCharacterization",
-              null,
-              false,
-              DriveCommands.wheelRadiusCharacterization(drive)));
-      registerAuto(
-          new AutoWrapper(
-              "DriveSimpleFFCharacterization",
-              null,
-              false,
-              DriveCommands.feedforwardCharacterization(drive)));
-      registerAuto(
-          new AutoWrapper(
               "RightTwoCollect",
               "CollectNeutralBottomShoot",
               true,
@@ -758,38 +729,6 @@ public class RobotContainer {
             DriveCommands.buildFollowPath("CollectDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             intake.stopMotorCommand());
-    return auto;
-  }
-
-  public Command buildNeutralCollectDepot() {
-    Command auto =
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            new WaitCommand(0.5),
-            intake.takeInCommand(),
-            DriveCommands.buildFollowPath("CollectNeutralTopToDepot"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            intake.stopMotorCommand(),
-            new WaitCommand(4),
-            intake.takeInCommand(),
-            DriveCommands.buildFollowPath("DepotSlowCollect"),
-            intake.stopMotorCommand());
-    return auto;
-  }
-
-  public Command buildRightNeutralZoneAuto() {
-    Command auto =
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            new WaitCommand(0.5),
-            intake.takeInCommand(),
-            DriveCommands.buildFollowPath("CollectNeutralBottomToHumanPlayer"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            intake.stopMotorCommand(),
-            new WaitCommand(4),
-            DriveCommands.buildFollowPath("BlueHumanPlayerStation"));
     return auto;
   }
 
