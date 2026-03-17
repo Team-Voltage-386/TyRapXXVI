@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -41,6 +42,7 @@ public class TurretIOSparkMax2 implements TurretIO {
 
   // Turret Limit Input
   DigitalInput turretLimitInput = new DigitalInput(9);
+  Debouncer debouncer = new Debouncer(0.05, Debouncer.DebounceType.kFalling);
 
   TuningUtil yawKp = new TuningUtil("/Tuning/turret/yawKp", TurretConstants.turretYawKp);
   TuningUtil yawKd = new TuningUtil("/Tuning/turret/yawKd", TurretConstants.turretYawKd);
@@ -54,6 +56,14 @@ public class TurretIOSparkMax2 implements TurretIO {
   protected boolean counterclockwiseLimitHit = false;
   protected double desiredAngle = 0.0;
   protected boolean manualMode = true;
+
+  public enum WhichLimit {
+    LEFT,
+    RIGHT,
+    NULL
+  }
+
+  WhichLimit limitSwitchTriggered = WhichLimit.NULL;
 
   protected ProfiledPIDController yawController =
       new ProfiledPIDController(
@@ -208,6 +218,7 @@ public class TurretIOSparkMax2 implements TurretIO {
     Logger.recordOutput("/Shooter/Turret/Velocity", velocity);
     Logger.recordOutput("/Shooter/Turret/Current", yawMotor.getOutputCurrent());
     Logger.recordOutput("/Shooter/Turret/LimitSwitchTrue", inputs.turretLimitTrue);
+    Logger.recordOutput("/Shooter/Turret/LimitSwitchTriggeredDirection", getLimitSwitch());
     Logger.recordOutput("/Shooter/Hood/AppliedOutput", hoodMotor.getAppliedOutput());
     Logger.recordOutput("/Shooter/Hood/Setpoint", hoodsetpoint);
     Logger.recordOutput("/Shooter/Hood/Current", hoodMotor.getOutputCurrent());
@@ -259,7 +270,28 @@ public class TurretIOSparkMax2 implements TurretIO {
 
   public void testTurretVoltage(double volts) {
     manualMode = true;
-    yawMotor.setVoltage(volts);
+    if (debouncer.calculate(!turretLimitInput.get())) {
+      // check velocity directions
+      if (yawEncoder.getVelocity() > 0 && limitSwitchTriggered == WhichLimit.NULL) {
+        limitSwitchTriggered = WhichLimit.LEFT;
+      }
+      if (yawEncoder.getVelocity() < 0 && limitSwitchTriggered == WhichLimit.NULL) {
+        limitSwitchTriggered = WhichLimit.RIGHT;
+      }
+    } else {
+      limitSwitchTriggered = WhichLimit.NULL;
+      yawMotor.setVoltage(volts);
+    }
+    if (limitSwitchTriggered == WhichLimit.RIGHT) {
+      System.out.println(
+          "Right limit switch triggered, cannot do volts in this direction any further");
+      yawMotor.setVoltage(MathUtil.clamp(volts, 0, TurretConstants.maxYawVoltage));
+    }
+    if (limitSwitchTriggered == WhichLimit.LEFT) {
+      System.out.println(
+          "Left limit switch triggered, cannot do volts in this direction any further");
+      yawMotor.setVoltage(MathUtil.clamp(volts, -TurretConstants.maxYawVoltage, 0));
+    }
   }
 
   public void testHoodVoltage(double volts) {
@@ -282,6 +314,22 @@ public class TurretIOSparkMax2 implements TurretIO {
     System.out.println("turret encoder zeroed");
     yawEncoder.setPosition(
         Rotation2d.fromDegrees(TurretConstants.turretCenterOffsetDeg).getRotations());
+  }
+
+  public String getLimitSwitch() {
+    String limitDirection = "no limit hit";
+    switch (limitSwitchTriggered) {
+      case RIGHT:
+        limitDirection = "right";
+        break;
+      case LEFT:
+        limitDirection = "left";
+        break;
+      case NULL:
+        limitDirection = "no limit hit";
+        break;
+    }
+    return limitDirection;
   }
 
   public void setHoodZero() {
