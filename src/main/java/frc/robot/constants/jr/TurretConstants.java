@@ -53,13 +53,13 @@ public class TurretConstants {
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.
   public static final double turretKs = 0.5; // volts
-  public static final double turretYawKp = 13.0; // volts per rotation
+  public static final double turretYawKp = 90.0; // volts per rotation
   public static final double turretYawKd = 0.0; // volts per rotation per second
 
   // This is found by running the motor at an arbitrary voltage (e.g., 3.3V) and measuring the
   // velocity reported by the encoder.
   // You then subtract the Ks from the voltage and divide by the velocity to get Kv.
-  public static final double turretKv = (3.3 - turretKs) / 68.25; // Volts per (rpm)
+  public static final double turretKv = 7.0; // Volts per (rpm)
 
   public static final int flywheelMasterCanId = 19;
   public static final int flywheelSlaveCanId = 11;

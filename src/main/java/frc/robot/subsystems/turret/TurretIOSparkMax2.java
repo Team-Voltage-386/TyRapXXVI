@@ -86,7 +86,7 @@ public class TurretIOSparkMax2 implements TurretIO {
         .uvwAverageDepth(2)
         .positionConversionFactor(gearRatioPerRot)
         .velocityConversionFactor(gearRatioPerRot);
-    yawConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(7.5, 0.0, 4.0);
+    yawConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0, 0.0, 0.00);
     yawConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -192,17 +192,21 @@ public class TurretIOSparkMax2 implements TurretIO {
         yawMotor.setVoltage(0);
       } else {
         double pidVal = yawController.calculate(yawEncoder.getPosition(), desiredAngle);
-        /*double feedforwardVal =
-        yawFeedforward.calculateWithVelocities(lastYawSpeed, yawController.getSetpoint().velocity); */
+        double feedforwardVal =
+            yawFeedforward.calculateWithVelocities(
+                lastYawSpeed, yawController.getSetpoint().velocity);
         double outVoltage =
-            MathUtil.clamp(pidVal, -TurretConstants.maxYawVoltage, TurretConstants.maxYawVoltage);
-        if (outVoltage > 0) {
-          outVoltage += yawFeedforward.getKs();
-        } else if (outVoltage < 0) {
-          outVoltage -= yawFeedforward.getKs();
-        }
+            MathUtil.clamp(
+                pidVal + feedforwardVal,
+                -TurretConstants.maxYawVoltage,
+                TurretConstants.maxYawVoltage);
+        // if (outVoltage > 0) {
+        //   outVoltage += yawFeedforward.getKs();
+        // } else if (outVoltage < 0) {
+        //   outVoltage -= yawFeedforward.getKs();
+        // }
         Logger.recordOutput("Shooter/Turret/pidVal", pidVal);
-        // Logger.recordOutput("Shooter/Turret/feedForwardVal", feedforwardVal);
+        Logger.recordOutput("Shooter/Turret/feedForwardVal", feedforwardVal);
         Logger.recordOutput("Shooter/Turret/outVoltage", outVoltage);
         Logger.recordOutput(
             "Shooter/Turret/profiledSetpoint", yawController.getSetpoint().position);
