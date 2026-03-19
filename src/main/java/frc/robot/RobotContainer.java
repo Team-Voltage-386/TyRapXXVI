@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.CycleIntake;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HubActivity;
 import frc.robot.constants.jr.DriveConstants;
@@ -32,8 +33,8 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax2;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIONull;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoWrapper;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -159,14 +160,19 @@ public class RobotContainer {
                 new ModuleIOSim(mods[2]),
                 new ModuleIOSim(mods[3]));
         // disable vision simulation for performance reasons
+        /*vis =
+        new Vision(
+            drive::addVisionMeasurement,
+            Stream.of(VisionConstants.cameraConfigs)
+                .map(
+                    cam ->
+                        new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
+                .toArray(VisionIOPhotonVision[]::new)); */
         vis =
             new Vision(
                 drive::addVisionMeasurement,
-                Stream.of(VisionConstants.cameraConfigs)
-                    .map(
-                        cam ->
-                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
-                    .toArray(VisionIOPhotonVision[]::new));
+                new VisionIONull(
+                    VisionConstants.cameraConfigs[0], driveSim::getSimulatedDriveTrainPose));
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
@@ -863,7 +869,7 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(6),
+            new ParallelRaceGroup(new WaitCommand(6), new CycleIntake(intake)),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),

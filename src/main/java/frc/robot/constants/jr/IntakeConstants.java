@@ -14,4 +14,8 @@ public final class IntakeConstants {
   public static final Rotation2d extendedAngle = Rotation2d.fromDegrees(0);
   public static final Rotation2d retractedAngle = Rotation2d.fromDegrees(90);
   public static final double speed = 180;
+
+  public static final double riseTimeDefaultSec = 0.7;
+  public static final double fallTimeDefaultSec = 1.3;
+  public static final double maxCycleAngleDefaultDeg = 30.0;
 }

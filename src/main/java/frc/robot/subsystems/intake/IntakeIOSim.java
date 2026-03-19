@@ -93,19 +93,26 @@ public class IntakeIOSim implements IntakeIO {
     // Not implemented in simulation
   }
 
+  public void setAngle(Rotation2d angle) {
+    currentSetPoint = angle;
+  }
+
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.connected = true;
     inputs.deployed = this.isDeployed;
     inputs.intakingState = this.intakingState;
-    if (currentSetPoint == IntakeConstants.extendedAngle) {
-      if (intakeMechanism.getAngle() > IntakeConstants.extendedAngle.getDegrees()) {
-        intakeMechanism.setAngle(intakeMechanism.getAngle() - (IntakeConstants.speed / 50));
-      }
-    } else {
-      if (intakeMechanism.getAngle() < IntakeConstants.retractedAngle.getDegrees()) {
-        intakeMechanism.setAngle(intakeMechanism.getAngle() + (IntakeConstants.speed / 50));
-      }
+
+    if (currentSetPoint.getDegrees() > intakeMechanism.getAngle()) {
+      intakeMechanism.setAngle(
+          Math.min(
+              currentSetPoint.getDegrees(),
+              intakeMechanism.getAngle() + (IntakeConstants.speed / 50)));
+    } else if (currentSetPoint.getDegrees() < intakeMechanism.getAngle()) {
+      intakeMechanism.setAngle(
+          Math.max(
+              currentSetPoint.getDegrees(),
+              intakeMechanism.getAngle() - (IntakeConstants.speed / 50)));
     }
     Logger.recordOutput("Intake/BallCount", this.intakeSimulation.getGamePiecesAmount());
     Logger.recordOutput("Intake/Mech", mech);

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.intake;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeIO {
@@ -36,4 +37,7 @@ public interface IntakeIO {
   public boolean isMotorStalled();
 
   public void testDeployVoltage(double voltage);
+
+  // Set intake angle where 0 degrees is parallel to the ground and +90 is vertical
+  public void setAngle(Rotation2d angle);
 }

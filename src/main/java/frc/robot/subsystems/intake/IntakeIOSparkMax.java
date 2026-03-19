@@ -13,6 +13,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.constants.jr.IntakeConstants;
 import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;
@@ -113,14 +114,10 @@ public class IntakeIOSparkMax implements IntakeIO {
   }
 
   public void testDeployVoltage(double voltage) {
-    /*if (voltage > 0) {
-      if (deploy_motor.getEncoder().getPosition() >= IntakeConstants.RETRACTED_DEPLOY_POSITION) {
+    /*if (voltage > 0) && (deploy_motor.getEncoder().getPosition() >= IntakeConstants.RETRACTED_DEPLOY_POSITION) {
         deploy_motor.setVoltage(0);
-      }
-    } else if (voltage < 0) {
-      if (deploy_motor.getEncoder().getPosition() <= IntakeConstants.EXTENDED_DEPLOY_POSITION) {
+    } else if (voltage < 0) && (deploy_motor.getEncoder().getPosition() <= IntakeConstants.EXTENDED_DEPLOY_POSITION) {
         deploy_motor.setVoltage(0);
-      }
     } else {
       deploy_motor.setVoltage(voltage);
     }*/
@@ -150,5 +147,13 @@ public class IntakeIOSparkMax implements IntakeIO {
   public void setIntakeVoltage(double voltage) {
     System.out.println("updated intake voltage to " + voltage);
     intakeVoltage = voltage;
+  }
+
+  public void setAngle(Rotation2d angle) {
+    // Convert angle to position
+    double position =
+        IntakeConstants.EXTENDED_DEPLOY_POSITION
+            - angle.getRotations() * (4.0 * IntakeConstants.EXTENDED_DEPLOY_POSITION);
+    deploy_motor.getClosedLoopController().setSetpoint(position, ControlType.kPosition);
   }
 }
