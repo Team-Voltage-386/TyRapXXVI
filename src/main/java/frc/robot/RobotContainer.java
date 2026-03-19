@@ -32,8 +32,8 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOSparkMax2;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIONull;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoWrapper;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -70,8 +70,8 @@ public class RobotContainer {
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.0);
-  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 40);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.8);
+  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 0.0);
 
   public SimContainer sim;
 
@@ -162,11 +162,9 @@ public class RobotContainer {
         vis =
             new Vision(
                 drive::addVisionMeasurement,
-                Stream.of(VisionConstants.cameraConfigs)
-                    .map(
-                        cam ->
-                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
-                    .toArray(VisionIOPhotonVision[]::new));
+                new VisionIONull(
+                    VisionConstants.cameraConfigs[0], driveSim::getSimulatedDriveTrainPose));
+        ;
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());

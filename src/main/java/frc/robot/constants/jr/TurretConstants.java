@@ -35,10 +35,10 @@ public class TurretConstants {
   public static final double turretMinAngleRot =
       -.875 + turretYawLimitMarginRot; // Maximum clockwise rotation in rotations
 
-  public static final double turretMaxRotationSpeedDegPerSec = 180.0;
+  public static final double turretMaxRotationSpeedDegPerSec = 360.0;
   public static final double turretMaxRotationSpeedRotPerSec =
       turretMaxRotationSpeedDegPerSec / 360.0;
-  public static final double turretMaxAccelDps2 = 360.0;
+  public static final double turretMaxAccelDps2 = 720.0;
   public static final double turretMaxAccelRotPerSec2 = turretMaxAccelDps2 / 360.0;
   public static final double maxYawVoltage = 8.0;
 
@@ -53,7 +53,7 @@ public class TurretConstants {
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.
   public static final double turretKs = 0.5; // volts
-  public static final double turretYawKp = 90.0; // volts per rotation
+  public static final double turretYawKp = 80.0; // volts per rotation
   public static final double turretYawKd = 0.0; // volts per rotation per second
 
   // This is found by running the motor at an arbitrary voltage (e.g., 3.3V) and measuring the

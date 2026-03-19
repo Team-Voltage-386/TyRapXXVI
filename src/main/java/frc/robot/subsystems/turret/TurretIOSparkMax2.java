@@ -74,7 +74,7 @@ public class TurretIOSparkMax2 implements TurretIO {
               TurretConstants.turretMaxRotationSpeedRotPerSec,
               TurretConstants.turretMaxAccelRotPerSec2));
   protected SimpleMotorFeedforward yawFeedforward =
-      new SimpleMotorFeedforward(TurretConstants.turretKs, TurretConstants.turretKv);
+      new SimpleMotorFeedforward(0.0, TurretConstants.turretKv);
 
   protected double lastYawSpeed = 0.0;
 
@@ -186,7 +186,7 @@ public class TurretIOSparkMax2 implements TurretIO {
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
-
+    handleLimits();
     if (!manualMode) {
       if (Math.abs(desiredAngle - yawEncoder.getPosition()) < (1.0 / 360.0)) {
         yawMotor.setVoltage(0);
@@ -200,10 +200,17 @@ public class TurretIOSparkMax2 implements TurretIO {
                 pidVal + feedforwardVal,
                 -TurretConstants.maxYawVoltage,
                 TurretConstants.maxYawVoltage);
-        // if (outVoltage > 0) {
-        //   outVoltage += yawFeedforward.getKs();
-        // } else if (outVoltage < 0) {
-        //   outVoltage -= yawFeedforward.getKs();
+        if (outVoltage > 0) {
+          outVoltage += TurretConstants.turretKs;
+        } else if (outVoltage < 0) {
+          outVoltage -= TurretConstants.turretKs;
+        }
+
+        // if (limitSwitchTriggered == WhichLimit.RIGHT) {
+        //   MathUtil.clamp(outVoltage, 0, TurretConstants.maxYawVoltage);
+        // }
+        // if (limitSwitchTriggered == WhichLimit.LEFT) {
+        //   MathUtil.clamp(outVoltage, -TurretConstants.maxYawVoltage, 0);
         // }
         Logger.recordOutput("Shooter/Turret/pidVal", pidVal);
         Logger.recordOutput("Shooter/Turret/feedForwardVal", feedforwardVal);
@@ -236,10 +243,8 @@ public class TurretIOSparkMax2 implements TurretIO {
     Logger.recordOutput("/Shooter/Turret/DesiredAngleRobotCtr", position);
     double wrappedPositionDeg = position.getDegrees();
     if (position.getRotations() > TurretConstants.turretMaxAngleRot) {
-      System.out.println("Wrapping angle around negative");
       wrappedPositionDeg = wrappedPositionDeg - 360.0;
     } else if (position.getRotations() < TurretConstants.turretMinAngleRot) {
-      System.out.println("Wrapping angle around positive");
       wrappedPositionDeg = wrappedPositionDeg + 360.0;
     }
     Logger.recordOutput("/Shooter/Turret/DesiredAngleWrapped", wrappedPositionDeg);
@@ -274,18 +279,6 @@ public class TurretIOSparkMax2 implements TurretIO {
 
   public void testTurretVoltage(double volts) {
     manualMode = true;
-    if (debouncer.calculate(!turretLimitInput.get())) {
-      // check velocity directions
-      if (yawEncoder.getVelocity() > 0 && limitSwitchTriggered == WhichLimit.NULL) {
-        limitSwitchTriggered = WhichLimit.LEFT;
-      }
-      if (yawEncoder.getVelocity() < 0 && limitSwitchTriggered == WhichLimit.NULL) {
-        limitSwitchTriggered = WhichLimit.RIGHT;
-      }
-    } else {
-      limitSwitchTriggered = WhichLimit.NULL;
-      yawMotor.setVoltage(volts);
-    }
     if (limitSwitchTriggered == WhichLimit.RIGHT) {
       System.out.println(
           "Right limit switch triggered, cannot do volts in this direction any further");
@@ -295,6 +288,9 @@ public class TurretIOSparkMax2 implements TurretIO {
       System.out.println(
           "Left limit switch triggered, cannot do volts in this direction any further");
       yawMotor.setVoltage(MathUtil.clamp(volts, -TurretConstants.maxYawVoltage, 0));
+    }
+    if (limitSwitchTriggered == WhichLimit.NULL) {
+      yawMotor.setVoltage(volts);
     }
   }
 
@@ -318,6 +314,20 @@ public class TurretIOSparkMax2 implements TurretIO {
     System.out.println("turret encoder zeroed");
     yawEncoder.setPosition(
         Rotation2d.fromDegrees(TurretConstants.turretCenterOffsetDeg).getRotations());
+  }
+
+  public void handleLimits() {
+    if (debouncer.calculate(!turretLimitInput.get())) {
+      // check velocity directions
+      if (yawEncoder.getVelocity() > 0 && limitSwitchTriggered == WhichLimit.NULL) {
+        limitSwitchTriggered = WhichLimit.LEFT;
+      }
+      if (yawEncoder.getVelocity() < 0 && limitSwitchTriggered == WhichLimit.NULL) {
+        limitSwitchTriggered = WhichLimit.RIGHT;
+      }
+    } else {
+      limitSwitchTriggered = WhichLimit.NULL;
+    }
   }
 
   public String getLimitSwitch() {
