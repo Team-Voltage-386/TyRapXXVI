@@ -152,13 +152,13 @@ public class IntakeIOSparkMax implements IntakeIO {
 
     if (!manual) {
       if (currentSetpoint < targetSetpoint) {
-        currentSetpoint = Math.min(targetSetpoint, currentSetpoint + IntakeConstants.deployIncPerStep);
+        currentSetpoint =
+            Math.min(targetSetpoint, currentSetpoint + IntakeConstants.deployIncPerStep);
       } else if (currentSetpoint > targetSetpoint) {
-        currentSetpoint = Math.max(targetSetpoint, currentSetpoint - IntakeConstants.deployIncPerStep);
+        currentSetpoint =
+            Math.max(targetSetpoint, currentSetpoint - IntakeConstants.deployIncPerStep);
       }
-      deploy_motor
-          .getClosedLoopController()
-          .setSetpoint(currentSetpoint, ControlType.kPosition);
+      deploy_motor.getClosedLoopController().setSetpoint(currentSetpoint, ControlType.kPosition);
     }
   }
 
