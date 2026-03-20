@@ -25,6 +25,9 @@ public class IntakeIOSparkMax implements IntakeIO {
   TuningUtil intakeVoltageTuneable =
       new TuningUtil("/Tuning/intake/voltage", IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE);
   double intakeVoltage = IntakeConstants.RETRIEVAL_MOTOR_VOLTAGE;
+  double currentSetpoint = IntakeConstants.RETRACTED_DEPLOY_POSITION;
+  double targetSetpoint = IntakeConstants.RETRACTED_DEPLOY_POSITION;
+  boolean manual = false;
 
   public IntakeIOSparkMax() {
     retrieval_motor = new SparkFlex(IntakeConstants.RETRIEVAL_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -76,16 +79,16 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void deploy() {
     System.out.println("deploying intake mechanism");
-    deploy_motor
-        .getClosedLoopController()
-        .setSetpoint(IntakeConstants.EXTENDED_DEPLOY_POSITION, ControlType.kPosition);
+    currentSetpoint = deploy_motor.getEncoder().getPosition();
+    targetSetpoint = IntakeConstants.EXTENDED_DEPLOY_POSITION;
+    manual = false;
   }
 
   public void retract() {
     System.out.println("retracting intake mechanism");
-    deploy_motor
-        .getClosedLoopController()
-        .setSetpoint(IntakeConstants.RETRACTED_DEPLOY_POSITION, ControlType.kPosition);
+    currentSetpoint = deploy_motor.getEncoder().getPosition();
+    targetSetpoint = IntakeConstants.RETRACTED_DEPLOY_POSITION;
+    manual = false;
   }
 
   public void takeIn() {
@@ -124,6 +127,7 @@ public class IntakeIOSparkMax implements IntakeIO {
     } else {
       deploy_motor.setVoltage(voltage);
     }*/
+    manual = true;
     deploy_motor.setVoltage(voltage);
   }
 
@@ -145,10 +149,22 @@ public class IntakeIOSparkMax implements IntakeIO {
         "Intake/DeployMotor/AbsolutePosition", deploy_motor.getAbsoluteEncoder().getPosition());
 
     intakeVoltageTuneable.get().ifPresent(this::setIntakeVoltage);
+
+    if (!manual) {
+      if (currentSetpoint < targetSetpoint) {
+        currentSetpoint = Math.min(targetSetpoint, currentSetpoint + IntakeConstants.deployIncPerStep);
+      } else if (currentSetpoint > targetSetpoint) {
+        currentSetpoint = Math.max(targetSetpoint, currentSetpoint - IntakeConstants.deployIncPerStep);
+      }
+      deploy_motor
+          .getClosedLoopController()
+          .setSetpoint(currentSetpoint, ControlType.kPosition);
+    }
   }
 
   public void setIntakeVoltage(double voltage) {
     System.out.println("updated intake voltage to " + voltage);
+    manual = true;
     intakeVoltage = voltage;
   }
 }
