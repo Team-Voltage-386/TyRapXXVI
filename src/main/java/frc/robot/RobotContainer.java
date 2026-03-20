@@ -407,8 +407,11 @@ public class RobotContainer {
           .onFalse(
               spindexer
                   .spindexerOffCommand()
-                  .andThen(new WaitCommand(2.0))
-                  .andThen(spindexer.feederOffCommand()));
+                  .andThen(new WaitCommand(1.0))
+                  .andThen(
+                      spindexer
+                          .feederOffCommand()
+                          .onlyIf(() -> kManipController.getHID().getRightTriggerAxis() == 0)));
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
       kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());
     }
