@@ -233,7 +233,8 @@ public class RobotContainer {
             drive,
             () -> -kDriveController.getLeftY(),
             () -> -kDriveController.getLeftX(),
-            () -> -kDriveController.getRightX()));
+            () -> -kDriveController.getRightX(),
+            spindexer::isFeederOn));
 
     // Lock to nearest 45° when A button is held
     kDriveController
@@ -406,7 +407,7 @@ public class RobotContainer {
           .onFalse(
               spindexer
                   .spindexerOffCommand()
-                  .andThen(new WaitCommand(0.25))
+                  .andThen(new WaitCommand(2.0))
                   .andThen(spindexer.feederOffCommand()));
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
       kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());

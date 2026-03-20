@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class ShotCalculation {
@@ -25,6 +26,7 @@ public class ShotCalculation {
   private double hoodAngle = Double.NaN;
   private double turretVelocity;
   private double hoodVelocity;
+  TuningUtil addRPM = new TuningUtil("/Tuning/turret/addRPM", 0.0);
 
   public record LaunchingParameters(
       boolean isValid,
@@ -151,7 +153,7 @@ public class ShotCalculation {
             turretVelocity,
             hoodAngle,
             hoodVelocity,
-            launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance),
+            launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance) + addRPM.getValue(),
             lookaheadPose);
 
     // Log calculated values

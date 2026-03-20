@@ -214,10 +214,7 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
-
-    if (inputs.turretLimitTrue) {
-      stopTurretYaw();
-    } else if (autoAimEnabled) {
+    if (autoAimEnabled) {
       setTarget();
       aimAtTarget(currentTargetPose);
     } else if (triggerSupplier.get() > TurretConstants.manualTriggerOnThreshold) {

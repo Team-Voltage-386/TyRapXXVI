@@ -225,7 +225,7 @@ public final class DriveConstants {
 
       turnCancoderIds = new int[] {9, 12, 10, 11};
 
-      driveCurrentLimit = 60; // 50;
+      driveCurrentLimit = 50;
 
       turnCurrentLimit = 20;
 
@@ -276,7 +276,7 @@ public final class DriveConstants {
       rotationPID = new PIDConstants(4.0, 0.0, 0.0);
 
       // Meters/Sec
-      maxSpeed = 5.45;
+      maxSpeed = 4.45;
 
       odometryFrequency = 100.0;
 
