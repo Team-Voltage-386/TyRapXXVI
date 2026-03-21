@@ -164,7 +164,6 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void setIntakeVoltage(double voltage) {
     System.out.println("updated intake voltage to " + voltage);
-    manual = true;
     intakeVoltage = voltage;
   }
 }
