@@ -61,10 +61,17 @@ public class DriveCommands {
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
-      DoubleSupplier omegaSupplier) {
+      DoubleSupplier omegaSupplier,
+      Supplier<Boolean> shootSupplier) {
     return Commands.run(
         () -> {
           // Get linear velocity
+          double speedMultiplier = 1.0;
+          if (shootSupplier.get()) {
+            speedMultiplier = 0.5;
+          } else {
+            speedMultiplier = 1.0;
+          }
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
@@ -75,10 +82,18 @@ public class DriveCommands {
           omega = Math.copySign(omega * omega, omega);
 
           // Convert to field relative speeds & send command
+          double minSpeed = -1.0 * drive.getMaxLinearSpeedMetersPerSec() * speedMultiplier;
+          double maxSpeed = -1.0 * minSpeed;
           ChassisSpeeds speeds =
               new ChassisSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  MathUtil.clamp(
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      minSpeed,
+                      maxSpeed),
+                  MathUtil.clamp(
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      minSpeed,
+                      maxSpeed),
                   omega * drive.getMaxAngularSpeedRadPerSec());
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()

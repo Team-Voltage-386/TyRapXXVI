@@ -206,12 +206,12 @@ public class TurretIOSparkMax2 implements TurretIO {
           outVoltage -= TurretConstants.turretKs;
         }
 
-        // if (limitSwitchTriggered == WhichLimit.RIGHT) {
-        //   MathUtil.clamp(outVoltage, 0, TurretConstants.maxYawVoltage);
-        // }
-        // if (limitSwitchTriggered == WhichLimit.LEFT) {
-        //   MathUtil.clamp(outVoltage, -TurretConstants.maxYawVoltage, 0);
-        // }
+        if (limitSwitchTriggered == WhichLimit.RIGHT) {
+          MathUtil.clamp(outVoltage, 0, TurretConstants.maxYawVoltage);
+        }
+        if (limitSwitchTriggered == WhichLimit.LEFT) {
+          MathUtil.clamp(outVoltage, -TurretConstants.maxYawVoltage, 0);
+        }
         Logger.recordOutput("Shooter/Turret/pidVal", pidVal);
         Logger.recordOutput("Shooter/Turret/feedForwardVal", feedforwardVal);
         Logger.recordOutput("Shooter/Turret/outVoltage", outVoltage);

@@ -1,0 +1,1572 @@
+{
+  "version": 1.0,
+  "grid_size": 100,
+  "tabs": [
+    {
+      "name": "Rebuilt",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "6E-91-E3-25-DE-16",
+            "x": 1300.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 200.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "cameraNames",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/coprocessors/6E-91-E3-25-DE-16/cameraNames",
+                  "period": 0.06,
+                  "data_type": "string[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "hostname",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/coprocessors/6E-91-E3-25-DE-16/hostname",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "AE-F7-90-24-D4-77",
+            "x": 1300.0,
+            "y": 200.0,
+            "width": 200.0,
+            "height": 200.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "cameraNames",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/coprocessors/AE-F7-90-24-D4-77/cameraNames",
+                  "period": 0.06,
+                  "data_type": "string[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "hostname",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/coprocessors/AE-F7-90-24-D4-77/hostname",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Camera0",
+            "x": 900.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 200.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Connected",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera0/Connected",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "TagIds",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera0/TagIds",
+                  "period": 0.06,
+                  "data_type": "int[]",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Camera1",
+            "x": 1100.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 200.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Connected",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera1/Connected",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "TagIds",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera1/TagIds",
+                  "period": 0.06,
+                  "data_type": "int[]",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Camera2",
+            "x": 900.0,
+            "y": 200.0,
+            "width": 200.0,
+            "height": 200.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Connected",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera2/Connected",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "TagIds",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera2/TagIds",
+                  "period": 0.06,
+                  "data_type": "int[]",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Camera3",
+            "x": 1100.0,
+            "y": 200.0,
+            "width": 200.0,
+            "height": 200.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Connected",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera3/Connected",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "TagIds",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/Vision/Camera3/TagIds",
+                  "period": 0.06,
+                  "data_type": "int[]",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "Auto Choices",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 300.0,
+            "height": 200.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Choices",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "TurretLimitTrue",
+            "x": 700.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 200.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Shooter/Turret/Inputs/TurretLimitTrue",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Cameras",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "backleft",
+            "x": 700.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 700.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "cameraDistortion",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/cameraDistortion",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "cameraIntrinsics",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/cameraIntrinsics",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driverMode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/backleft/driverMode",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "driverModeRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/backleft/driverModeRequest",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "fps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/fps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimit",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/fpsLimit",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimitRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/fpsLimitRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "hasTarget",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/backleft/hasTarget",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "heartbeat",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/heartbeat",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "inputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/inputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "latencyMillis",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/latencyMillis",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "outputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/outputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/pipelineIndexRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexState",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/pipelineIndexState",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetArea",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/targetArea",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPitch",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/targetPitch",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsX",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/targetPixelsX",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsY",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/targetPixelsY",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetSkew",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/targetSkew",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetYaw",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backleft/targetYaw",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "backright",
+            "x": 900.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 700.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "cameraDistortion",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/cameraDistortion",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "cameraIntrinsics",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/cameraIntrinsics",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driverMode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/backright/driverMode",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "driverModeRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/backright/driverModeRequest",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "fps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/fps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimit",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/fpsLimit",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimitRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/fpsLimitRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "hasTarget",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/backright/hasTarget",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "heartbeat",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/heartbeat",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "inputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/inputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "latencyMillis",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/latencyMillis",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "outputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/outputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/pipelineIndexRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexState",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/pipelineIndexState",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetArea",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/targetArea",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPitch",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/targetPitch",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsX",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/targetPixelsX",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsY",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/targetPixelsY",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetSkew",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/targetSkew",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetYaw",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/backright/targetYaw",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "frontleft",
+            "x": 1100.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 700.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "cameraDistortion",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/cameraDistortion",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "cameraIntrinsics",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/cameraIntrinsics",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driverMode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/frontleft/driverMode",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "driverModeRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/frontleft/driverModeRequest",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "fps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/fps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimit",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/fpsLimit",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimitRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/fpsLimitRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "hasTarget",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/frontleft/hasTarget",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "heartbeat",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/heartbeat",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "inputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/inputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "latencyMillis",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/latencyMillis",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "outputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/outputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/pipelineIndexRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexState",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/pipelineIndexState",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetArea",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/targetArea",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPitch",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/targetPitch",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsX",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/targetPixelsX",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsY",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/targetPixelsY",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetSkew",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/targetSkew",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetYaw",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontleft/targetYaw",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "frontright",
+            "x": 1300.0,
+            "y": 0.0,
+            "width": 200.0,
+            "height": 700.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "cameraDistortion",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/cameraDistortion",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "cameraIntrinsics",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/cameraIntrinsics",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driverMode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/frontright/driverMode",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "driverModeRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/frontright/driverModeRequest",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "fps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/fps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimit",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/fpsLimit",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "fpsLimitRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/fpsLimitRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "hasTarget",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/frontright/hasTarget",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "heartbeat",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/heartbeat",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "inputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/inputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "latencyMillis",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/latencyMillis",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "outputSaveImgCmd",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/outputSaveImgCmd",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/pipelineIndexRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pipelineIndexState",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/pipelineIndexState",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetArea",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/targetArea",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPitch",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/targetPitch",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsX",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/targetPixelsX",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetPixelsY",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/targetPixelsY",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetSkew",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/targetSkew",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "targetYaw",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 200.0,
+                "height": 200.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/frontright/targetYaw",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "photonvision1_Port_1182_Output_MJPEG_Server",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 300.0,
+            "height": 300.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision1_Port_1182_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "photonvision1_Port_1184_Output_MJPEG_Server",
+            "x": 300.0,
+            "y": 0.0,
+            "width": 300.0,
+            "height": 300.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision1_Port_1184_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "photonvision2_Port_1182_Output_MJPEG_Server",
+            "x": 0.0,
+            "y": 300.0,
+            "width": 300.0,
+            "height": 300.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision2_Port_1182_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "photonvision2_Port_1184_Output_MJPEG_Server",
+            "x": 300.0,
+            "y": 300.0,
+            "width": 300.0,
+            "height": 300.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision2_Port_1184_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
