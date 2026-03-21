@@ -13,6 +13,7 @@ public interface TurretIO {
     public Rotation2d turretYaw = new Rotation2d();
     public Rotation2d turretPitch = new Rotation2d();
     public boolean turretLimitTrue = false;
+    public boolean withinTargetYawMargin = false;
   }
 
   default void updateInputs(TurretIOInputs inputs) {}

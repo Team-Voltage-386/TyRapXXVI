@@ -176,6 +176,7 @@ public class TurretIOSparkMax2 implements TurretIO {
             });
 
     inputs.connected = true;
+    inputs.withinTargetYawMargin = Math.abs(desiredAngle - yawEncoder.getPosition()) < 5/360;
     Rotation2d yawTurretCenter = Rotation2d.fromRotations(yawEncoder.getPosition());
 
     Logger.recordOutput("/Shooter/Turret/ActualYawTurretCtr", yawTurretCenter);

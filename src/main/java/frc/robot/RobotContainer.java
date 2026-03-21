@@ -131,7 +131,8 @@ public class RobotContainer {
                 spindexer::isFeederOn,
                 this::isInAllianceArea,
                 this::verticalHalfOfField,
-                this::getShotTriggerValue);
+                this::getShotTriggerValue,
+                spindexer);
 
         vis =
             new Vision(
@@ -187,7 +188,8 @@ public class RobotContainer {
                 spindexer::isFeederOn,
                 this::isInAllianceArea,
                 this::verticalHalfOfField,
-                this::getShotTriggerValue);
+                this::getShotTriggerValue,
+                spindexer);
 
         intake = new IntakeSubsystem(intakeIOSim);
 
@@ -401,13 +403,13 @@ public class RobotContainer {
 
       kManipController
           .rightTrigger()
-          .onTrue(spindexer.spindexerOnCommand().andThen(spindexer.feederOnCommand()));
+          .onTrue(spindexer.feederOnCommand());
       kManipController
           .rightTrigger()
           .onFalse(
               spindexer
                   .spindexerOffCommand()
-                  .andThen(new WaitCommand(2.0))
+                  .andThen(new WaitCommand(1.0))
                   .andThen(spindexer.feederOffCommand()));
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
       kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());

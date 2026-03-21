@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.flywheel.Flywheel;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -21,6 +22,7 @@ public class Turret extends SubsystemBase {
   private final Supplier<Pose2d> dtPose;
   private Pose3d currentTargetPose = new Pose3d(Constants.blueHubPose, Rotation3d.kZero);
   private final Flywheel flywheel;
+  private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
   private boolean autoAimEnabled = false;
@@ -31,6 +33,7 @@ public class Turret extends SubsystemBase {
   private Supplier<Boolean> isInAlliance;
   private Supplier<Boolean> verticalHalfofField;
   private Supplier<Double> triggerSupplier;
+  
 
   public Turret(
       TurretIO io,
@@ -40,10 +43,12 @@ public class Turret extends SubsystemBase {
       Supplier<Boolean> isShootingSupplier,
       Supplier<Boolean> isInAlliance,
       Supplier<Boolean> verticalHalfofField,
-      Supplier<Double> triggerSupplier) {
+      Supplier<Double> triggerSupplier,
+      SpindexerSubsystem spindexer) {
     this.io = io;
     this.dtPose = dtPose;
     this.flywheel = flywheel;
+    this.spindexer = spindexer;
     this.shotCalculation = shotCalculation;
     this.calculatedPitch = Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle);
     this.isShootingSupplier = isShootingSupplier;
@@ -118,15 +123,18 @@ public class Turret extends SubsystemBase {
 
     double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
     calculatedPitch = new Rotation2d(shotCalculation.getParameters().hoodAngle());
+    double desiredTurretYaw =
+        Rotation2d.fromRadians(yaw).getDegrees() - turretFieldPos.getRotation().getDegrees();
     if (isShootingSupplier.get()) {
       io.setTurretPitch(calculatedPitch);
+      io.setTurretYaw(limitTurretYaw(desiredTurretYaw));
+      if (canShoot()){
+          spindexer.spindexerOn();
+      }
     } else {
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
     }
 
-    double desiredTurretYaw =
-        Rotation2d.fromRadians(yaw).getDegrees() - turretFieldPos.getRotation().getDegrees();
-    io.setTurretYaw(limitTurretYaw(desiredTurretYaw));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
     double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
     flywheel.setFlywheelSpeed(shooterWheelRPM);
@@ -195,6 +203,10 @@ public class Turret extends SubsystemBase {
     return diff;
   }
 
+  public boolean canShoot(){
+    return inputs.withinTargetYawMargin;
+  }
+
   protected Rotation2d limitTurretYaw(double desiredYawDeg) {
     double desiredYaw360 = zeroTo360(desiredYawDeg);
     // Check if the desired yaw is within the dead zone
@@ -220,6 +232,9 @@ public class Turret extends SubsystemBase {
     } else if (triggerSupplier.get() > TurretConstants.manualTriggerOnThreshold) {
       // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
       // and set the hood to the max angle for close range shots
+      if (triggerSupplier.get() > 0.80) {
+        spindexer.spindexerOn();
+      }
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(TurretConstants.manualShotSpeedRpm);
     } else {
