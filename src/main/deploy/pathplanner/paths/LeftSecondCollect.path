@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.207261055634806,
-        "y": 7.451043890865955
+        "x": 4.084686746987952,
+        "y": 7.564650602409639
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.458543562009144,
-        "y": 7.465163751159025
+        "x": 5.33596925336229,
+        "y": 7.5787704627027095
       },
       "isLocked": false,
       "linkedName": "BlueTopShotFar"
@@ -64,16 +64,16 @@
     },
     {
       "anchor": {
-        "x": 5.7340228245363765,
-        "y": 7.327888730382191
+        "x": 6.342139800285306,
+        "y": 7.451043890865955
       },
       "prevControl": {
-        "x": 6.622147329842835,
-        "y": 6.638831804280145
+        "x": 7.230264305591764,
+        "y": 6.761986964763909
       },
       "nextControl": {
-        "x": 5.364845100520567,
-        "y": 7.614317565726516
+        "x": 5.972962076269496,
+        "y": 7.73747272621028
       },
       "isLocked": false,
       "linkedName": null
@@ -114,8 +114,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 6.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -131,5 +131,5 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

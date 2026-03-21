@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.constants.jr.VisionConstants;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,7 +37,24 @@ public class VisionIOPhotonVision implements VisionIO {
 
   protected final PhotonCamera camera;
   protected final Transform3d robotToCamera;
+  public static final int[] blueHubTags = {18, 19, 20, 21, 24, 25, 26, 27};
+  public static final int[] redHubTags = {2, 3, 4, 5, 8, 9, 10, 11};
+  public static int[] hubTags = redHubTags;
+
+  static {
+    // Initialize hubTags based on the current alliance at class load time
+    Alliance currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+    if (currentAlliance == Alliance.Red) {
+      hubTags = redHubTags;
+    } else if (currentAlliance == Alliance.Blue) {
+      hubTags = blueHubTags;
+    } else {
+      hubTags = blueHubTags;
+    }
+  }
+
   protected boolean useCamera = false;
+  protected boolean preferHubTags = false;
 
   /**
    * Creates a new VisionIOPhotonVision.
@@ -56,10 +75,13 @@ public class VisionIOPhotonVision implements VisionIO {
       // Update latest target observation
       List<PhotonTrackedTarget> targets = result.getTargets();
       for (var target : targets) {
-        int climbTags = target.getFiducialId();
-        if (climbTags == 31 || climbTags == 32 || climbTags == 15 || climbTags == 16) {
-          useCamera = true;
-        } else useCamera = false;
+        int tags = target.getFiducialId();
+        preferHubTags = false;
+        for (int hubTag : hubTags) {
+          if (tags == hubTag) {
+            preferHubTags = true;
+          }
+        }
       }
       if (result.hasTargets()) {
         double zThetaDeg =
@@ -110,6 +132,7 @@ public class VisionIOPhotonVision implements VisionIO {
                 multitagResult.fiducialIDsUsed.size(), // Tag count
                 totalTagDistance / result.targets.size(), // Average tag distance
                 useCamera, // Only use camera when the best target is tag 31 or 32 (for climbing)
+                preferHubTags,
                 PoseObservationType.PHOTONVISION)); // Observation type
 
       } else if (!result.targets.isEmpty()) { // Single tag result
@@ -137,6 +160,7 @@ public class VisionIOPhotonVision implements VisionIO {
                   1, // Tag count
                   cameraToTarget.getTranslation().getNorm(), // Average tag distance
                   useCamera,
+                  preferHubTags,
                   PoseObservationType.PHOTONVISION)); // Observation type
         }
       }

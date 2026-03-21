@@ -215,7 +215,7 @@ public final class DriveConstants {
           new Rotation2d[] {
             new Rotation2d(3.085 + Math.PI),
             new Rotation2d(-0.86),
-            new Rotation2d(1.155 + Math.PI),
+            new Rotation2d(-1.972 + 2 * Math.PI),
             new Rotation2d(2.826)
           };
 
@@ -225,7 +225,7 @@ public final class DriveConstants {
 
       turnCancoderIds = new int[] {9, 12, 10, 11};
 
-      driveCurrentLimit = 60;
+      driveCurrentLimit = 50;
 
       turnCurrentLimit = 20;
 
@@ -276,7 +276,7 @@ public final class DriveConstants {
       rotationPID = new PIDConstants(4.0, 0.0, 0.0);
 
       // Meters/Sec
-      maxSpeed = 5.45;
+      maxSpeed = 4.45;
 
       odometryFrequency = 100.0;
 

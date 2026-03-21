@@ -14,9 +14,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveDistance2;
 import frc.robot.commands.HubActivity;
-import frc.robot.commands.RotateToAngle;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.IntakeConstants;
 import frc.robot.constants.jr.VisionConstants;
@@ -32,10 +30,10 @@ import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.turret.ShotCalculation;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
-import frc.robot.subsystems.turret.TurretIOSparkMax;
+import frc.robot.subsystems.turret.TurretIOSparkMax2;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIONull;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoWrapper;
 import frc.robot.util.TuningUtil;
 import java.io.IOException;
@@ -72,8 +70,8 @@ public class RobotContainer {
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.0);
-  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 40);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.8);
+  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 0.0);
 
   public SimContainer sim;
 
@@ -126,7 +124,7 @@ public class RobotContainer {
         spindexer = new SpindexerSubsystem();
         turret =
             new Turret(
-                new TurretIOSparkMax(),
+                new TurretIOSparkMax2(),
                 drive::getPose,
                 flywheel,
                 shotCalculation,
@@ -164,11 +162,9 @@ public class RobotContainer {
         vis =
             new Vision(
                 drive::addVisionMeasurement,
-                Stream.of(VisionConstants.cameraConfigs)
-                    .map(
-                        cam ->
-                            new VisionIOPhotonVisionSim(cam, driveSim::getSimulatedDriveTrainPose))
-                    .toArray(VisionIOPhotonVision[]::new));
+                new VisionIONull(
+                    VisionConstants.cameraConfigs[0], driveSim::getSimulatedDriveTrainPose));
+        ;
         spindexer = new SpindexerSubsystem();
 
         flywheel = new Flywheel(new FlywheelIOSim());
@@ -237,7 +233,8 @@ public class RobotContainer {
             drive,
             () -> -kDriveController.getLeftY(),
             () -> -kDriveController.getLeftX(),
-            () -> -kDriveController.getRightX()));
+            () -> -kDriveController.getRightX(),
+            spindexer::isFeederOn));
 
     // Lock to nearest 45° when A button is held
     kDriveController
@@ -350,14 +347,12 @@ public class RobotContainer {
 
       kDriveController
           .back()
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setHoodZero()));
 
-      kDriveController.start().onTrue(turret.toggleAutoAimCommand());
-      // kManipController.start().onTrue(vis.preferHubTagsOn());
-      // kManipController.start().onFalse(vis.preferHubTagsOff());
+      // kDriveController.start().onTrue(turret.toggleAutoAimCommand());
       kManipController
           .back()
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setYawZero()));
       kDriveController.rightBumper().onTrue(intake.reverseCommand());
       kDriveController.rightBumper().onFalse(intake.stopMotorCommand());
 
@@ -368,10 +363,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
+                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(0);
                   },
                   () -> false,
                   turret));
@@ -382,20 +377,23 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + -1 * runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-1 * runVolts.getValue());
+                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(-1 * runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(0);
                   },
                   () -> false,
                   turret));
 
       kManipController.rightBumper().onTrue(turret.adjustYaw(setDegrees::getValue));
+      kManipController
+          .start()
+          .onTrue(turret.toggleAutoAimCommand()); // .alongWith(vis.toggleHubTags()));
       // Manipulator controller bindings
+      kManipController.a().onTrue(spindexer.feederReverseCommand());
       kManipController
           .a()
-          .onTrue(spindexer.feederReverseCommand())
-          .onFalse(spindexer.feederOffCommand());
+          .onFalse(spindexer.feederOffCommand().alongWith(spindexer.spindexerOffCommand()));
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.reverseCommand());
       kManipController.x().onFalse(intake.stopMotorCommand());
@@ -409,13 +407,13 @@ public class RobotContainer {
           .onFalse(
               spindexer
                   .spindexerOffCommand()
-                  .andThen(new WaitCommand(0.25))
-                  .andThen(spindexer.feederOffCommand()));
+                  .andThen(new WaitCommand(1.0))
+                  .andThen(
+                      spindexer
+                          .feederOffCommand()
+                          .onlyIf(() -> kManipController.getHID().getRightTriggerAxis() == 0)));
       kManipController.leftTrigger().onTrue(spindexer.feederOnCommand());
       kManipController.leftTrigger().onFalse(spindexer.feederOffCommand());
-      // kManipController.leftBumper().onTrue(Commands.none());
-
-      // kManipController.rightBumper().onTrue(Commands.none());
     }
   }
 
@@ -431,36 +429,7 @@ public class RobotContainer {
   public void initializeAutos() {
     try {
       registerAuto(new AutoWrapper("SimpleLeftDepot", "Spacing", true, buildSimpleLeftAuto()));
-      registerAuto(new AutoWrapper("SimpleRight", "Spacing", true, buildSimpleRightAuto()));
-      registerAuto(
-          new AutoWrapper(
-              "LeftNeutralDepot", "CollectNeutralTopToDepot", true, buildNeutralCollectDepot()));
-      registerAuto(
-          new AutoWrapper(
-              "RightNeutralHumanPlayer",
-              "CollectNeutralBottomToHumanPlayer",
-              true,
-              buildRightNeutralZoneAuto()));
-      registerAuto(new AutoWrapper("Square", "Square", true, DriveCommands.driveSquare(drive)));
-      registerAuto(
-          new AutoWrapper(
-              "SquareStraight", "SquareStraight", true, DriveCommands.SquareStraight(drive)));
-      registerAuto(
-          new AutoWrapper("SmallSquare", "SmallSquare", true, DriveCommands.SmallSquare(drive)));
-      registerAuto(
-          new AutoWrapper("BlueSquare", "BlueSquare", true, DriveCommands.BlueSquare(drive)));
-      registerAuto(
-          new AutoWrapper(
-              "WheelRadiusCharacterization",
-              null,
-              false,
-              DriveCommands.wheelRadiusCharacterization(drive)));
-      registerAuto(
-          new AutoWrapper(
-              "DriveSimpleFFCharacterization",
-              null,
-              false,
-              DriveCommands.feedforwardCharacterization(drive)));
+      registerAuto(new AutoWrapper("BackUpAndShoot", "Spacing", true, buildSimpleRightAuto()));
       registerAuto(
           new AutoWrapper(
               "RightTwoCollect",
@@ -738,6 +707,14 @@ public class RobotContainer {
     // Ensure the intake is deployed. This is mainly for simulation testing
     // since the intake should normally be deployed at the start of auto
     // CommandScheduler.getInstance().schedule(intake.deployCommand());
+
+    // Stop all motors when we enter teleop to clean up from auto
+    CommandScheduler.getInstance()
+        .schedule(
+            intake
+                .stopMotorCommand()
+                .alongWith(spindexer.spindexerOffCommand())
+                .alongWith(spindexer.feederOffCommand()));
   }
 
   public Command buildLeftNeutralZoneAuto() {
@@ -745,45 +722,17 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            new WaitCommand(0.5),
+            intake.takeInCommand(),
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
+            intake.stopMotorCommand(),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(3),
+            new WaitCommand(4),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(6),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand());
-    return auto;
-  }
-
-  public Command buildNeutralCollectDepot() {
-    Command auto =
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            DriveCommands.buildFollowPath("CollectNeutralTopToDepot"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(4),
-            DriveCommands.buildFollowPath("DepotSlowCollect"),
-            new WaitCommand(5),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand());
-    return auto;
-  }
-
-  public Command buildRightNeutralZoneAuto() {
-    Command auto =
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            DriveCommands.buildFollowPath("CollectNeutralBottomToHumanPlayer"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(4),
-            DriveCommands.buildFollowPath("BlueHumanPlayerStation"),
-            new WaitCommand(4),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand());
+            intake.stopMotorCommand());
     return auto;
   }
 
@@ -802,10 +751,7 @@ public class RobotContainer {
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
             new WaitCommand(4),
-            intake.stopMotorCommand(),
-            new WaitCommand(4),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand());
+            intake.stopMotorCommand());
     return auto;
   }
 
@@ -818,8 +764,7 @@ public class RobotContainer {
             new WaitCommand(1),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(5),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            turret.disableAutoAimCommand());
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()));
     return auto;
   }
 
@@ -828,13 +773,23 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            new WaitCommand(0.5),
+            intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(7),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            spindexer
+                .spindexerOnCommand()
+                .alongWith(spindexer.feederOnCommand())
+                .alongWith(intake.stopMotorCommand()),
+            new WaitCommand(6),
+            spindexer
+                .spindexerOffCommand()
+                .alongWith(spindexer.feederOffCommand())
+                .alongWith(intake.takeInCommand()),
             DriveCommands.buildFollowPath("RightSecondCollect"),
-            new RotateToAngle(drive, () -> getRightLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
+            spindexer
+                .spindexerOnCommand()
+                .alongWith(spindexer.feederOnCommand())
+                .alongWith(intake.stopMotorCommand()));
     return auto;
   }
 
@@ -843,14 +798,23 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+            new WaitCommand(0.5),
+            intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(8),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            new WaitCommand(1.0),
+            spindexer
+                .spindexerOnCommand()
+                .alongWith(spindexer.feederOnCommand())
+                .alongWith(intake.stopMotorCommand()),
+            new WaitCommand(6),
+            spindexer
+                .spindexerOffCommand()
+                .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),
             DriveCommands.buildFollowPath("LeftSecondCollect"),
-            turret.disableAutoAimCommand(),
-            new RotateToAngle(drive, () -> getLeftLadderAngle(), Rotation2d.fromDegrees(1)),
-            new DriveDistance2(drive, () -> 0.3, -90).withTimeout(0.4));
+            spindexer
+                .spindexerOnCommand()
+                .alongWith(spindexer.feederOnCommand())
+                .alongWith(intake.stopMotorCommand()));
     return auto;
   }
 }

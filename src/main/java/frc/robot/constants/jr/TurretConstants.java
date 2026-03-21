@@ -28,8 +28,19 @@ public class TurretConstants {
       turretDeadZoneCenterDeg + turretDeadZoneHalfWidthDeg;
   public static final Rotation2d turretDeadZoneEndRot =
       Rotation2d.fromDegrees(turretDeadZoneEndDeg);
-  public static final double turretMaxAngleRot = 0.075;
-  public static final double turretMinAngleRot = -.875;
+  public static final double turretYawLimitMarginRot =
+      0.01; // Margin to prevent hitting the limit switche
+  public static final double turretMaxAngleRot =
+      0.075 - turretYawLimitMarginRot; // Maximum counter clockwise rotation in rotations
+  public static final double turretMinAngleRot =
+      -.875 + turretYawLimitMarginRot; // Maximum clockwise rotation in rotations
+
+  public static final double turretMaxRotationSpeedDegPerSec = 360.0;
+  public static final double turretMaxRotationSpeedRotPerSec =
+      turretMaxRotationSpeedDegPerSec / 360.0;
+  public static final double turretMaxAccelDps2 = 720.0;
+  public static final double turretMaxAccelRotPerSec2 = turretMaxAccelDps2 / 360.0;
+  public static final double maxYawVoltage = 8.0;
 
   public static final double turretMaxHoodAngle = 62;
   public static final Rotation2d turretMaxHoodRot = Rotation2d.fromDegrees(turretMaxHoodAngle);
@@ -41,12 +52,14 @@ public class TurretConstants {
 
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.
-  public static final double turretKs = 0.13; // volts
+  public static final double turretKs = 0.5; // volts
+  public static final double turretYawKp = 80.0; // volts per rotation
+  public static final double turretYawKd = 0.0; // volts per rotation per second
 
   // This is found by running the motor at an arbitrary voltage (e.g., 3.3V) and measuring the
   // velocity reported by the encoder.
   // You then subtract the Ks from the voltage and divide by the velocity to get Kv.
-  public static final double turretKv = (3.3 - turretKs) / 68.25; // Volts per (rpm)
+  public static final double turretKv = 7.0; // Volts per (rpm)
 
   public static final int flywheelMasterCanId = 19;
   public static final int flywheelSlaveCanId = 11;

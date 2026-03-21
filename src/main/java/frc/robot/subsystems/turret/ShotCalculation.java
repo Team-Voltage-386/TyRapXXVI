@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class ShotCalculation {
@@ -25,6 +26,7 @@ public class ShotCalculation {
   private double hoodAngle = Double.NaN;
   private double turretVelocity;
   private double hoodVelocity;
+  TuningUtil addRPM = new TuningUtil("/Tuning/turret/addRPM", 0.0);
 
   public record LaunchingParameters(
       boolean isValid,
@@ -61,17 +63,20 @@ public class ShotCalculation {
     launchHoodAngleMap.put(2.602, Rotation2d.fromDegrees(57.0));
     launchHoodAngleMap.put(3.602, Rotation2d.fromDegrees(53.0));
     launchHoodAngleMap.put(4.602, Rotation2d.fromDegrees(51.0));
+    launchHoodAngleMap.put(5.0, Rotation2d.fromDegrees(50.0));
 
     launchFlywheelSpeedMap.put(1.602, 2262.0); // RPM
     launchFlywheelSpeedMap.put(2.602, 2400.0);
     launchFlywheelSpeedMap.put(3.602, 2650.0);
     launchFlywheelSpeedMap.put(4.602, 2925.0);
+    launchFlywheelSpeedMap.put(5.0, 3035.0);
 
     timeOfFlightMap.put(1.669, 0.88);
     timeOfFlightMap.put(2.233, 0.9275);
     timeOfFlightMap.put(2.823, 1.007);
     timeOfFlightMap.put(3.782, 1.057);
     timeOfFlightMap.put(4.75, 1.167);
+    timeOfFlightMap.put(5.0, 1.197);
   }
 
   public ShotCalculation(Drive dt) {
@@ -151,7 +156,7 @@ public class ShotCalculation {
             turretVelocity,
             hoodAngle,
             hoodVelocity,
-            launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance),
+            launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance) + addRPM.getValue(),
             lookaheadPose);
 
     // Log calculated values
