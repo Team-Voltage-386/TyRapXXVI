@@ -24,6 +24,7 @@ public class Turret extends SubsystemBase {
   private ShotCalculation shotCalculation;
 
   private boolean autoAimEnabled = false;
+  private boolean manualMode = false;
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
   private Rotation2d calculatedPitch;
@@ -212,12 +213,16 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  public void toggleManualFlywheel() {
+    manualMode = !manualMode;
+  }
+
   @Override
   public void periodic() {
     if (autoAimEnabled) {
       setTarget();
       aimAtTarget(currentTargetPose);
-    } else if (triggerSupplier.get() > TurretConstants.manualTriggerOnThreshold) {
+    } else if (manualMode) {
       // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
       // and set the hood to the max angle for close range shots
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);

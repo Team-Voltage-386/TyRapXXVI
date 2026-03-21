@@ -386,6 +386,7 @@ public class RobotContainer {
                   turret));
 
       kManipController.rightBumper().onTrue(turret.adjustYaw(setDegrees::getValue));
+      kManipController.leftBumper().onTrue(new InstantCommand(() -> turret.toggleManualFlywheel()));
       kManipController
           .start()
           .onTrue(turret.toggleAutoAimCommand()); // .alongWith(vis.toggleHubTags()));
