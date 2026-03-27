@@ -49,6 +49,7 @@ public class TurretConstants {
   public static final double turretHoodAngleRange = turretMaxHoodAngle - turretMinHoodAngle;
 
   public static final double maxHoodSetpoint = 0.92;
+  public static final double hoodKP = 2.4;
 
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.

@@ -48,7 +48,7 @@ public class TurretIOSparkMax2 implements TurretIO {
   TuningUtil yawKd = new TuningUtil("/Tuning/turret/yawKd", TurretConstants.turretYawKd);
   TuningUtil yawKs = new TuningUtil("Tuning/turret/yawKs", TurretConstants.turretKs);
   TuningUtil yawKv = new TuningUtil("Tuning/turret/yawKv", TurretConstants.turretKv);
-  TuningUtil hoodKp = new TuningUtil("/Tuning/turret/hoodKp", 0.9);
+  TuningUtil hoodKp = new TuningUtil("/Tuning/turret/hoodKp", TurretConstants.hoodKP);
   TuningUtil hoodKd = new TuningUtil("/Tuning/turret/hoodKd", 0.0);
   TuningUtil turretRightLimit = new TuningUtil("/Tuning/turret/rightLimit", 0);
   TuningUtil turretLeftLimit = new TuningUtil("/Tuning/turret/leftLimit", 0);
