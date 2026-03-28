@@ -25,6 +25,7 @@ public class Turret extends SubsystemBase {
 
   private boolean autoAimEnabled = false;
   private boolean manualMode = false;
+  protected boolean isScoring = true;
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
   private Rotation2d calculatedPitch;
@@ -109,8 +110,8 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> toggleAutoAim());
   }
 
-  public void aimAtTarget(Pose3d targetPose) {
-    shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d());
+  public void aimAtTarget(Pose3d targetPose, boolean isScoring) {
+    shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d(), isScoring);
     Pose2d turretFieldPos = shotCalculation.getParameters().lookaheadPose();
     Translation3d turretFieldTrans =
         new Translation3d(
@@ -142,12 +143,7 @@ public class Turret extends SubsystemBase {
    * @param targetPose - The pose to hit with the Fuel.
    * @return The command to aim the turret.
    */
-  public Command aimAtCommand(Supplier<Pose3d> targetPoseIn) {
-    return run(
-        () -> {
-          aimAtTarget(targetPoseIn.get());
-        });
-  }
+  // deleted aimAtCommand
 
   public Command adjustPitch(Supplier<Double> pitchDeg) {
     return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
@@ -160,12 +156,14 @@ public class Turret extends SubsystemBase {
   public void setTarget() {
     var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
     if (this.isInAlliance.get()) {
+      isScoring = true;
       if (alliance == DriverStation.Alliance.Blue) {
         currentTargetPose = Constants.blueHubPose3d;
       } else {
         currentTargetPose = Constants.redHubPose3d;
       }
     } else {
+      isScoring = false;
       if (alliance == DriverStation.Alliance.Blue) {
         if (this.verticalHalfofField.get()) {
           currentTargetPose = Constants.blueLeftCornerPose3d;
@@ -221,7 +219,7 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     if (autoAimEnabled) {
       setTarget();
-      aimAtTarget(currentTargetPose);
+      aimAtTarget(currentTargetPose, isScoring);
     } else if (manualMode) {
       // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
       // and set the hood to the max angle for close range shots

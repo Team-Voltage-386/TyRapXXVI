@@ -326,23 +326,17 @@ public class RobotContainer {
 
       kDriveController.rightTrigger().onTrue(intake.takeInCommand());
       kDriveController.rightTrigger().onFalse(intake.stopMotorCommand());
-      /*kDriveController
-          .rightTrigger()
-          .whileTrue(
-              new ConditionalCommand(
-                  turret.aimAtCommand(() -> getHubPose3d()),
-                  flywheel.shootCommand(),
-                  () -> turret.isAutoAimEnabled()));
+      kDriveController.leftBumper().whileTrue(flywheel.shootCommand());
 
       kDriveController
-          .rightTrigger()
+          .leftBumper()
           .onFalse(
               new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
-                  .alongWith(
-                      turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
+                  // .alongWith(
+                  // turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
                   .alongWith(spindexer.spindexerOffCommand())
                   .andThen(new WaitCommand(.5))
-                  .andThen(spindexer.feederOffCommand())); */
+                  .andThen(spindexer.feederOffCommand()));
       kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
 
       kDriveController
