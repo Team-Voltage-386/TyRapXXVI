@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.DisplayShiftTime;
 import frc.robot.util.LocalADStarAK;
 import java.util.Optional;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -136,6 +137,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
     robotContainer.getHubActivityCommand().schedule();
+    CommandScheduler.getInstance().schedule(new DisplayShiftTime());
     robotContainer.runTeleopStart();
   }
 

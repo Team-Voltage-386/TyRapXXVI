@@ -20,7 +20,8 @@ public class DisplayShiftTime extends Command {
     SHIFT2(80, 25),
     SHIFT3(55, 25),
     SHIFT4(30, 25),
-    END(0, 30);
+    ENDGAME(0, 30),
+    DONE(-1, 0);
 
     private final int endTime;
     private final double shiftTime;
@@ -40,64 +41,69 @@ public class DisplayShiftTime extends Command {
     }
   }
 
-  private GameStates thisGameState = GameStates.AUTO;
-  private double shiftTimeLeft = 0;
+  private GameStates thisGameState = GameStates.ALL;
+  private double shiftTimeLeft = 10;
 
   /**
-   * Constructor for the CycleLED Command class.
+   * Constructor
    *
-   * @param subsystem The subsystem used by this command.
    */
   public DisplayShiftTime() {}
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    Logger.recordOutput("GameShift/CurrentShift", GameStates.ALL.name());
+    Logger.recordOutput("GameShift/shiftTimeLeft", GameStates.ALL.getShiftTime());
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     switch (thisGameState) {
       case AUTO:
-        if (Timer.getMatchTime() == GameStates.AUTO.getEndTime()) {
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           thisGameState = GameStates.ALL;
         }
         break;
       case ALL:
-        if (Timer.getMatchTime() == GameStates.ALL.getEndTime()) {
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           thisGameState = GameStates.SHIFT1;
         }
         break;
       case SHIFT1:
-        if (Timer.getMatchTime() == GameStates.SHIFT1.getEndTime()) {
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           thisGameState = GameStates.SHIFT2;
         }
         break;
       case SHIFT2:
-        if (Timer.getMatchTime() == GameStates.SHIFT2.getEndTime()) {
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           thisGameState = GameStates.SHIFT3;
         }
         break;
       case SHIFT3:
-        if (Timer.getMatchTime() == GameStates.SHIFT3.getEndTime()) {
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           thisGameState = GameStates.SHIFT4;
         }
         break;
       case SHIFT4:
-        if (Timer.getMatchTime() == GameStates.SHIFT4.getEndTime()) {
-          thisGameState = GameStates.END;
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          thisGameState = GameStates.ENDGAME;
         }
         break;
-      case END:
-        if (Timer.getMatchTime() == GameStates.END.getEndTime()) {
-          thisGameState = GameStates.END;
+      case ENDGAME:
+        if (Timer.getMatchTime() == thisGameState.getEndTime()) {
+          thisGameState = GameStates.DONE;
         }
+        break;
+        //Note: "DONE" does not show up in Sim
+      case DONE:
+        System.out.println("Change Shift: Done");
         break;
       default:
         break;
     }
-    shiftTimeLeft =
-        thisGameState.getShiftTime() - Timer.getMatchTime() - thisGameState.getEndTime();
+    shiftTimeLeft = Timer.getMatchTime() - thisGameState.getEndTime();
     Logger.recordOutput("GameShift/CurrentShift", thisGameState.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", shiftTimeLeft);
   }
@@ -109,6 +115,6 @@ public class DisplayShiftTime extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
   }
 }
