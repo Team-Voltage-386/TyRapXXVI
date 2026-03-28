@@ -137,7 +137,8 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
     robotContainer.getHubActivityCommand().schedule();
-    CommandScheduler.getInstance().schedule(new DisplayShiftTime());
+    CommandScheduler.getInstance()
+        .schedule(new DisplayShiftTime(robotContainer.getIsAheadHubSup()));
     robotContainer.runTeleopStart();
   }
 
@@ -154,6 +155,7 @@ public class Robot extends LoggedRobot {
             break;
           case Blue:
             robotContainer.setIsAheadHub(true);
+            break;
         }
       } else {
         switch (ourTeam.get()) {
@@ -162,6 +164,7 @@ public class Robot extends LoggedRobot {
             break;
           case Blue:
             robotContainer.setIsAheadHub(false);
+            break;
         }
       }
     }

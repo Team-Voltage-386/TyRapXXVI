@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -16,10 +17,12 @@ public class DisplayShiftTime extends Command {
   public enum GameStates {
     AUTO(0, 20),
     ALL(130, 10),
+    ALL_SHIFT1(105, 35),
     SHIFT1(105, 25),
     SHIFT2(80, 25),
     SHIFT3(55, 25),
     SHIFT4(30, 25),
+    SHIFT4_ENDGAME(0, 55),
     ENDGAME(0, 30),
     DONE(-1, 0);
 
@@ -43,12 +46,15 @@ public class DisplayShiftTime extends Command {
 
   private GameStates thisGameState = GameStates.ALL;
   private double shiftTimeLeft = 10;
+  private final BooleanSupplier hubIsAheadSup;
 
   /**
    * Constructor
    *
    */
-  public DisplayShiftTime() {}
+  public DisplayShiftTime(BooleanSupplier hubIsAheadSup) {
+    this.hubIsAheadSup = hubIsAheadSup;
+  }
 
   // Called when the command is initially scheduled.
   @Override
@@ -96,7 +102,7 @@ public class DisplayShiftTime extends Command {
           thisGameState = GameStates.DONE;
         }
         break;
-        //Note: "DONE" does not show up in Sim
+      // Note: "DONE" does not show up in Sim
       case DONE:
         System.out.println("Change Shift: Done");
         break;
@@ -106,6 +112,7 @@ public class DisplayShiftTime extends Command {
     shiftTimeLeft = Timer.getMatchTime() - thisGameState.getEndTime();
     Logger.recordOutput("GameShift/CurrentShift", thisGameState.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", shiftTimeLeft);
+    Logger.recordOutput("GameShift/hubIsAhead", hubIsAheadSup);
   }
 
   // Called once the command ends or is interrupted.
