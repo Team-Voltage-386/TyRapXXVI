@@ -20,6 +20,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   private final SparkFlex feeder_motor;
   public boolean feederOn = false;
+  public boolean reverse = true;
 
   public SpindexerSubsystem() {
     spindexer_motor =
@@ -64,6 +65,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void spindexerOn() {
     System.out.println("turning on spindexer");
+    reverse = false;
     spindexer_motor.setVoltage(-SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
   }
 
@@ -73,6 +75,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public void spindexerOff() {
     System.out.println("turning off spindexer");
+    reverse = false;
     spindexer_motor.set(0);
   }
 
@@ -83,11 +86,13 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void feederOn() {
     System.out.println("turning on feeder");
     feederOn = true;
+    reverse = false;
     feeder_motor.setVoltage(-SpindexerConstants.FEEDER_MOTOR_VOLTAGE);
   }
 
   public void feederReverse() {
     System.out.println("reversing feeder");
+    reverse = true;
     spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
     feeder_motor.setVoltage(SpindexerConstants.FEEDER_MOTOR_VOLTAGE);
   }
@@ -112,6 +117,10 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public boolean isFeederOn() {
     return feederOn;
+  }
+
+  public boolean isReverse() {
+    return reverse;
   }
 
   @Override
