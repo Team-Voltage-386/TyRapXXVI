@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
@@ -16,6 +17,7 @@ public class DisplayShiftTime extends Command {
   // Define the enum
   public enum GameStates {
     AUTO(0, 20),
+    INIT(-1, -1),
     ALL(130, 10),
     ALL_SHIFT1(105, 35),
     SHIFT1(105, 25),
@@ -44,7 +46,7 @@ public class DisplayShiftTime extends Command {
     }
   }
 
-  private GameStates thisGameState = GameStates.ALL;
+  private GameStates thisGameState = GameStates.INIT;
   private double shiftTimeLeft = 10;
   private final BooleanSupplier hubIsAheadSup;
 
@@ -54,14 +56,14 @@ public class DisplayShiftTime extends Command {
    */
   public DisplayShiftTime(BooleanSupplier hubIsAheadSup) {
     this.hubIsAheadSup = hubIsAheadSup;
+    Logger.recordOutput("GameShift/CurrentShift", GameStates.INIT.name());
+    Logger.recordOutput("GameShift/shiftTimeLeft", GameStates.INIT.getShiftTime());
+    Logger.recordOutput("GameShift/hubIsAhead", this.hubIsAheadSup.getAsBoolean());
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    Logger.recordOutput("GameShift/CurrentShift", GameStates.ALL.name());
-    Logger.recordOutput("GameShift/shiftTimeLeft", GameStates.ALL.getShiftTime());
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -72,9 +74,23 @@ public class DisplayShiftTime extends Command {
           thisGameState = GameStates.ALL;
         }
         break;
+      case INIT:
+        if (DriverStation.isEnabled() && !DriverStation.isAutonomous()) {
+          if (hubIsAheadSup.getAsBoolean()) {
+            this.thisGameState = GameStates.ALL_SHIFT1;
+          } else {
+            thisGameState = GameStates.ALL;
+          }
+        }
+        break;
       case ALL:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           thisGameState = GameStates.SHIFT1;
+        }
+        break;
+      case ALL_SHIFT1:
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          thisGameState = GameStates.SHIFT2;
         }
         break;
       case SHIFT1:
@@ -89,12 +105,23 @@ public class DisplayShiftTime extends Command {
         break;
       case SHIFT3:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
-          thisGameState = GameStates.SHIFT4;
+          if (hubIsAheadSup.getAsBoolean()) {
+            thisGameState = GameStates.SHIFT4;
+          } else {
+            thisGameState = GameStates.SHIFT4_ENDGAME;
+          }
         }
         break;
       case SHIFT4:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           thisGameState = GameStates.ENDGAME;
+        }
+        break;
+      case SHIFT4_ENDGAME:
+        {
+          if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+            thisGameState = GameStates.DONE;
+          }
         }
         break;
       case ENDGAME:
@@ -112,7 +139,7 @@ public class DisplayShiftTime extends Command {
     shiftTimeLeft = Timer.getMatchTime() - thisGameState.getEndTime();
     Logger.recordOutput("GameShift/CurrentShift", thisGameState.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", shiftTimeLeft);
-    Logger.recordOutput("GameShift/hubIsAhead", hubIsAheadSup);
+    Logger.recordOutput("GameShift/hubIsAhead", hubIsAheadSup.getAsBoolean());
   }
 
   // Called once the command ends or is interrupted.
