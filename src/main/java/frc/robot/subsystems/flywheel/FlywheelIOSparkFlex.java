@@ -41,7 +41,8 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
   TuningUtil flywheelKs = new TuningUtil("/Tuning/flywheel/flywheelKs", TurretConstants.flywheelKs);
   TuningUtil flywheelKa = new TuningUtil("/Tuning/flywheel/flywheelKa", TurretConstants.flywheelKa);
   TuningUtil threshold = new TuningUtil("/Tuning/flywheel/Threshold", 400);
-  TuningUtil rateLimit = new TuningUtil("/Tuning/flywheel/RateLimit", 2000);
+  TuningUtil rateLimit =
+      new TuningUtil("/Tuning/flywheel/RateLimit", TurretConstants.flywheelRateLimit);
   SlewRateLimiter filter = new SlewRateLimiter(rateLimit.getValue());
 
   public FlywheelIOSparkFlex() {
