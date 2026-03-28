@@ -136,7 +136,7 @@ public class DisplayShiftTime extends Command {
         }
         break;
       case ENDGAME:
-        if (Timer.getMatchTime() == thisGameState.getEndTime()) {
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = false;
           thisGameState = GameStates.DONE;
         }
@@ -163,6 +163,10 @@ public class DisplayShiftTime extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    if (DriverStation.getMatchTime() < 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
