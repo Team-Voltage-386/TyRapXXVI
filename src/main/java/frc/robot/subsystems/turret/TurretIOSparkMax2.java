@@ -182,7 +182,6 @@ public class TurretIOSparkMax2 implements TurretIO {
     inputs.turretYaw = yawTurretCenter.minus(TurretConstants.turretCenterOffsetRot);
     inputs.turretPitch = Rotation2d.fromRotations(hoodMotor.getEncoder().getPosition());
     inputs.turretLimitTrue = !turretLimitInput.get();
-
     double velocity = yawEncoder.getVelocity();
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
