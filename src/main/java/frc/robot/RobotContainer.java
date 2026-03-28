@@ -45,7 +45,6 @@ import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.json.simple.parser.ParseException;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -484,31 +483,6 @@ public class RobotContainer {
     sim.simulationPeriodic(drive::addVisionMeasurement);
   }
 
-  public Rotation2d getAngletoHub() {
-    Rotation2d angleToHub = Rotation2d.fromDegrees(0);
-    Pose2d robotPosition = drive.getPose();
-    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-    if (currentAlliance.isPresent()) {
-      angleToHub =
-          switch (currentAlliance.get()) {
-            case Red -> {
-              yield Constants.redHubPose
-                  .toTranslation2d()
-                  .minus(robotPosition.getTranslation())
-                  .getAngle();
-            }
-            case Blue -> {
-              yield Constants.blueHubPose
-                  .toTranslation2d()
-                  .minus(robotPosition.getTranslation())
-                  .getAngle();
-            }
-          };
-    }
-    Logger.recordOutput("/Drive/AngleToHub", angleToHub.getDegrees());
-    return angleToHub;
-  }
-
   public Translation3d getHubPose() {
     Translation3d hubPose = new Translation3d();
     Optional<Alliance> currentAlliance = DriverStation.getAlliance();
@@ -524,58 +498,12 @@ public class RobotContainer {
           hubPose = Constants.blueHubPose;
           break;
       }
-      ;
     }
     return hubPose;
   }
 
-  public Rotation2d getLeftLadderAngle() {
-    Rotation2d ladderAngle = new Rotation2d();
-    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-    if (currentAlliance.isPresent()) {
-      switch (currentAlliance.get()) {
-        case Red:
-          ladderAngle = Rotation2d.fromDegrees(180);
-          break;
-        case Blue:
-          ladderAngle = Rotation2d.fromDegrees(0);
-          break;
-        default:
-          ladderAngle = Rotation2d.fromDegrees(0);
-          break;
-      }
-      ;
-    }
-    return ladderAngle;
-  }
-
-  // added Right
-  public Rotation2d getRightLadderAngle() {
-    Rotation2d ladderAngle = new Rotation2d();
-    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-    if (currentAlliance.isPresent()) {
-      switch (currentAlliance.get()) {
-        case Red:
-          ladderAngle = Rotation2d.fromDegrees(0);
-          break;
-        case Blue:
-          ladderAngle = Rotation2d.fromDegrees(180);
-          break;
-        default:
-          ladderAngle = Rotation2d.fromDegrees(0);
-          break;
-      }
-      ;
-    }
-    return ladderAngle;
-  }
-
   public Pose3d getHubPose3d() {
     return new Pose3d(getHubPose(), Rotation3d.kZero);
-  }
-
-  public Pose3d getPose3d(Translation3d pose) {
-    return new Pose3d(pose, Rotation3d.kZero);
   }
 
   public Command pathfindToPosition(double xPosition, double yPosition) {

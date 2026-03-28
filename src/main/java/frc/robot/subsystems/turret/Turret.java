@@ -229,15 +229,16 @@ public class Turret extends SubsystemBase {
     if (autoAimEnabled) {
       setTarget();
       aimAtTarget(currentTargetPose, isScoring);
-      if ((Math.abs(deltaYaw) < 5) && triggerSupplier.get() > 0.5) {
-        spindexer.spindexerOn();
-        manipController.setRumble(RumbleType.kBothRumble, 0.0);
-      } else if (Math.abs(deltaYaw) > 5 && triggerSupplier.get() > 0.5) {
-        spindexer.spindexerOff();
-        manipController.setRumble(RumbleType.kBothRumble, 0.3);
+      if (triggerSupplier.get() > 0.5) {
+        if (Math.abs(deltaYaw) <= TurretConstants.turretMarginDegrees) {
+          spindexer.spindexerOn();
+          manipController.setRumble(RumbleType.kBothRumble, 0.0);
+        } else {
+          spindexer.spindexerOff();
+          manipController.setRumble(RumbleType.kBothRumble, 0.3);
+        }
       }
     } else if (manualMode) {
-      // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
       // and set the hood to the max angle for close range shots
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(TurretConstants.manualShotSpeedRpm);
