@@ -74,7 +74,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   }
 
   public void spindexerOff() {
-    System.out.println("turning off spindexer");
+    // System.out.println("turning off spindexer");
     reverse = false;
     spindexer_motor.set(0);
   }
