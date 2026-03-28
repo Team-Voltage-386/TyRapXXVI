@@ -6,9 +6,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
-import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
@@ -43,45 +40,15 @@ public class ShotCalculation {
   Drive dt;
   private Translation2d target;
 
-  private static double minDistance;
-  private static double maxDistance;
-  private static double phaseDelay;
-  private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
-      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
-  private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
-      new InterpolatingDoubleTreeMap();
-  private static final InterpolatingDoubleTreeMap timeOfFlightMap =
-      new InterpolatingDoubleTreeMap();
+  public static final Scoring scoring = new Scoring();
 
-  static {
-    minDistance = 1.5;
-    maxDistance = 6.7;
-    phaseDelay = 0.03; // figure this out idk ask chief delphi
+  public static final Passing passing = new Passing();
 
-    // max is 62 degrees
-    launchHoodAngleMap.put(1.602, Rotation2d.fromDegrees(62.0));
-    launchHoodAngleMap.put(2.602, Rotation2d.fromDegrees(57.0));
-    launchHoodAngleMap.put(3.602, Rotation2d.fromDegrees(53.0));
-    launchHoodAngleMap.put(4.602, Rotation2d.fromDegrees(51.0));
-    launchHoodAngleMap.put(5.0, Rotation2d.fromDegrees(50.0));
-
-    launchFlywheelSpeedMap.put(1.602, 2262.0); // RPM
-    launchFlywheelSpeedMap.put(2.602, 2400.0);
-    launchFlywheelSpeedMap.put(3.602, 2650.0);
-    launchFlywheelSpeedMap.put(4.602, 2925.0);
-    launchFlywheelSpeedMap.put(5.0, 3035.0);
-
-    timeOfFlightMap.put(1.669, 0.88);
-    timeOfFlightMap.put(2.233, 0.9275);
-    timeOfFlightMap.put(2.823, 1.007);
-    timeOfFlightMap.put(3.782, 1.057);
-    timeOfFlightMap.put(4.75, 1.167);
-    timeOfFlightMap.put(5.0, 1.197);
-  }
+  protected ShootingConstants shootingConstants = scoring;
 
   public ShotCalculation(Drive dt) {
     this.dt = dt;
-    setTarget(Constants.blueHubPose.toTranslation2d());
+    setTarget(Constants.blueHubPose.toTranslation2d(), true);
   }
 
   public LaunchingParameters getParameters() {
@@ -94,9 +61,9 @@ public class ShotCalculation {
     estimatedPose =
         estimatedPose.exp(
             new Twist2d(
-                robotRelativeVelocity.vxMetersPerSecond * phaseDelay,
-                robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
-                robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
+                robotRelativeVelocity.vxMetersPerSecond * shootingConstants.phaseDelay,
+                robotRelativeVelocity.vyMetersPerSecond * shootingConstants.phaseDelay,
+                robotRelativeVelocity.omegaRadiansPerSecond * shootingConstants.phaseDelay));
 
     Pose2d turretPosition =
         estimatedPose.transformBy(
@@ -125,7 +92,7 @@ public class ShotCalculation {
     Pose2d lookaheadPose = turretPosition;
     double lookaheadTurretToTargetDistance = turretToTargetDistance;
     for (int i = 0; i < 20; i++) {
-      timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+      timeOfFlight = shootingConstants.timeOfFlightMap.get(lookaheadTurretToTargetDistance);
       double offsetX = turretVelocityX * timeOfFlight;
       double offsetY = turretVelocityY * timeOfFlight;
       lookaheadPose =
@@ -140,7 +107,8 @@ public class ShotCalculation {
 
     // Calculate parameters accounted for imparted velocity
     turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
-    hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
+    hoodAngle =
+        shootingConstants.launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
     if (lastTurretAngle == null) lastTurretAngle = turretAngle;
     if (Double.isNaN(lastHoodAngle)) lastHoodAngle = hoodAngle;
     turretVelocity =
@@ -150,20 +118,21 @@ public class ShotCalculation {
     lastHoodAngle = hoodAngle;
     latestParameters =
         new LaunchingParameters(
-            lookaheadTurretToTargetDistance >= minDistance
-                && lookaheadTurretToTargetDistance <= maxDistance,
+            lookaheadTurretToTargetDistance >= shootingConstants.minDistance
+                && lookaheadTurretToTargetDistance <= shootingConstants.maxDistance,
             turretAngle,
             turretVelocity,
             hoodAngle,
             hoodVelocity,
-            launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance) + addRPM.getValue(),
+            shootingConstants.launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance)
+                + addRPM.getValue(),
             lookaheadPose);
 
     // Log calculated values
     Logger.recordOutput(
         "ShotCalculation/isValid",
-        lookaheadTurretToTargetDistance >= minDistance
-            && lookaheadTurretToTargetDistance <= maxDistance);
+        lookaheadTurretToTargetDistance >= shootingConstants.minDistance
+            && lookaheadTurretToTargetDistance <= shootingConstants.maxDistance);
     Logger.recordOutput("ShotCalculation/LookaheadPose", lookaheadPose);
     Logger.recordOutput("ShotCalculation/TurretToTargetDistance", lookaheadTurretToTargetDistance);
 
@@ -174,8 +143,13 @@ public class ShotCalculation {
     latestParameters = null;
   }
 
-  public void setTarget(Translation2d target) {
+  public void setTarget(Translation2d target, boolean isScoring) {
     this.target = target;
+    if (isScoring) {
+      shootingConstants = scoring;
+    } else {
+      shootingConstants = passing;
+    }
   }
 
   public boolean boundLookahead(Pose2d pose) {

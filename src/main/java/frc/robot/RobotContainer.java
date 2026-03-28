@@ -131,7 +131,8 @@ public class RobotContainer {
                 spindexer::isFeederOn,
                 this::isInAllianceArea,
                 this::verticalHalfOfField,
-                this::getShotTriggerValue);
+                this::getShotTriggerValue,
+                spindexer);
 
         vis =
             new Vision(
@@ -187,7 +188,8 @@ public class RobotContainer {
                 spindexer::isFeederOn,
                 this::isInAllianceArea,
                 this::verticalHalfOfField,
-                this::getShotTriggerValue);
+                this::getShotTriggerValue,
+                spindexer);
 
         intake = new IntakeSubsystem(intakeIOSim);
 
@@ -326,33 +328,43 @@ public class RobotContainer {
 
       kDriveController.rightTrigger().onTrue(intake.takeInCommand());
       kDriveController.rightTrigger().onFalse(intake.stopMotorCommand());
-      /*kDriveController
-          .rightTrigger()
-          .whileTrue(
-              new ConditionalCommand(
-                  turret.aimAtCommand(() -> getHubPose3d()),
-                  flywheel.shootCommand(),
-                  () -> turret.isAutoAimEnabled()));
 
+      kDriveController.leftBumper().whileTrue(flywheel.shootCommand());
       kDriveController
-          .rightTrigger()
+          .leftBumper()
           .onFalse(
               new InstantCommand(() -> flywheel.setFlywheelSpeed(0))
-                  .alongWith(
-                      turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
+                  // .alongWith(
+                  // turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
                   .alongWith(spindexer.spindexerOffCommand())
                   .andThen(new WaitCommand(.5))
-                  .andThen(spindexer.feederOffCommand())); */
-      kDriveController.leftTrigger().whileTrue(turret.adjustPitch(() -> setDegrees.getValue()));
+                  .andThen(spindexer.feederOffCommand()));
+
+      kDriveController
+          .leftTrigger()
+          .onTrue(spindexer.spindexerOnCommand().andThen(spindexer.feederOnCommand()));
+      kDriveController
+          .leftTrigger()
+          .onFalse(
+              spindexer
+                  .spindexerOffCommand()
+                  .andThen(new WaitCommand(1.0))
+                  .andThen(
+                      spindexer
+                          .feederOffCommand()
+                          .onlyIf(() -> kDriveController.getHID().getRightTriggerAxis() == 0)));
 
       kDriveController
           .back()
+          .debounce(2.0)
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setHoodZero()));
 
       // kDriveController.start().onTrue(turret.toggleAutoAimCommand());
       kManipController
           .back()
+          .debounce(2.0)
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setYawZero()));
+
       kDriveController.rightBumper().onTrue(intake.reverseCommand());
       kDriveController.rightBumper().onFalse(intake.stopMotorCommand());
 
@@ -387,6 +399,7 @@ public class RobotContainer {
 
       kManipController.rightBumper().onTrue(turret.adjustYaw(setDegrees::getValue));
       kManipController.leftBumper().onTrue(new InstantCommand(() -> turret.toggleManualFlywheel()));
+
       kManipController
           .start()
           .onTrue(turret.toggleAutoAimCommand()); // .alongWith(vis.toggleHubTags()));
@@ -400,9 +413,7 @@ public class RobotContainer {
       kManipController.x().onFalse(intake.stopMotorCommand());
       kManipController.y().onTrue(intake.deployCommand());
 
-      kManipController
-          .rightTrigger()
-          .onTrue(spindexer.spindexerOnCommand().andThen(spindexer.feederOnCommand()));
+      kManipController.rightTrigger().onTrue(spindexer.feederOnCommand());
       kManipController
           .rightTrigger()
           .onFalse(
@@ -777,6 +788,7 @@ public class RobotContainer {
             new WaitCommand(0.5),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
+            new WaitCommand(0.2),
             spindexer
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
@@ -802,7 +814,7 @@ public class RobotContainer {
             new WaitCommand(0.5),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
-            new WaitCommand(1.0),
+            new WaitCommand(0.2),
             spindexer
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
