@@ -234,6 +234,7 @@ public class Turret extends SubsystemBase {
 
     io.updateInputs(inputs);
     Logger.processInputs("Shooter/Turret/Inputs", inputs);
+    Logger.recordOutput("Shooter/Turret/autoAimEnabled", autoAimEnabled);
 
     Pose2d pose =
         dtPose.get().plus(new Transform2d(TurretConstants.turretPosition, Rotation2d.kZero));
