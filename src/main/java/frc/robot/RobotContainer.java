@@ -30,7 +30,7 @@ import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.turret.ShotCalculation;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOSim;
-import frc.robot.subsystems.turret.TurretIOSparkMax2;
+import frc.robot.subsystems.turret.TurretIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIONull;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -124,7 +124,7 @@ public class RobotContainer {
         spindexer = new SpindexerSubsystem();
         turret =
             new Turret(
-                new TurretIOSparkMax2(),
+                new TurretIOSparkMax(),
                 drive::getPose,
                 flywheel,
                 shotCalculation,
@@ -357,13 +357,13 @@ public class RobotContainer {
       kDriveController
           .back()
           .debounce(2.0)
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setHoodZero()));
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setHoodZero()));
 
       // kDriveController.start().onTrue(turret.toggleAutoAimCommand());
       kManipController
           .back()
           .debounce(2.0)
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setYawZero()));
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax) turret.io).setYawZero()));
 
       kDriveController.rightBumper().onTrue(intake.reverseCommand());
       kDriveController.rightBumper().onFalse(intake.stopMotorCommand());
@@ -375,10 +375,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + runVolts.getValue());
-                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
                   },
                   () -> false,
                   turret));
@@ -389,10 +389,10 @@ public class RobotContainer {
                   () -> {},
                   () -> {
                     System.out.println("running at " + -1 * runVolts.getValue());
-                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(-1 * runVolts.getValue());
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(-1 * runVolts.getValue());
                   },
                   (c) -> {
-                    ((TurretIOSparkMax2) turret.io).testTurretVoltage(0);
+                    ((TurretIOSparkMax) turret.io).testTurretVoltage(0);
                   },
                   () -> false,
                   turret));
