@@ -729,25 +729,6 @@ public class RobotContainer {
                 .alongWith(spindexer.feederOffCommand()));
   }
 
-  public Command buildLeftNeutralZoneAuto() {
-    Command auto =
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            new WaitCommand(0.5),
-            intake.takeInCommand(),
-            DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
-            intake.stopMotorCommand(),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(4),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
-            intake.takeInCommand(),
-            DriveCommands.buildFollowPath("CollectDepot"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            intake.stopMotorCommand());
-    return auto;
-  }
-
   public Command buildSimpleLeftAuto() {
     Command auto =
         new SequentialCommandGroup(
