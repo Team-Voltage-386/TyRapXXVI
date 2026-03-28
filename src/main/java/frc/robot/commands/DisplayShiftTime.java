@@ -49,6 +49,7 @@ public class DisplayShiftTime extends Command {
   private GameStates thisGameState = GameStates.INIT;
   private double shiftTimeLeft = 10;
   private final BooleanSupplier hubIsAheadSup;
+  private boolean okToShoot = false;
 
   /**
    * Constructor
@@ -59,6 +60,7 @@ public class DisplayShiftTime extends Command {
     Logger.recordOutput("GameShift/CurrentShift", GameStates.INIT.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", GameStates.INIT.getShiftTime());
     Logger.recordOutput("GameShift/hubIsAhead", this.hubIsAheadSup.getAsBoolean());
+    Logger.recordOutput("GameShift/okToShoot", okToShoot);
   }
 
   // Called when the command is initially scheduled.
@@ -84,27 +86,36 @@ public class DisplayShiftTime extends Command {
         }
         break;
       case ALL:
+        okToShoot = true;
+
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          okToShoot = !okToShoot;
           thisGameState = GameStates.SHIFT1;
         }
         break;
       case ALL_SHIFT1:
+        okToShoot = true;
+
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          okToShoot = !okToShoot;
           thisGameState = GameStates.SHIFT2;
         }
         break;
       case SHIFT1:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          okToShoot = !okToShoot;
           thisGameState = GameStates.SHIFT2;
         }
         break;
       case SHIFT2:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          okToShoot = !okToShoot;
           thisGameState = GameStates.SHIFT3;
         }
         break;
       case SHIFT3:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          okToShoot = !okToShoot;
           if (hubIsAheadSup.getAsBoolean()) {
             thisGameState = GameStates.SHIFT4;
           } else {
@@ -114,23 +125,25 @@ public class DisplayShiftTime extends Command {
         break;
       case SHIFT4:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          okToShoot = !okToShoot;
           thisGameState = GameStates.ENDGAME;
         }
         break;
       case SHIFT4_ENDGAME:
-        {
-          if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
-            thisGameState = GameStates.DONE;
-          }
+        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
+          okToShoot = false;
+          thisGameState = GameStates.DONE;
         }
         break;
       case ENDGAME:
         if (Timer.getMatchTime() == thisGameState.getEndTime()) {
+          okToShoot = false;
           thisGameState = GameStates.DONE;
         }
         break;
       // Note: "DONE" does not show up in Sim
       case DONE:
+        okToShoot = !okToShoot;
         System.out.println("Change Shift: Done");
         break;
       default:
@@ -140,6 +153,7 @@ public class DisplayShiftTime extends Command {
     Logger.recordOutput("GameShift/CurrentShift", thisGameState.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", shiftTimeLeft);
     Logger.recordOutput("GameShift/hubIsAhead", hubIsAheadSup.getAsBoolean());
+    Logger.recordOutput("GameShift/okToShoot", okToShoot);
   }
 
   // Called once the command ends or is interrupted.
