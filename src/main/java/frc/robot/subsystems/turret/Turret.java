@@ -251,7 +251,7 @@ public class Turret extends SubsystemBase {
     }
     if (triggerSupplier.get() < 0.5) {
       manipController.setRumble(RumbleType.kBothRumble, 0.0);
-      if (spindexer.isReverse()) {
+      if (!spindexer.isReverse()) {
         spindexer.spindexerOff();
       }
     }
