@@ -18,7 +18,7 @@ public class Passing extends ShootingConstants {
     launchHoodAngleMap.put(4.5, Rotation2d.fromDegrees(40.0));
     launchHoodAngleMap.put(6.0, Rotation2d.fromDegrees(40.0));
     launchHoodAngleMap.put(8.0, Rotation2d.fromDegrees(40.0));
-    //launchHoodAngleMap.put(10.0, Rotation2d.fromDegrees(40.0));
+    // launchHoodAngleMap.put(10.0, Rotation2d.fromDegrees(40.0));
     // test 10
 
     // get TOF
@@ -27,7 +27,7 @@ public class Passing extends ShootingConstants {
     launchFlywheelSpeedMap.put(4.5, 2550.0);
     launchFlywheelSpeedMap.put(6.0, 3000.0);
     launchFlywheelSpeedMap.put(8.0, 3750.0);
-    //launchFlywheelSpeedMap.put(10.0, 4500.0);
+    // launchFlywheelSpeedMap.put(10.0, 4500.0);
 
     timeOfFlightMap.put(1.669, 0.88);
     timeOfFlightMap.put(2.233, 0.9275);

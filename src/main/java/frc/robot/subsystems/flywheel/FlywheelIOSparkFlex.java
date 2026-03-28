@@ -88,7 +88,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
     // configure follower motor (copy leader, and add follower data)
     flywheelConfigFollower = new SparkFlexConfig();
     flywheelConfigFollower.apply(flywheelConfig);
-    //flywheelConfigFollower.follow(flywheelMotor);
+    // flywheelConfigFollower.follow(flywheelMotor);
 
     tryUntilOk(
         5,
@@ -104,7 +104,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
   private void configureFollower() {
     // configure follower motor (copy leader, and add follower data)
     flywheelConfigFollower.apply(flywheelConfig);
-    //flywheelConfigFollower.follow(flywheelMotor);
+    // flywheelConfigFollower.follow(flywheelMotor);
     flywheelMotorFollower.configure(
         flywheelConfigFollower, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
