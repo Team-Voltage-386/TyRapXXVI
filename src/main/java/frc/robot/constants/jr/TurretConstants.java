@@ -69,6 +69,7 @@ public class TurretConstants {
   public static final double flywheelKa = 0.006;
   public static final double manualShotSpeedRpm = 2270.0;
   public static final double manualTriggerOnThreshold = 0.15;
+  public static final double flywheelRateLimit = 3300.0;
 
   public static final double shooterWheelRadiusMeters = 0.05;
 
