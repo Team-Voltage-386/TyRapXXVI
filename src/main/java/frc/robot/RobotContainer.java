@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -87,6 +88,9 @@ public class RobotContainer {
 
   // Autos
   private final Map<String, AutoWrapper> autos = new HashMap<>();
+
+  // Hub Status
+  private boolean hubIsAhead;
 
   /**
    * The container for the robot. Contains subsystems, IO devices, and commands.
@@ -665,6 +669,11 @@ public class RobotContainer {
 
   public void setIsAheadHub(boolean setTo) {
     getHubActivityCommand().setIsAhead(setTo);
+    this.hubIsAhead = setTo;
+  }
+
+  public BooleanSupplier getIsAheadHubSup() {
+    return () -> this.hubIsAhead;
   }
 
   public Rotation2d getAngleForRamp() {
