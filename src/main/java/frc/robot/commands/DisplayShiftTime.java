@@ -16,40 +16,51 @@ import org.littletonrobotics.junction.Logger;
 public class DisplayShiftTime extends Command {
   // Define the enum
   public enum GameStates {
-    AUTO(0, 20),
-    INIT(-1, -1),
-    ALL(130, 10),
-    ALL_SHIFT1(105, 35),
-    SHIFT1(105, 25),
-    SHIFT2(80, 25),
-    SHIFT3(55, 25),
-    SHIFT4(30, 25),
-    SHIFT4_ENDGAME(0, 55),
-    ENDGAME(0, 30),
-    DONE(-1, 0);
+    INIT(-1, -1, -1),
+    ALL(130, 10, 5),
+    ALL_SHIFT1(105, 35, 5),
+    SHIFT1(105, 25, 5),
+    SHIFT2(80, 25, 5),
+    SHIFT3(55, 25, 5),
+    SHIFT4(30, 25, 5),
+    SHIFT4_ENDGAME(0, 55, 5),
+    ENDGAME(0, 30, 5),
+    DONE(-1, 0, 0);
 
     private final int endTime;
-    private final double shiftTime;
+    private final int shiftTime;
+    private final int warnSeconds;
 
     // GameStates Constructor
-    GameStates(int endTime, double shiftTime) {
+    GameStates(int endTime, int shiftTime, int warnSeconds) {
       this.endTime = endTime;
       this.shiftTime = shiftTime;
+      this.warnSeconds = warnSeconds;
     }
 
+    // Get the end time for the shift
     public int getEndTime() {
       return endTime;
     }
 
-    public double getShiftTime() {
+    // Get the total shift time
+    public int getShiftTime() {
       return shiftTime;
+    }
+
+    // Get the warning time in seconds
+    public int getWarnSeconds() {
+      return warnSeconds;
     }
   }
 
   private GameStates thisGameState = GameStates.INIT;
-  private double shiftTimeLeft = 10;
+  private int shiftTimeLeft = 10;
   private final BooleanSupplier hubIsAheadSup;
   private boolean okToShoot = false;
+  private boolean warnLight = false;
+  private boolean timerToggle = false;
+  private final Timer warnTimer = new Timer();
 
   /**
    * Constructor
@@ -61,21 +72,36 @@ public class DisplayShiftTime extends Command {
     Logger.recordOutput("GameShift/shiftTimeLeft", GameStates.INIT.getShiftTime());
     Logger.recordOutput("GameShift/hubIsAhead", this.hubIsAheadSup.getAsBoolean());
     Logger.recordOutput("GameShift/okToShoot", okToShoot);
+    Logger.recordOutput("GameShift/warnLight", warnLight);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    // Start the time for warnings
+    warnTimer.start();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    // Toggle the warning signal and reset the warning timer
+    if (warnTimer.hasElapsed(0.25)) {
+      timerToggle = !timerToggle;
+      warnTimer.reset();
+    }
+
+    // Display warning timer
+    if (((int) Timer.getMatchTime() - thisGameState.getEndTime())
+        <= thisGameState.getWarnSeconds()) {
+      warnLight = timerToggle;
+    } else {
+      warnLight = false;
+    }
+
+    // Move through the game states
     switch (thisGameState) {
-      case AUTO:
-        if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
-          thisGameState = GameStates.ALL;
-        }
-        break;
+      // Initial state
       case INIT:
         if (DriverStation.isEnabled() && !DriverStation.isAutonomous()) {
           if (hubIsAheadSup.getAsBoolean()) {
@@ -85,14 +111,15 @@ public class DisplayShiftTime extends Command {
           }
         }
         break;
+      // ALL Shooting
       case ALL:
         okToShoot = true;
-
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = !okToShoot;
           thisGameState = GameStates.SHIFT1;
         }
         break;
+      // Combined ALL and SHIFT1
       case ALL_SHIFT1:
         okToShoot = true;
 
@@ -101,18 +128,21 @@ public class DisplayShiftTime extends Command {
           thisGameState = GameStates.SHIFT2;
         }
         break;
+      // Only SHIFT1
       case SHIFT1:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = !okToShoot;
           thisGameState = GameStates.SHIFT2;
         }
         break;
+      // Only SHIFT2
       case SHIFT2:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = !okToShoot;
           thisGameState = GameStates.SHIFT3;
         }
         break;
+      // Only SHIFT3
       case SHIFT3:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = !okToShoot;
@@ -123,18 +153,21 @@ public class DisplayShiftTime extends Command {
           }
         }
         break;
+      // Only SHIFT4
       case SHIFT4:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = !okToShoot;
           thisGameState = GameStates.ENDGAME;
         }
         break;
+      // Combined SHIFT4 and ENDGAME
       case SHIFT4_ENDGAME:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = false;
           thisGameState = GameStates.DONE;
         }
         break;
+      // Only ENDGAME
       case ENDGAME:
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = false;
@@ -142,28 +175,39 @@ public class DisplayShiftTime extends Command {
         }
         break;
       // Note: "DONE" does not show up in Sim
+      // DONE State
       case DONE:
-        okToShoot = !okToShoot;
+        okToShoot = false;
         System.out.println("Change Shift: Done");
         break;
+      // Default case is empty
       default:
         break;
     }
-    shiftTimeLeft = Timer.getMatchTime() - thisGameState.getEndTime();
+
+    // Calculate time left on the shift
+    shiftTimeLeft = (int) Timer.getMatchTime() - thisGameState.getEndTime();
+
+    // Display items on dashboard
     Logger.recordOutput("GameShift/CurrentShift", thisGameState.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", shiftTimeLeft);
     Logger.recordOutput("GameShift/hubIsAhead", hubIsAheadSup.getAsBoolean());
     Logger.recordOutput("GameShift/okToShoot", okToShoot);
+    Logger.recordOutput("GameShift/warnLight", warnLight);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    System.out.println("DisplayShiftTime: End");
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    // Stop the command once the match is done
     if (DriverStation.getMatchTime() < 0) {
+      System.out.println("DisplayShiftTime: isFinished");
       return true;
     } else {
       return false;
