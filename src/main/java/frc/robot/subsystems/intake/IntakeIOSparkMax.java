@@ -1,6 +1,6 @@
 package frc.robot.subsystems.intake;
 
-import static frc.robot.util.SparkUtil.*;
+import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -81,6 +81,13 @@ public class IntakeIOSparkMax implements IntakeIO {
     System.out.println("deploying intake mechanism");
     currentSetpoint = deploy_motor.getEncoder().getPosition();
     targetSetpoint = IntakeConstants.EXTENDED_DEPLOY_POSITION;
+    manual = false;
+  }
+
+  public void setSetpoint(double setpoint) {
+    System.out.println("deploying intake mechanism halfway");
+    currentSetpoint = deploy_motor.getEncoder().getPosition();
+    targetSetpoint = setpoint;
     manual = false;
   }
 
