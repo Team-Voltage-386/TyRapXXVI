@@ -15,9 +15,8 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HubActivity;
-import frc.robot.constants.jr.DriveConstants;
-import frc.robot.constants.jr.IntakeConstants;
-import frc.robot.constants.jr.VisionConstants;
+import frc.robot.constants.rebuilt.IntakeConstants;
+import frc.robot.constants.rebuilt.VisionConstants;
 import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.drive.*;
@@ -97,25 +96,14 @@ public class RobotContainer {
 
     switch (Constants.currentMode) {
       case REAL:
-
         // Real robot, instantiate hardware IO implementations
-        if (!DriveConstants.isReefscape) {
-          drive =
-              new Drive(
-                  new GyroIOPigeon2(),
-                  new ModuleIOSparkFlexCancoder(0, true, false),
-                  new ModuleIOSparkFlexCancoder(1, true, false),
-                  new ModuleIOSparkFlexCancoder(2, true, false),
-                  new ModuleIOSparkFlexCancoder(3, true, false));
-        } else {
-          drive =
-              new Drive(
-                  new GyroIOPigeon2(),
-                  new ModuleIOSparkMaxCancoder(0),
-                  new ModuleIOSparkMaxCancoder(1),
-                  new ModuleIOSparkMaxCancoder(2),
-                  new ModuleIOSparkMaxCancoder(3));
-        }
+        drive =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOSparkMaxCancoder(0),
+                new ModuleIOSparkMaxCancoder(1),
+                new ModuleIOSparkMaxCancoder(2),
+                new ModuleIOSparkMaxCancoder(3));
 
         flywheel = new Flywheel(new FlywheelIOSparkFlex());
 
@@ -262,36 +250,6 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     if (turret != null) {
-      /*kDriveController
-          .povRight()
-          .whileTrue(
-              new FunctionalCommand(
-                  () -> {},
-                  () -> {
-                    System.out.println("running at " + runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(runVolts.getValue());
-                  },
-                  (c) -> {
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
-                  },
-                  () -> false,
-                  turret));
-
-      kDriveController
-          .povLeft()
-          .whileTrue(
-              new FunctionalCommand(
-                  () -> {},
-                  () -> {
-                    System.out.println("running at " + -runVolts.getValue());
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(-runVolts.getValue());
-                  },
-                  (c) -> {
-                    ((TurretIOSparkMax) turret.io).testHoodVoltage(0);
-                  },
-                  () -> false,
-                  turret)); */
-
       kManipController
           .povUp()
           .whileTrue(

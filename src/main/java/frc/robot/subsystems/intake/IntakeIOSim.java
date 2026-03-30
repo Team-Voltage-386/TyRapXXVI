@@ -7,7 +7,7 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Inches;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.constants.jr.IntakeConstants;
+import frc.robot.constants.rebuilt.IntakeConstants;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.drivesims.AbstractDriveTrainSimulation;
 import org.littletonrobotics.junction.Logger;

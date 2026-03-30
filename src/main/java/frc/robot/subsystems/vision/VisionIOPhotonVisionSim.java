@@ -1,7 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.constants.jr.VisionConstants;
+import frc.robot.constants.rebuilt.VisionConstants;
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;

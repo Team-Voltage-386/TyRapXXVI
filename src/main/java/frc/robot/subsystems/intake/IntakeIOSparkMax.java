@@ -13,7 +13,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.constants.jr.IntakeConstants;
+import frc.robot.constants.rebuilt.IntakeConstants;
 import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;
 

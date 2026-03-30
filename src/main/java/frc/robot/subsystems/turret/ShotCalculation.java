@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
-import frc.robot.constants.jr.TurretConstants;
+import frc.robot.constants.rebuilt.TurretConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;

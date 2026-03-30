@@ -12,8 +12,9 @@ public final class DriveConstants {
   private DriveConstants() {}
 
   public static final int driveCurrentLimit =
-      frc.robot.constants.jr.DriveConstants.driveCurrentLimit;
-  public static final int turnCurrentLimit = frc.robot.constants.jr.DriveConstants.turnCurrentLimit;
+      frc.robot.constants.rebuilt.DriveConstants.driveCurrentLimit;
+  public static final int turnCurrentLimit =
+      frc.robot.constants.rebuilt.DriveConstants.turnCurrentLimit;
 
   public static final double driveKp = 0.05;
   public static final double driveKd = 0.0;
@@ -24,29 +25,23 @@ public final class DriveConstants {
   public static final double turnKd = 0.0;
 
   public static final Translation2d[] moduleTranslations =
-      frc.robot.constants.jr.DriveConstants.moduleTranslations;
+      frc.robot.constants.rebuilt.DriveConstants.moduleTranslations;
 
   public static final double driveBaseRadius =
-      frc.robot.constants.jr.DriveConstants.driveBaseRadius;
-  public static final double maxSpeed = frc.robot.constants.jr.DriveConstants.maxSpeed;
+      frc.robot.constants.rebuilt.DriveConstants.driveBaseRadius;
+  public static final double maxSpeed = frc.robot.constants.rebuilt.DriveConstants.maxSpeed;
 
   public static final PIDConstants translationPID =
-      frc.robot.constants.jr.DriveConstants.translationPID;
-  public static final PIDConstants rotationPID = frc.robot.constants.jr.DriveConstants.rotationPID;
+      frc.robot.constants.rebuilt.DriveConstants.translationPID;
+  public static final PIDConstants rotationPID =
+      frc.robot.constants.rebuilt.DriveConstants.rotationPID;
 
   public static final RobotConfig ppRobotConfig =
-      frc.robot.constants.jr.DriveConstants.ppRobotConfig;
+      frc.robot.constants.rebuilt.DriveConstants.ppRobotConfig;
 
-  public static final double odometryFrequency;
+  public static final double odometryFrequency =
+      frc.robot.constants.rebuilt.DriveConstants.odometryFrequency;
 
   public static final double wheelRadiusMeters =
-      frc.robot.constants.jr.DriveConstants.wheelRadiusMeters;
-
-  static {
-    if (frc.robot.constants.jr.DriveConstants.isReefscape) {
-      odometryFrequency = 100.0;
-    } else {
-      odometryFrequency = 100.0;
-    }
-  }
+      frc.robot.constants.rebuilt.DriveConstants.wheelRadiusMeters;
 }

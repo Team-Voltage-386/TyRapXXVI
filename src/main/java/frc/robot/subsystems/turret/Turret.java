@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.constants.jr.TurretConstants;
+import frc.robot.constants.rebuilt.TurretConstants;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.flywheel.Flywheel;
 import java.util.function.Supplier;

@@ -9,8 +9,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.constants.jr.DriveConstants;
-import frc.robot.constants.jr.VisionConstants;
+import frc.robot.constants.rebuilt.DriveConstants;
+import frc.robot.constants.rebuilt.VisionConstants;
 import frc.robot.subsystems.drive.Drive;
 import org.littletonrobotics.junction.Logger;
 

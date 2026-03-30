@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.constants.jr.VisionConstants;
+import frc.robot.constants.rebuilt.VisionConstants;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;

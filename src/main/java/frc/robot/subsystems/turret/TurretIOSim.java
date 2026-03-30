@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
-import frc.robot.constants.jr.TurretConstants;
+import frc.robot.constants.rebuilt.TurretConstants;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.intake.IntakeIOSim;

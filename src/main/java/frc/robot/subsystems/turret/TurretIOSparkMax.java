@@ -1,6 +1,6 @@
 package frc.robot.subsystems.turret;
 
-import static frc.robot.constants.jr.TurretConstants.*;
+import static frc.robot.constants.rebuilt.TurretConstants.*;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.PersistMode;
@@ -19,8 +19,8 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.constants.jr.DriveConstants;
-import frc.robot.constants.jr.TurretConstants;
+import frc.robot.constants.rebuilt.DriveConstants;
+import frc.robot.constants.rebuilt.TurretConstants;
 import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;
 

@@ -14,7 +14,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import frc.robot.constants.jr.TurretConstants;
+import frc.robot.constants.rebuilt.TurretConstants;
 import frc.robot.util.TuningUtil;
 import org.littletonrobotics.junction.Logger;
 

@@ -1,4 +1,4 @@
-package frc.robot.constants.jr;
+package frc.robot.constants.rebuilt;
 
 public final class ClimbConstants {
   public static final int DEPLOY_MOTOR_CAN_ID = 80;

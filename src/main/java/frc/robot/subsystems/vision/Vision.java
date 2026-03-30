@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.constants.jr.VisionConstants;
+import frc.robot.constants.rebuilt.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.util.TuningUtil;
 import java.util.LinkedList;

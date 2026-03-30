@@ -16,7 +16,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.constants.jr.DriveConstants;
+import frc.robot.constants.rebuilt.DriveConstants;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
