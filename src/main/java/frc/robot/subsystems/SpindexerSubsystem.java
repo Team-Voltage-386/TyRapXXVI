@@ -23,9 +23,10 @@ public class SpindexerSubsystem extends SubsystemBase {
   public boolean feederOn = false;
   public boolean reverse = true;
 
-  TuningUtil spindexerVolts = new TuningUtil("Spindexer/spindexerVolts", 0);
-  TuningUtil agitatorVolts = new TuningUtil("Agitator/agitatorVolts", 0);
-
+  TuningUtil spindexerVolts =
+      new TuningUtil("Spindexer/spindexerVolts", SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
+  TuningUtil agitatorVolts =
+      new TuningUtil("Spindexer/agitatorVolts", SpindexerConstants.AGITATOR_MOTOR_VOLTAGE);
 
   public SpindexerSubsystem() {
     spindexer_motor =
@@ -90,7 +91,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOn() {
     System.out.println("turning on spindexer");
     reverse = false;
-    spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
+    spindexer_motor.setVoltage(spindexerVolts.getValue());
     agitatorOn();
   }
 
@@ -112,7 +113,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void agitatorOn() {
     System.out.println("turning on agitator");
     reverse = false;
-    agitator_motor.setVoltage(SpindexerConstants.AGITATOR_MOTOR_VOLTAGE);
+    agitator_motor.setVoltage(agitatorVolts.getValue());
   }
 
   public Command agitatorOnCommand() {
