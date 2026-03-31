@@ -246,10 +246,7 @@ public class TurretIOSparkMax implements TurretIO {
     } else if (position.getRotations() < TurretConstants.turretMinAngleRot) {
       wrappedPositionDeg = wrappedPositionDeg + 360.0;
     }
-    Logger.recordOutput("/Shooter/Turret/DesiredAngleWrapped", wrappedPositionDeg);
-    Logger.recordOutput(
-        "/Shooter/Turret/DesiredAngleWrappedRot",
-        Rotation2d.fromDegrees(wrappedPositionDeg).getRotations());
+    Logger.recordOutput("/Shooter/Turret/DesiredAngleWrapped", Rotation2d.fromDegrees(wrappedPositionDeg));
     desiredAngle =
         MathUtil.clamp(
             Rotation2d.fromDegrees(wrappedPositionDeg).getRotations(),
