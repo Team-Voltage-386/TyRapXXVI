@@ -17,7 +17,7 @@ import frc.robot.constants.jr.SpindexerConstants;
 public class SpindexerSubsystem extends SubsystemBase {
 
   private final SparkFlex spindexer_motor;
-
+  private final SparkFlex agitator_motor;
   private final SparkFlex feeder_motor;
   public boolean feederOn = false;
   public boolean reverse = true;
@@ -42,6 +42,25 @@ public class SpindexerSubsystem extends SubsystemBase {
         () ->
             spindexer_motor.configure(
                 spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+  
+    agitator_motor = new SparkFlex(SpindexerConstants.AGITATOR_MOTOR_CAN_ID, MotorType.kBrushless);
+    SparkFlexConfig agitatorConfig = new SparkFlexConfig();
+    agitatorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
+    agitatorConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
+    agitatorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+    agitatorConfig
+        .signals
+        .primaryEncoderPositionAlwaysOn(true)
+        .primaryEncoderVelocityAlwaysOn(true)
+        .primaryEncoderVelocityPeriodMs(20)
+        .appliedOutputPeriodMs(20)
+        .busVoltagePeriodMs(20)
+        .outputCurrentPeriodMs(20);
+    tryUntilOk(
+        5,
+        () ->
+            agitator_motor.configure(
+                agitatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
     feeder_motor = new SparkFlex(SpindexerConstants.FEEDER_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkFlexConfig feederConfig = new SparkFlexConfig();
@@ -67,6 +86,7 @@ public class SpindexerSubsystem extends SubsystemBase {
     System.out.println("turning on spindexer");
     reverse = false;
     spindexer_motor.setVoltage(-SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
+    agitatorOn();
   }
 
   public Command spindexerOnCommand() {
@@ -77,10 +97,31 @@ public class SpindexerSubsystem extends SubsystemBase {
     // System.out.println("turning off spindexer");
     reverse = false;
     spindexer_motor.set(0);
+    agitatorOff();
   }
 
   public Command spindexerOffCommand() {
     return Commands.runOnce(() -> spindexerOff());
+  }
+
+  public void agitatorOn() {
+    System.out.println("turning on agitator");
+    reverse = false;
+    agitator_motor.setVoltage(-SpindexerConstants.AGITATOR_MOTOR_VOLTAGE);
+  }
+
+  public Command agitatorOnCommand() {
+    return Commands.runOnce(() -> agitatorOn());
+  }
+
+  public void agitatorOff() {
+    // System.out.println("turning off spindexer");
+    reverse = false;
+    agitator_motor.set(0);
+  }
+
+  public Command agitatorOffCommand() {
+    return Commands.runOnce(() -> agitatorOff());
   }
 
   public void feederOn() {
