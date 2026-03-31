@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.jr.SpindexerConstants;
+import frc.robot.util.TuningUtil;
 
 public class SpindexerSubsystem extends SubsystemBase {
 
@@ -21,6 +22,10 @@ public class SpindexerSubsystem extends SubsystemBase {
   private final SparkFlex feeder_motor;
   public boolean feederOn = false;
   public boolean reverse = true;
+
+  TuningUtil spindexerVolts = new TuningUtil("Spindexer/spindexerVolts", 0);
+  TuningUtil agitatorVolts = new TuningUtil("Agitator/agitatorVolts", 0);
+
 
   public SpindexerSubsystem() {
     spindexer_motor =
@@ -85,7 +90,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOn() {
     System.out.println("turning on spindexer");
     reverse = false;
-    spindexer_motor.setVoltage(-SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
+    spindexer_motor.setVoltage(SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
     agitatorOn();
   }
 
@@ -107,7 +112,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void agitatorOn() {
     System.out.println("turning on agitator");
     reverse = false;
-    agitator_motor.setVoltage(-SpindexerConstants.AGITATOR_MOTOR_VOLTAGE);
+    agitator_motor.setVoltage(SpindexerConstants.AGITATOR_MOTOR_VOLTAGE);
   }
 
   public Command agitatorOnCommand() {
