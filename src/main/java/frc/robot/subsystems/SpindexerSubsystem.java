@@ -42,7 +42,7 @@ public class SpindexerSubsystem extends SubsystemBase {
         () ->
             spindexer_motor.configure(
                 spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-  
+
     agitator_motor = new SparkFlex(SpindexerConstants.AGITATOR_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkFlexConfig agitatorConfig = new SparkFlexConfig();
     agitatorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
