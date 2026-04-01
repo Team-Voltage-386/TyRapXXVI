@@ -6,9 +6,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.constants.jr.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 
 /**
@@ -19,9 +16,7 @@ public class JiggleIntake extends Command {
 
   private final Timer timer = new Timer();
   private final IntakeSubsystem intake;
-  private Command activeCommand = Commands.none();
-  private double outSetpoint = IntakeConstants.EXTENDED_DEPLOY_POSITION;
-  private double inSetpoint = IntakeConstants.HALF_DEPLOY_POSITION;
+  private double sign = 1;
 
   public JiggleIntake(IntakeSubsystem subsystem) {
     intake = subsystem;
@@ -30,44 +25,24 @@ public class JiggleIntake extends Command {
 
   @Override
   public void initialize() {
-    activeCommand.cancel();
     timer.reset();
     timer.start();
-  }
-
-  /**
-   * Calculates a number between two numbers at a specific increment.
-   *
-   * @param start The start value.
-   * @param end The end value.
-   * @param amount The amount to interpolate between the two values (0.0 to 1.0).
-   * @return The interpolated float value.
-   */
-  public static double lerp(double start, double end, double amount) {
-    return start + (end - start) * amount;
-    // An alternative, more precise method for floating point values is:
-    // return (1 - amount) * start + amount * end;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double timeSec = timer.get() % 2;
-    activeCommand.cancel();
-    activeCommand =
-        intake.setSetpoint(
-            lerp(
-                timeSec > 1 ? inSetpoint : outSetpoint,
-                timeSec > 1 ? outSetpoint : inSetpoint,
-                timer.get() % 1));
-    CommandScheduler.getInstance().schedule(activeCommand);
+    if (timer.get() > .66) {
+      sign *= -1;
+      timer.reset();
+    }
+    intake.testDeployVoltage(sign * 3);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    activeCommand.cancel();
-    CommandScheduler.getInstance().schedule(intake.deployCommand());
+    intake.testDeployVoltage(0);
   }
 
   // Returns true when the command should end.
