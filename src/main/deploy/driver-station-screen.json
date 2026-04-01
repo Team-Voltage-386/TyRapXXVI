@@ -1,0 +1,59 @@
+{
+    "ip": "127.0.0.1",
+    "mode": 0,
+    "tabs": [
+        {
+            "cols": 5,
+            "rows": 3,
+            "title": "Status",
+            "widgets": [
+                {
+                    "colSpan": 2,
+                    "column": 3,
+                    "properties": {
+                    },
+                    "row": 0,
+                    "rowSpan": 1,
+                    "title": "MatchTime",
+                    "topic": "/AdvantageKit/DriverStation/MatchTime",
+                    "type": "matchTime"
+                },
+                {
+                    "colSpan": 2,
+                    "column": 3,
+                    "properties": {
+                    },
+                    "row": 1,
+                    "rowSpan": 2,
+                    "title": "okToShoot",
+                    "topic": "/AdvantageKit/RealOutputs/GameShift/okToShoot",
+                    "type": "color"
+                },
+                {
+                    "colSpan": 2,
+                    "column": 0,
+                    "properties": {
+                        "fontSize": 390
+                    },
+                    "row": 0,
+                    "rowSpan": 3,
+                    "title": "shiftTimeLeft",
+                    "topic": "/AdvantageKit/RealOutputs/GameShift/shiftTimeLeft",
+                    "type": "intDisplay"
+                },
+                {
+                    "colSpan": 1,
+                    "column": 2,
+                    "properties": {
+                    },
+                    "row": 0,
+                    "rowSpan": 3,
+                    "title": "warnLight",
+                    "topic": "/AdvantageKit/RealOutputs/GameShift/warnLight",
+                    "type": "color"
+                }
+            ]
+        }
+    ],
+    "team": 386
+}

@@ -41,7 +41,8 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
   TuningUtil flywheelKs = new TuningUtil("/Tuning/flywheel/flywheelKs", TurretConstants.flywheelKs);
   TuningUtil flywheelKa = new TuningUtil("/Tuning/flywheel/flywheelKa", TurretConstants.flywheelKa);
   TuningUtil threshold = new TuningUtil("/Tuning/flywheel/Threshold", 400);
-  TuningUtil rateLimit = new TuningUtil("/Tuning/flywheel/RateLimit", 2000);
+  TuningUtil rateLimit =
+      new TuningUtil("/Tuning/flywheel/RateLimit", TurretConstants.flywheelRateLimit);
   SlewRateLimiter filter = new SlewRateLimiter(rateLimit.getValue());
 
   public FlywheelIOSparkFlex() {
@@ -88,7 +89,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
     // configure follower motor (copy leader, and add follower data)
     flywheelConfigFollower = new SparkFlexConfig();
     flywheelConfigFollower.apply(flywheelConfig);
-    flywheelConfigFollower.follow(flywheelMotor);
+    // flywheelConfigFollower.follow(flywheelMotor);
 
     tryUntilOk(
         5,
@@ -104,7 +105,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
   private void configureFollower() {
     // configure follower motor (copy leader, and add follower data)
     flywheelConfigFollower.apply(flywheelConfig);
-    flywheelConfigFollower.follow(flywheelMotor);
+    // flywheelConfigFollower.follow(flywheelMotor);
     flywheelMotorFollower.configure(
         flywheelConfigFollower, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }

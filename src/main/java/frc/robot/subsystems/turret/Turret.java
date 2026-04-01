@@ -2,10 +2,13 @@ package frc.robot.subsystems.turret;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.constants.jr.TurretConstants;
+import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.flywheel.Flywheel;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -21,10 +24,14 @@ public class Turret extends SubsystemBase {
   private final Supplier<Pose2d> dtPose;
   private Pose3d currentTargetPose = new Pose3d(Constants.blueHubPose, Rotation3d.kZero);
   private final Flywheel flywheel;
+  private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
+  private XboxController manipController = new XboxController(1);
 
   private boolean autoAimEnabled = false;
   private boolean manualMode = false;
+  private double deltaYaw = 0.0;
+  protected boolean isScoring = true;
 
   private Rotation2d manualPitch = new Rotation2d(TurretConstants.turretMaxHoodAngle);
   private Rotation2d calculatedPitch;
@@ -41,7 +48,8 @@ public class Turret extends SubsystemBase {
       Supplier<Boolean> isShootingSupplier,
       Supplier<Boolean> isInAlliance,
       Supplier<Boolean> verticalHalfofField,
-      Supplier<Double> triggerSupplier) {
+      Supplier<Double> triggerSupplier,
+      SpindexerSubsystem spindexer) {
     this.io = io;
     this.dtPose = dtPose;
     this.flywheel = flywheel;
@@ -51,6 +59,7 @@ public class Turret extends SubsystemBase {
     this.isInAlliance = isInAlliance;
     this.verticalHalfofField = verticalHalfofField;
     this.triggerSupplier = triggerSupplier;
+    this.spindexer = spindexer;
 
     io.setTurretPitch(Rotation2d.fromDegrees(TurretConstants.turretMaxHoodAngle));
   }
@@ -109,8 +118,8 @@ public class Turret extends SubsystemBase {
     return runOnce(() -> toggleAutoAim());
   }
 
-  public void aimAtTarget(Pose3d targetPose) {
-    shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d());
+  public void aimAtTarget(Pose3d targetPose, boolean isScoring) {
+    shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d(), isScoring);
     Pose2d turretFieldPos = shotCalculation.getParameters().lookaheadPose();
     Translation3d turretFieldTrans =
         new Translation3d(
@@ -127,6 +136,7 @@ public class Turret extends SubsystemBase {
 
     double desiredTurretYaw =
         Rotation2d.fromRadians(yaw).getDegrees() - turretFieldPos.getRotation().getDegrees();
+    deltaYaw = getAngleDifference(desiredTurretYaw, inputs.turretYaw.getDegrees());
     io.setTurretYaw(limitTurretYaw(desiredTurretYaw));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
     double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
@@ -142,12 +152,7 @@ public class Turret extends SubsystemBase {
    * @param targetPose - The pose to hit with the Fuel.
    * @return The command to aim the turret.
    */
-  public Command aimAtCommand(Supplier<Pose3d> targetPoseIn) {
-    return run(
-        () -> {
-          aimAtTarget(targetPoseIn.get());
-        });
-  }
+  // deleted aimAtCommand
 
   public Command adjustPitch(Supplier<Double> pitchDeg) {
     return runOnce(() -> io.setTurretPitch(new Rotation2d(Math.toRadians(pitchDeg.get()))));
@@ -160,12 +165,14 @@ public class Turret extends SubsystemBase {
   public void setTarget() {
     var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
     if (this.isInAlliance.get()) {
+      isScoring = true;
       if (alliance == DriverStation.Alliance.Blue) {
         currentTargetPose = Constants.blueHubPose3d;
       } else {
         currentTargetPose = Constants.redHubPose3d;
       }
     } else {
+      isScoring = false;
       if (alliance == DriverStation.Alliance.Blue) {
         if (this.verticalHalfofField.get()) {
           currentTargetPose = Constants.blueLeftCornerPose3d;
@@ -221,19 +228,37 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     if (autoAimEnabled) {
       setTarget();
-      aimAtTarget(currentTargetPose);
+      aimAtTarget(currentTargetPose, isScoring);
+      if ((Math.abs(deltaYaw) < 5) && triggerSupplier.get() > 0.5) {
+        spindexer.spindexerOn();
+        manipController.setRumble(RumbleType.kBothRumble, 0.0);
+      } else if (Math.abs(deltaYaw) > 5 && triggerSupplier.get() > 0.5) {
+        spindexer.spindexerOff();
+        manipController.setRumble(RumbleType.kBothRumble, 0.3);
+      }
     } else if (manualMode) {
       // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
       // and set the hood to the max angle for close range shots
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(TurretConstants.manualShotSpeedRpm);
+      if (triggerSupplier.get() > 0.5) {
+        spindexer.spindexerOn();
+      }
+
     } else {
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(0);
     }
+    if (triggerSupplier.get() < 0.5) {
+      manipController.setRumble(RumbleType.kBothRumble, 0.0);
+      if (!spindexer.isReverse()) {
+        spindexer.spindexerOff();
+      }
+    }
 
     io.updateInputs(inputs);
     Logger.processInputs("Shooter/Turret/Inputs", inputs);
+    Logger.recordOutput("Shooter/Turret/autoAimEnabled", autoAimEnabled);
 
     Pose2d pose =
         dtPose.get().plus(new Transform2d(TurretConstants.turretPosition, Rotation2d.kZero));
@@ -251,5 +276,6 @@ public class Turret extends SubsystemBase {
             new Rotation3d(dtPose.get().getRotation()));
 
     Logger.recordOutput("Shooter/Turret/Visual", turretVisual);
+    Logger.recordOutput("Shooter/Turret/deltaYaw", deltaYaw);
   }
 }

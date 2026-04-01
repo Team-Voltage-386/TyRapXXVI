@@ -16,76 +16,92 @@
     },
     {
       "anchor": {
-        "x": 5.7340228245363765,
-        "y": 7.327888730382191
+        "x": 6.5639761904761915,
+        "y": 7.4038571428571425
       },
       "prevControl": {
-        "x": 5.438707605118761,
-        "y": 7.441492288318658
+        "x": 6.267328665477859,
+        "y": 7.470602835981767
       },
       "nextControl": {
-        "x": 6.309357644373149,
-        "y": 7.106565621241089
+        "x": 6.995880952380953,
+        "y": 7.306678571428572
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.471526390870183,
-        "y": 6.680955777457797
+        "x": 6.898702380952382,
+        "y": 6.550845238095238
       },
       "prevControl": {
-        "x": 6.2800357915285705,
-        "y": 6.934578512617653
+        "x": 6.918525837308217,
+        "y": 6.868020539788615
       },
       "nextControl": {
-        "x": 6.839605370982118,
-        "y": 6.193447784836706
+        "x": 6.855511904761906,
+        "y": 5.85979761904762
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.342139800285306,
-        "y": 5.115378031383738
+        "x": 6.294035714285716,
+        "y": 5.773416666666667
       },
       "prevControl": {
-        "x": 6.654431375916958,
-        "y": 5.088834984105058
+        "x": 6.5190382978003685,
+        "y": 5.555232343258519
       },
       "nextControl": {
-        "x": 5.999071631584069,
-        "y": 5.144536917925038
+        "x": 5.9377142857142875,
+        "y": 6.118940476190476
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.342139800285306,
-        "y": 7.451043890865955
+        "x": 6.153666666666668,
+        "y": 6.550845238095238
       },
       "prevControl": {
-        "x": 7.230264305591764,
-        "y": 6.761986964763909
+        "x": 6.1104761904761915,
+        "y": 6.18372619047619
       },
       "nextControl": {
-        "x": 5.972962076269496,
-        "y": 7.73747272621028
+        "x": 6.203239967176047,
+        "y": 6.972218292424957
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.000242510699001,
-        "y": 7.451043890865955
+        "x": 5.948511904761906,
+        "y": 7.4038571428571425
       },
       "prevControl": {
-        "x": 4.615899569599474,
-        "y": 7.4354153639825
+        "x": 6.412809523809524,
+        "y": 7.2095
+      },
+      "nextControl": {
+        "x": 5.472399282088143,
+        "y": 7.603160101185694
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.832178571428572,
+        "y": 7.564650602409639
+      },
+      "prevControl": {
+        "x": 4.4478356303290445,
+        "y": 7.549022075526184
       },
       "nextControl": null,
       "isLocked": false,
@@ -95,22 +111,36 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": 0.0
+      "rotationDegrees": -21.037511025421782
     },
     {
       "waypointRelativePos": 2.0,
-      "rotationDegrees": -76.39329607374958
+      "rotationDegrees": -34.69515353123361
     },
     {
       "waypointRelativePos": 3.0,
-      "rotationDegrees": -129.6441749571448
+      "rotationDegrees": -93.81407483429022
     },
     {
-      "waypointRelativePos": 4.0,
-      "rotationDegrees": 0.0
+      "waypointRelativePos": 5.0,
+      "rotationDegrees": 0.21423332468249714
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.1564748201438901,
+      "maxWaypointRelativePos": 4.85,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 5.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {

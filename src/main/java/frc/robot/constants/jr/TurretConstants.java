@@ -49,6 +49,7 @@ public class TurretConstants {
   public static final double turretHoodAngleRange = turretMaxHoodAngle - turretMinHoodAngle;
 
   public static final double maxHoodSetpoint = 0.92;
+  public static final double hoodKP = 2.4;
 
   // Ks is maximum voltage that does not move the motor. Just try voltages until the motor stops
   // moving.
@@ -61,13 +62,14 @@ public class TurretConstants {
   // You then subtract the Ks from the voltage and divide by the velocity to get Kv.
   public static final double turretKv = 7.0; // Volts per (rpm)
 
-  public static final int flywheelMasterCanId = 19;
-  public static final int flywheelSlaveCanId = 11;
-  public static final double flywheelKs = 0.1515;
-  public static final double flywheelKv = 0.001774;
+  public static final int flywheelMasterCanId = 11;
+  public static final int flywheelSlaveCanId = 19;
+  public static final double flywheelKs = 0.0123;
+  public static final double flywheelKv = 0.00182;
   public static final double flywheelKa = 0.006;
   public static final double manualShotSpeedRpm = 2270.0;
   public static final double manualTriggerOnThreshold = 0.15;
+  public static final double flywheelRateLimit = 3300.0;
 
   public static final double shooterWheelRadiusMeters = 0.05;
 
