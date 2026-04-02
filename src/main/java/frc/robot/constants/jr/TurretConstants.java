@@ -63,7 +63,7 @@ public class TurretConstants {
   public static final double turretKv = 7.0; // Volts per (rpm)
 
   public static final int flywheelMasterCanId = 11;
-  public static final int flywheelSlaveCanId = 19;
+  // public static final int flywheelSlaveCanId = 19;
   public static final double flywheelKs = 0.0123;
   public static final double flywheelKv = 0.00182;
   public static final double flywheelKa = 0.006;
