@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 
 /**
@@ -16,8 +17,7 @@ public class JiggleIntake extends Command {
 
   private final Timer timer = new Timer();
   private final IntakeSubsystem intake;
-  private double sign = 1;
-
+  private boolean out = true;
   public JiggleIntake(IntakeSubsystem subsystem) {
     intake = subsystem;
     addRequirements(subsystem);
@@ -33,16 +33,16 @@ public class JiggleIntake extends Command {
   @Override
   public void execute() {
     if (timer.get() > .66) {
-      sign *= -1;
-      timer.reset();
+      double voltage = out ? 3 : -1.5;
+      intake.testDeployVoltage(voltage);
+      out = !out;
     }
-    intake.testDeployVoltage(sign * 3);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.testDeployVoltage(0);
+    CommandScheduler.getInstance().schedule(intake.deployCommand());
   }
 
   // Returns true when the command should end.
