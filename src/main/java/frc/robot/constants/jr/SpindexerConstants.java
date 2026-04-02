@@ -8,4 +8,7 @@ public class SpindexerConstants {
   public static final double AGITATOR_MOTOR_VOLTAGE = 0.1 * 12;
   public static final double FEEDER_MOTOR_VOLTAGE = 0.95 * 12;
   public static final double agitatorGearRatio = 1 / 3.0;
+  public static final double AGITATOR_RPM = 60.0;
+  public static final double AGITATOR_KP = 0.5;
+  public static final double AGITATOR_KD = 0.02;
 }

@@ -28,9 +28,9 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   SparkFlexConfig agitatorConfig;
 
-  TuningUtil agitatorKp = new TuningUtil("/Tuning/spindexer/agitatorKp", 0.1);
-  TuningUtil agitatorKd = new TuningUtil("/Tuning/spindexer/agitatorKd", 0.02);
-  TuningUtil agitatorRpm = new TuningUtil("/Tuning/spindexer/agitatorRpm", 60);
+  TuningUtil agitatorKp = new TuningUtil("/Tuning/spindexer/agitatorKp", SpindexerConstants.AGITATOR_KP);
+  TuningUtil agitatorKd = new TuningUtil("/Tuning/spindexer/agitatorKd", SpindexerConstants.AGITATOR_KD);
+  TuningUtil agitatorRpm = new TuningUtil("/Tuning/spindexer/agitatorRpm", SpindexerConstants.AGITATOR_RPM);
   double agitatorRpmVal = agitatorRpm.getValue();
   double agitatorSetpoint = 0.0;
   double agitatorIncrement = (agitatorRpmVal / 60.0) / 50.0;
@@ -46,11 +46,6 @@ public class SpindexerSubsystem extends SubsystemBase {
     SparkFlexConfig spindexerConfig = new SparkFlexConfig();
     spindexerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
     spindexerConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
-    spindexerConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .positionWrappingEnabled(true);
-    // .positionWrappingInputRange(0.0, 1.0);
     spindexerConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -74,8 +69,12 @@ public class SpindexerSubsystem extends SubsystemBase {
         .uvwAverageDepth(2)
         .positionConversionFactor(SpindexerConstants.agitatorGearRatio)
         .velocityConversionFactor(SpindexerConstants.agitatorGearRatio);
-    agitatorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-    agitatorConfig.closedLoop.pid(0.0, 0.0, 0.0, ClosedLoopSlot.kSlot0);
+    agitatorConfig.closedLoop.pid(agitatorKp.getValue(), 0.0, agitatorKd.getValue(), ClosedLoopSlot.kSlot0);
+    agitatorConfig
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .positionWrappingEnabled(true)
+        .positionWrappingInputRange(0.0, 1.0);
     agitatorConfig
         .signals
         .primaryEncoderPositionAlwaysOn(true)
