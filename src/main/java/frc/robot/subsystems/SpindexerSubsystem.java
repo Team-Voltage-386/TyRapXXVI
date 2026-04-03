@@ -28,9 +28,12 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   SparkFlexConfig agitatorConfig;
 
-  TuningUtil agitatorKp = new TuningUtil("/Tuning/spindexer/agitatorKp", SpindexerConstants.AGITATOR_KP);
-  TuningUtil agitatorKd = new TuningUtil("/Tuning/spindexer/agitatorKd", SpindexerConstants.AGITATOR_KD);
-  TuningUtil agitatorRpm = new TuningUtil("/Tuning/spindexer/agitatorRpm", SpindexerConstants.AGITATOR_RPM);
+  TuningUtil agitatorKp =
+      new TuningUtil("/Tuning/spindexer/agitatorKp", SpindexerConstants.AGITATOR_KP);
+  TuningUtil agitatorKd =
+      new TuningUtil("/Tuning/spindexer/agitatorKd", SpindexerConstants.AGITATOR_KD);
+  TuningUtil agitatorRpm =
+      new TuningUtil("/Tuning/spindexer/agitatorRpm", SpindexerConstants.AGITATOR_RPM);
   double agitatorRpmVal = agitatorRpm.getValue();
   double agitatorSetpoint = 0.0;
   double agitatorIncrement = (agitatorRpmVal / 60.0) / 50.0;
@@ -69,7 +72,8 @@ public class SpindexerSubsystem extends SubsystemBase {
         .uvwAverageDepth(2)
         .positionConversionFactor(SpindexerConstants.agitatorGearRatio)
         .velocityConversionFactor(SpindexerConstants.agitatorGearRatio);
-    agitatorConfig.closedLoop.pid(agitatorKp.getValue(), 0.0, agitatorKd.getValue(), ClosedLoopSlot.kSlot0);
+    agitatorConfig.closedLoop.pid(
+        agitatorKp.getValue(), 0.0, agitatorKd.getValue(), ClosedLoopSlot.kSlot0);
     agitatorConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
