@@ -18,6 +18,7 @@ public class JiggleIntake extends Command {
   private final Timer timer = new Timer();
   private final IntakeSubsystem intake;
   private boolean out = true;
+
   public JiggleIntake(IntakeSubsystem subsystem) {
     intake = subsystem;
     addRequirements(subsystem);
