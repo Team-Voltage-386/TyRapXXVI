@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HubActivity;
+import frc.robot.commands.JiggleIntake;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.IntakeConstants;
 import frc.robot.constants.jr.VisionConstants;
@@ -50,15 +51,13 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
   // LED and Rumble
   private final LightSubsystem m_lightSubsystem = new LightSubsystem();
 
@@ -225,11 +224,9 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by
+   * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses
-   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then
-   * passing it to a
+   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
@@ -415,7 +412,7 @@ public class RobotContainer {
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.reverseCommand());
       kManipController.x().onFalse(intake.stopMotorCommand());
-      kManipController.y().onTrue(intake.deployCommand());
+      kManipController.y().whileTrue(new JiggleIntake(intake));
 
       kManipController.rightTrigger().onTrue(spindexer.feederOnCommand());
       kManipController
@@ -444,6 +441,7 @@ public class RobotContainer {
 
   public void initializeAutos() {
     try {
+      registerAuto(new AutoWrapper("jiggle", "Spacing", true, new JiggleIntake(intake)));
       registerAuto(new AutoWrapper("SimpleLeftDepot", "Spacing", true, buildSimpleLeftAuto()));
       registerAuto(new AutoWrapper("BackUpAndShoot", "Spacing", true, buildSimpleRightAuto()));
       registerAuto(
@@ -748,7 +746,7 @@ public class RobotContainer {
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
             intake.stopMotorCommand(),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(4),
+            new WaitCommand(4).deadlineFor(new JiggleIntake(intake)),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectDepot"),
@@ -764,9 +762,11 @@ public class RobotContainer {
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("Spacing"),
             new WaitCommand(.5),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(3),
-            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
+            new SequentialCommandGroup(
+                    spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+                    new WaitCommand(3),
+                    spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()))
+                .deadlineFor(new JiggleIntake(intake)),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("DepotFromCenter"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
@@ -784,7 +784,7 @@ public class RobotContainer {
             DriveCommands.buildFollowPath("Spacing"),
             new WaitCommand(1),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(5),
+            new WaitCommand(5).deadlineFor(new JiggleIntake(intake)),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()));
     return auto;
   }
@@ -802,7 +802,7 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(6),
+            new WaitCommand(6).deadlineFor(new JiggleIntake(intake)),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand())
@@ -828,7 +828,7 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(6),
+            new WaitCommand(6).deadlineFor(new JiggleIntake(intake)),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),

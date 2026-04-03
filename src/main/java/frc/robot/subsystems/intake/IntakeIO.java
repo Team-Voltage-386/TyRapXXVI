@@ -16,6 +16,7 @@ public interface IntakeIO {
 
   @AutoLog
   class IntakeIOInputs {
+
     public boolean connected = false;
     public boolean deployed = false;
     public IntakingState intakingState = IntakingState.STOPPED;
@@ -24,6 +25,8 @@ public interface IntakeIO {
   default void updateInputs(IntakeIOInputs inputs) {}
 
   public void deploy();
+
+  public void setSetpoint(double setpoint);
 
   public void retract();
 

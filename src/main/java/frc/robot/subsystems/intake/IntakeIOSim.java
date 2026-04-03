@@ -54,6 +54,8 @@ public class IntakeIOSim implements IntakeIO {
     currentSetPoint = IntakeConstants.extendedAngle;
   }
 
+  public void setSetpoint(double setpoint) {}
+
   public void retract() {
     System.out.println("retracting intake mechanism");
     this.isDeployed = false;
