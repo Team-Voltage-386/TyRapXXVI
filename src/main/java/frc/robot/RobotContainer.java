@@ -746,12 +746,14 @@ public class RobotContainer {
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
             intake.stopMotorCommand(),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(4).deadlineFor(new JiggleIntake(intake)),
+            new WaitCommand(5).deadlineFor(new SequentialCommandGroup(new WaitCommand(2.5), new JiggleIntake(intake))),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectDepot"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            intake.stopMotorCommand());
+            intake.stopMotorCommand(),
+            new WaitCommand(2),
+            new JiggleIntake(intake));
     return auto;
   }
 
@@ -802,7 +804,7 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(6).deadlineFor(new JiggleIntake(intake)),
+            new WaitCommand(6).deadlineFor(new SequentialCommandGroup(new WaitCommand(2.5), new JiggleIntake(intake))),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand())
@@ -811,7 +813,9 @@ public class RobotContainer {
             spindexer
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
-                .alongWith(intake.stopMotorCommand()));
+                .alongWith(intake.stopMotorCommand()),
+            new WaitCommand(2),
+            new JiggleIntake(intake));
     return auto;
   }
 
@@ -828,7 +832,7 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(6).deadlineFor(new JiggleIntake(intake)),
+            new WaitCommand(6).deadlineFor(new SequentialCommandGroup(new WaitCommand(2.5), new JiggleIntake(intake))),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),
@@ -836,7 +840,9 @@ public class RobotContainer {
             spindexer
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
-                .alongWith(intake.stopMotorCommand()));
+                .alongWith(intake.stopMotorCommand()),
+            new WaitCommand(2),
+            new JiggleIntake(intake));
     return auto;
   }
 }
