@@ -59,6 +59,8 @@ public class IntakeIOSim implements IntakeIO {
     this.isDeployed = false;
     this.intakeSimulation.stopIntake();
     currentSetPoint = IntakeConstants.retractedAngle;
+    
+    
   }
 
   public void takeIn() {

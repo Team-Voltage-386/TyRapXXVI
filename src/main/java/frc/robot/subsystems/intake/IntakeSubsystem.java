@@ -46,4 +46,9 @@ public class IntakeSubsystem extends SubsystemBase {
   public void periodic() {
     intakeIO.updateInputs(this.inputs);
   }
+
+  public boolean isDeployed()
+  {
+    return inputs.deployed;
+  }
 }
