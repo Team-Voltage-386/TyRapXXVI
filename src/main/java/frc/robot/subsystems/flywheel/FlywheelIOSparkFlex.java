@@ -27,8 +27,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
   // real robot will likely have two motors, use follower
   private final SparkFlex flywheelMotor =
       new SparkFlex(TurretConstants.flywheelMasterCanId, MotorType.kBrushless);
-  private final SparkFlex flywheelMotorFollower =
-      new SparkFlex(TurretConstants.flywheelSlaveCanId, MotorType.kBrushless);
+
   private final RelativeEncoder flywheelEncoder = flywheelMotor.getEncoder();
   private double flywheelSetpoint;
 
@@ -86,28 +85,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
             flywheelMotor.configure(
                 flywheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    // configure follower motor (copy leader, and add follower data)
-    flywheelConfigFollower = new SparkFlexConfig();
-    flywheelConfigFollower.apply(flywheelConfig);
-    // flywheelConfigFollower.follow(flywheelMotor);
-
-    tryUntilOk(
-        5,
-        () ->
-            flywheelMotorFollower.configure(
-                flywheelConfigFollower,
-                ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters));
-
     flywheelEncoder.setPosition(0);
-  }
-
-  private void configureFollower() {
-    // configure follower motor (copy leader, and add follower data)
-    flywheelConfigFollower.apply(flywheelConfig);
-    // flywheelConfigFollower.follow(flywheelMotor);
-    flywheelMotorFollower.configure(
-        flywheelConfigFollower, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void updateInputs(FlywheelIOInputs inputs) {
@@ -121,7 +99,6 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
                   flywheelConfig,
                   ResetMode.kNoResetSafeParameters,
                   PersistMode.kNoPersistParameters);
-              configureFollower();
             });
     flywheelKd
         .get()
@@ -133,7 +110,6 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
                   flywheelConfig,
                   ResetMode.kNoResetSafeParameters,
                   PersistMode.kNoPersistParameters);
-              configureFollower();
             });
     flywheelKs
         .get()
@@ -145,7 +121,6 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
                   flywheelConfig,
                   ResetMode.kNoResetSafeParameters,
                   PersistMode.kNoPersistParameters);
-              configureFollower();
             });
     flywheelKv
         .get()
@@ -157,7 +132,6 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
                   flywheelConfig,
                   ResetMode.kNoResetSafeParameters,
                   PersistMode.kNoPersistParameters);
-              configureFollower();
             });
     flywheelKa
         .get()
@@ -169,7 +143,6 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
                   flywheelConfig,
                   ResetMode.kNoResetSafeParameters,
                   PersistMode.kNoPersistParameters);
-              configureFollower();
             });
     rateLimit
         .get()
@@ -187,13 +160,8 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
     Logger.recordOutput(
         "/Shooter/Flywheel/AppliedOutput",
         flywheelMotor.getAppliedOutput() * flywheelMotor.getBusVoltage());
-    Logger.recordOutput(
-        "/Shooter/Flywheel/AppliedOutputFollower",
-        flywheelMotorFollower.getAppliedOutput() * flywheelMotorFollower.getBusVoltage());
     Logger.recordOutput("/Shooter/Flywheel/Velocity", velocity);
     Logger.recordOutput("/Shooter/Flywheel/Current", flywheelMotor.getOutputCurrent());
-    Logger.recordOutput(
-        "/Shooter/Flywheel/CurrentFollower", flywheelMotorFollower.getOutputCurrent());
     readjustPID();
   }
 

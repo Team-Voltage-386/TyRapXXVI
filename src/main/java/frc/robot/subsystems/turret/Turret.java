@@ -230,7 +230,9 @@ public class Turret extends SubsystemBase {
       setTarget();
       aimAtTarget(currentTargetPose, isScoring);
       if ((Math.abs(deltaYaw) < 5) && triggerSupplier.get() > 0.5) {
-        spindexer.spindexerOn();
+        if (!spindexer.isSpindexerOn()) {
+          spindexer.spindexerOn();
+        }
         manipController.setRumble(RumbleType.kBothRumble, 0.0);
       } else if (Math.abs(deltaYaw) > 5 && triggerSupplier.get() > 0.5) {
         spindexer.spindexerOff();
@@ -242,7 +244,9 @@ public class Turret extends SubsystemBase {
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(TurretConstants.manualShotSpeedRpm);
       if (triggerSupplier.get() > 0.5) {
-        spindexer.spindexerOn();
+        if (!spindexer.isSpindexerOn()) {
+          spindexer.spindexerOn();
+        }
       }
 
     } else {
@@ -258,6 +262,7 @@ public class Turret extends SubsystemBase {
 
     io.updateInputs(inputs);
     Logger.processInputs("Shooter/Turret/Inputs", inputs);
+    Logger.recordOutput("Shooter/Turret/autoAimEnabled", autoAimEnabled);
 
     Pose2d pose =
         dtPose.get().plus(new Transform2d(TurretConstants.turretPosition, Rotation2d.kZero));
