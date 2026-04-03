@@ -186,7 +186,7 @@ public class DisplayShiftTime extends Command {
     }
 
     // Calculate time left on the shift
-    shiftTimeLeft = (int) Timer.getMatchTime() - thisGameState.getEndTime();
+    shiftTimeLeft = (int) Math.round(Timer.getMatchTime() - thisGameState.getEndTime());
 
     // Display items on dashboard
     Logger.recordOutput("GameShift/CurrentShift", thisGameState.name());
