@@ -20,6 +20,7 @@ public interface IntakeIO {
     public boolean connected = false;
     public boolean deployed = false;
     public IntakingState intakingState = IntakingState.STOPPED;
+    public double position;
   }
 
   default void updateInputs(IntakeIOInputs inputs) {}

@@ -128,7 +128,9 @@ public class Turret extends SubsystemBase {
 
     double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
     calculatedPitch = new Rotation2d(shotCalculation.getParameters().hoodAngle());
-    if (isShootingSupplier.get()) {
+
+    if ((isShootingSupplier.get() && DriverStation.isAutonomousEnabled())
+        || (triggerSupplier.get() > 0.5 && DriverStation.isTeleopEnabled())) {
       io.setTurretPitch(calculatedPitch);
     } else {
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
@@ -229,21 +231,23 @@ public class Turret extends SubsystemBase {
     if (autoAimEnabled) {
       setTarget();
       aimAtTarget(currentTargetPose, isScoring);
-      if ((Math.abs(deltaYaw) < 5) && triggerSupplier.get() > 0.5) {
-        if (!spindexer.isSpindexerOn()) {
-          spindexer.spindexerOn();
-        }
+      if ((Math.abs(deltaYaw) < 5)) {
+        if (isShootingSupplier.get())
+          if (!spindexer.isSpindexerOn()) {
+            spindexer.spindexerOn();
+          }
         manipController.setRumble(RumbleType.kBothRumble, 0.0);
-      } else if (Math.abs(deltaYaw) > 5 && triggerSupplier.get() > 0.5) {
+      } else if (Math.abs(deltaYaw) > 5 && isShootingSupplier.get()) {
         spindexer.spindexerOff();
         manipController.setRumble(RumbleType.kBothRumble, 0.3);
       }
+
     } else if (manualMode) {
       // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
       // and set the hood to the max angle for close range shots
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(TurretConstants.manualShotSpeedRpm);
-      if (triggerSupplier.get() > 0.5) {
+      if (isShootingSupplier.get()) {
         if (!spindexer.isSpindexerOn()) {
           spindexer.spindexerOn();
         }
@@ -253,8 +257,9 @@ public class Turret extends SubsystemBase {
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(0);
     }
-    if (triggerSupplier.get() < 0.5) {
+    if (!isShootingSupplier.get()) {
       manipController.setRumble(RumbleType.kBothRumble, 0.0);
+      io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       if (!spindexer.isReverse()) {
         spindexer.spindexerOff();
       }

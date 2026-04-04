@@ -17,7 +17,7 @@ public class Passing extends ShootingConstants {
     launchHoodAngleMap.put(6.0, Rotation2d.fromDegrees(40.0));
     launchHoodAngleMap.put(8.0, Rotation2d.fromDegrees(40.0));
     // launchHoodAngleMap.put(10.0, Rotation2d.fromDegrees(40.0));
-  
+
     launchFlywheelSpeedMap.put(2.0, 2000.0); // RPM
     launchFlywheelSpeedMap.put(3.0, 2000.0); // RPM
     launchFlywheelSpeedMap.put(4.5, 2550.0);
@@ -30,6 +30,5 @@ public class Passing extends ShootingConstants {
     timeOfFlightMap.put(5.5, 1.03);
     timeOfFlightMap.put(8.1, 1.55);
     timeOfFlightMap.put(9.11, 1.61);
-    
   }
 }

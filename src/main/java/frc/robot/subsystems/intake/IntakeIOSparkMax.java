@@ -140,11 +140,12 @@ public class IntakeIOSparkMax implements IntakeIO {
 
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.connected = true;
+    inputs.position = deploy_motor.getEncoder().getPosition();
     Logger.recordOutput("/Intake/Deploy/Current", deploy_motor.getOutputCurrent());
     Logger.recordOutput("/Intake/Retrieval/Current", retrieval_motor.getOutputCurrent());
     inputs.deployed =
         Math.abs(deploy_motor.getEncoder().getPosition() - IntakeConstants.EXTENDED_DEPLOY_POSITION)
-            < 5;
+            < 1;
     inputs.intakingState =
         retrieval_motor.getAppliedOutput() > 0.1
             ? IntakingState.INTAKING

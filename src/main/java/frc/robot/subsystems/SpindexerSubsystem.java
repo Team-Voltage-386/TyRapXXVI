@@ -24,7 +24,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   private final SparkFlex agitator_motor;
   private final SparkFlex feeder_motor;
   public boolean feederOn = false;
-  public boolean reverse = true;
+  public boolean reverse = false;
 
   SparkFlexConfig agitatorConfig;
 
@@ -195,6 +195,14 @@ public class SpindexerSubsystem extends SubsystemBase {
 
   public boolean isFeederOn() {
     return feederOn;
+  }
+
+  public boolean turnFeederFalse() {
+    return feederOn = false;
+  }
+
+  public Command feederFalseCommand() {
+    return Commands.runOnce(() -> turnFeederFalse());
   }
 
   public boolean isReverse() {

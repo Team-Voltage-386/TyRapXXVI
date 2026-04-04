@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.JiggleIntake;
+import frc.robot.commands.WaitForIntake;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.IntakeConstants;
 import frc.robot.constants.jr.VisionConstants;
@@ -70,7 +71,7 @@ public class RobotContainer {
   private final SpindexerSubsystem spindexer;
   private ShotCalculation shotCalculation;
 
-  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 1.8);
+  TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 2.5);
   TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 0.0);
 
   public SimContainer sim;
@@ -338,7 +339,7 @@ public class RobotContainer {
                   // .alongWith(
                   // turret.runOnce(() -> turret.io.setTurretPitch(Rotation2d.fromDegrees(62))))
                   .alongWith(spindexer.spindexerOffCommand())
-                  .andThen(new WaitCommand(.5))
+                  .andThen(new WaitCommand(.4))
                   .andThen(spindexer.feederOffCommand()));
 
       kDriveController
@@ -420,7 +421,8 @@ public class RobotContainer {
           .onFalse(
               spindexer
                   .spindexerOffCommand()
-                  .andThen(new WaitCommand(1.0))
+                  .andThen(spindexer.feederFalseCommand())
+                  .andThen(new WaitCommand(0.6))
                   .andThen(
                       spindexer
                           .feederOffCommand()
@@ -741,12 +743,14 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            new WaitCommand(0.5),
+            new WaitForIntake(intake),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
             intake.stopMotorCommand(),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-            new WaitCommand(5).deadlineFor(new SequentialCommandGroup(new WaitCommand(2.5), new JiggleIntake(intake))),
+            new WaitCommand(5)
+                .deadlineFor(
+                    new SequentialCommandGroup(new WaitCommand(2.5), new JiggleIntake(intake))),
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectDepot"),
@@ -763,7 +767,7 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
             DriveCommands.buildFollowPath("Spacing"),
-            new WaitCommand(.5),
+            new WaitForIntake(intake),
             new SequentialCommandGroup(
                     spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
                     new WaitCommand(3),
@@ -804,7 +808,8 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(6).deadlineFor(new SequentialCommandGroup(new WaitCommand(2.5), new JiggleIntake(intake))),
+            new WaitCommand(2.5),
+            new JiggleIntake(intake).withTimeout(3.5),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand())
@@ -832,7 +837,8 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(6).deadlineFor(new SequentialCommandGroup(new WaitCommand(2.5), new JiggleIntake(intake))),
+            new WaitCommand(2.5),
+            new JiggleIntake(intake).withTimeout(3.5),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),

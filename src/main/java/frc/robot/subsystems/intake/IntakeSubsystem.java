@@ -46,6 +46,14 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeIO.testDeployVoltage(voltage);
   }
 
+  public double getPosition() {
+    return inputs.position;
+  }
+
+  public boolean isDeployed() {
+    return inputs.deployed;
+  }
+
   @Override
   public void periodic() {
     intakeIO.updateInputs(this.inputs);
