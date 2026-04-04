@@ -800,7 +800,7 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            new WaitCommand(0.5),
+            new WaitForIntake(intake),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
             new WaitCommand(0.2),
@@ -814,6 +814,7 @@ public class RobotContainer {
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand())
                 .alongWith(intake.takeInCommand()),
+            new WaitForIntake(intake),
             DriveCommands.buildFollowPath("RightSecondCollect"),
             spindexer
                 .spindexerOnCommand()
@@ -829,7 +830,7 @@ public class RobotContainer {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
-            new WaitCommand(0.5),
+            new WaitForIntake(intake),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
             new WaitCommand(0.2),
@@ -842,6 +843,7 @@ public class RobotContainer {
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),
+            new WaitForIntake(intake),
             DriveCommands.buildFollowPath("LeftSecondCollect"),
             spindexer
                 .spindexerOnCommand()
