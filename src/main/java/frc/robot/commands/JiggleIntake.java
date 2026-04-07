@@ -35,7 +35,7 @@ public class JiggleIntake extends Command {
   public void execute() {
     if (timer.get() > .66) {
       double voltage = out ? 3 : -1.5;
-      if (intake.getPosition() > 14.0) {
+      if (intake.getPosition() > -5.0) {
         if (voltage > 0) {
           voltage = 0;
         }
