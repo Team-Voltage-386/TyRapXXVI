@@ -9,8 +9,11 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,6 +26,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   private final SparkFlex spindexer_motor;
   private final SparkFlex agitator_motor;
   private final SparkFlex feeder_motor;
+  private final SparkMax antijam_motor;
   public boolean feederOn = false;
   public boolean reverse = false;
 
@@ -42,6 +46,8 @@ public class SpindexerSubsystem extends SubsystemBase {
       new TuningUtil("Spindexer/spindexerVolts", SpindexerConstants.SPINDEXER_MOTOR_VOLTAGE);
   TuningUtil agitatorVolts =
       new TuningUtil("Spindexer/agitatorVolts", SpindexerConstants.AGITATOR_MOTOR_VOLTAGE);
+  TuningUtil antijamVolts =
+      new TuningUtil("Spindexer/agitatorVolts", SpindexerConstants.ANTIJAM_VOLTAGE);
 
   public SpindexerSubsystem() {
     spindexer_motor =
@@ -111,12 +117,32 @@ public class SpindexerSubsystem extends SubsystemBase {
         () ->
             feeder_motor.configure(
                 feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+
+    antijam_motor = new SparkMax(SpindexerConstants.ANTIJAM_MOTOR_CAN_ID, MotorType.kBrushless);
+    SparkMaxConfig antijamConfig = new SparkMaxConfig();
+    antijamConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
+    antijamConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
+    antijamConfig
+        .signals
+        .primaryEncoderPositionAlwaysOn(true)
+        .primaryEncoderVelocityAlwaysOn(true)
+        .primaryEncoderVelocityPeriodMs(20)
+        .appliedOutputPeriodMs(20)
+        .busVoltagePeriodMs(20)
+        .outputCurrentPeriodMs(20);
+    tryUntilOk(
+        5,
+        () ->
+            antijam_motor.configure(
+                antijamConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+
   }
 
   public void spindexerOn() {
     System.out.println("turning on spindexer");
     reverse = false;
     spindexer_motor.setVoltage(spindexerVolts.getValue());
+    antijam_motor.setVoltage(antijamVolts.getValue());
     agitatorOn();
   }
 
@@ -131,7 +157,8 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOff() {
     // System.out.println("turning off spindexer");
     reverse = false;
-    spindexer_motor.set(0);
+    spindexer_motor.set(0); 
+    antijam_motor.set(0);
     agitatorOff();
   }
 
