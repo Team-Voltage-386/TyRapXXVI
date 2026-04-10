@@ -13,7 +13,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -47,7 +46,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   TuningUtil agitatorVolts =
       new TuningUtil("Spindexer/agitatorVolts", SpindexerConstants.AGITATOR_MOTOR_VOLTAGE);
   TuningUtil antijamVolts =
-      new TuningUtil("Spindexer/agitatorVolts", SpindexerConstants.ANTIJAM_VOLTAGE);
+      new TuningUtil("Spindexer/antijamVolts", SpindexerConstants.ANTIJAM_VOLTAGE);
 
   public SpindexerSubsystem() {
     spindexer_motor =
@@ -120,7 +119,7 @@ public class SpindexerSubsystem extends SubsystemBase {
 
     antijam_motor = new SparkMax(SpindexerConstants.ANTIJAM_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig antijamConfig = new SparkMaxConfig();
-    antijamConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
+    antijamConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(30).voltageCompensation(12.0);
     antijamConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     antijamConfig
         .signals
@@ -135,7 +134,6 @@ public class SpindexerSubsystem extends SubsystemBase {
         () ->
             antijam_motor.configure(
                 antijamConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-
   }
 
   public void spindexerOn() {
@@ -157,7 +155,7 @@ public class SpindexerSubsystem extends SubsystemBase {
   public void spindexerOff() {
     // System.out.println("turning off spindexer");
     reverse = false;
-    spindexer_motor.set(0); 
+    spindexer_motor.set(0);
     antijam_motor.set(0);
     agitatorOff();
   }
