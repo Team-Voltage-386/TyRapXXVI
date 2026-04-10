@@ -18,6 +18,7 @@ public class JiggleIntake extends Command {
   private final Timer timer = new Timer();
   private final IntakeSubsystem intake;
   private boolean out = true;
+  private double voltage = 3.0;
 
   public JiggleIntake(IntakeSubsystem subsystem) {
     intake = subsystem;
@@ -34,16 +35,16 @@ public class JiggleIntake extends Command {
   @Override
   public void execute() {
     if (timer.get() > .66) {
-      double voltage = out ? 3 : -1.5;
-      if (intake.getPosition() > -5.0) {
-        if (voltage > 0) {
-          voltage = 0;
-        }
-      }
-      intake.testDeployVoltage(voltage);
+      voltage = out ? 3 : -1.5;
       out = !out;
       timer.reset();
     }
+    if (intake.getPosition() > -6.5) {
+      if (voltage > 0) {
+        voltage = 0;
+      }
+    }
+    intake.testDeployVoltage(voltage);
   }
 
   // Called once the command ends or is interrupted.
