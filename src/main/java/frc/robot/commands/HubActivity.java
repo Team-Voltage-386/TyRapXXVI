@@ -22,6 +22,7 @@ public class HubActivity extends Command {
   private boolean hubIsActive = true;
   private boolean isAutoAhead =
       false; // Will be replaced by actual value when value is recieved during the match.
+  private double secsToSwitch;
 
   // prerecorded times for hub activity. Each time the timer reaches the value in the array, the hub
   // toggles activity states.
@@ -54,32 +55,24 @@ public class HubActivity extends Command {
   @Override
   public void execute() {
     if (isAutoAhead) {
-      if (Timer.getMatchTime() < timesWinning[counter]) {
-        counter++;
-        hubIsActive = !hubIsActive;
-        m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
-        System.out.println("Hub is " + hubIsActive);
-      }
-      if (Timer.getMatchTime() - 3 < timesWinning[counter]) {
-        // Add rumble logic here
-        m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
-      }
+      secsToSwitch = Timer.getMatchTime() - timesWinning[counter];
     } else {
-      if (Timer.getMatchTime() < timesLosing[counter]) {
-        counter++;
-        hubIsActive = !hubIsActive;
-        m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
-        System.out.println("Hub is " + hubIsActive);
-      }
-      if (Timer.getMatchTime() - 3 < timesLosing[counter]) {
-        // Add rumble logic here
-        m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
-      }
+      secsToSwitch = Timer.getMatchTime() - timesLosing[counter];
     }
-    if (hubIsActive) {
-      LightSubsystem.changeAllLEDColor(0, 255, 0);
+    if (secsToSwitch <= 0) {
+      counter++;
+      hubIsActive = !hubIsActive;
+      m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+      System.out.println("Hub is " + hubIsActive);
+    }
+    if (secsToSwitch < 3) {
+      m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
+    }
+
+    if (hubIsActive ^ (secsToSwitch < 7 && ((10 / secsToSwitch) % 2 < 1))) {
+      LightSubsystem.changeAllLEDColor(0, 0, 255);
     } else {
-      LightSubsystem.changeAllLEDColor(255, 0, 0);
+      LightSubsystem.changeAllLEDColor(255, 255, 0);
     }
   }
 
