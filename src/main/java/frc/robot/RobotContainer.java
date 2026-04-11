@@ -303,8 +303,8 @@ public class RobotContainer {
               new FunctionalCommand(
                   () -> {},
                   () -> {
-                    System.out.println("running at " + IntakeConstants.DEPLOY_MANUAL_VOLTAGE);
-                    intake.testDeployVoltage(IntakeConstants.DEPLOY_MANUAL_VOLTAGE);
+                    System.out.println("running at " + IntakeConstants.RETRACT_MANUAL_VOLTAGE);
+                    intake.testDeployVoltage(IntakeConstants.RETRACT_MANUAL_VOLTAGE);
                   },
                   (c) -> {
                     intake.testDeployVoltage(0);
