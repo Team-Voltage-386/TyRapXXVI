@@ -18,7 +18,7 @@ public final class IntakeConstants {
   public static final double speed = 180;
   public static final double deployTimeSec = 0.5;
   // public static final double deployRate = -1 * EXTENDED_DEPLOY_POSITION / deployTimeSec;
-  public static final double deployRate = -130.0;
+  public static final double deployRate = -260.0;
   public static final double deployIncPerStepFast = deployRate * 0.02;
   public static final double deployIncPerStepSlow = deployIncPerStepFast * 0.3;
   public static final double deploySlowdownPointUp = 6.5;

@@ -144,7 +144,6 @@ public class SpindexerSubsystem extends SubsystemBase {
     reverse = false;
     agitator_motor.getEncoder().setPosition(0);
     agitatorSetpoint = 0.0;
-    // agitator_motor.setVoltage(agitatorVolts.getValue());
   }
 
   public Command agitatorOnCommand() {

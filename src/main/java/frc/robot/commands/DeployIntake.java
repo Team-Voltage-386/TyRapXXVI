@@ -4,13 +4,19 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.jr.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.util.TuningUtil;
 
 public class DeployIntake extends Command {
   /** Creates a new DeployIntake. */
   IntakeSubsystem intakeSubsystem;
+
+  protected static final TuningUtil deployRate =
+      new TuningUtil("Intake/deployRate", IntakeConstants.deployRate);
+  protected double deployRateVal = deployRate.getValue();
 
   public DeployIntake(IntakeSubsystem intakeSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
@@ -19,7 +25,9 @@ public class DeployIntake extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    deployRateVal = deployRate.getValue();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -30,18 +38,14 @@ public class DeployIntake extends Command {
     // Compute current speed so that average speed of full deploy achieves the desired deploy time
     // Max speed should be when intakeDeployFraction is 0, and speed should be 0 when
     // intakeDeployFraction is 1
-    double desiredSpeedRotPerSec = (1 - intakeDeployFraction) * IntakeConstants.deployRate;
+    double desiredSpeedRotPerSec = (1 - intakeDeployFraction) * deployRateVal;
     // Calculate the increment for one 50Hz cycle. May need to apply a minimum speed to prevent
     // stalling near end of deployment
     double deployStep = desiredSpeedRotPerSec * 0.02;
-    double newSetpoint = intakeSubsystem.getPosition() - deployStep;
-    System.out.println(
-        "Deploying intake at speed: "
-            + desiredSpeedRotPerSec
-            + " rot/s, new setpoint: "
-            + newSetpoint);
+    double newSetpoint = intakeSubsystem.getPosition() + deployStep;
     // Do not allow setpoint to go past the extended position
-    intakeSubsystem.setSetpoint(Math.max(newSetpoint, IntakeConstants.EXTENDED_DEPLOY_POSITION));
+    intakeSubsystem.setSetpoint(
+        MathUtil.clamp(newSetpoint, IntakeConstants.EXTENDED_DEPLOY_POSITION, 0));
   }
 
   // Called once the command ends or is interrupted.
