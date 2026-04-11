@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.DeployIntake;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.JiggleIntake;
@@ -413,7 +414,7 @@ public class RobotContainer {
       kManipController.b().onTrue(intake.retractCommand());
       kManipController.x().onTrue(intake.reverseCommand());
       kManipController.x().onFalse(intake.stopMotorCommand());
-      kManipController.y().whileTrue(new JiggleIntake(intake));
+      kManipController.y().onTrue(new DeployIntake(intake));
 
       kManipController.rightTrigger().onTrue(spindexer.feederOnCommand());
       kManipController

@@ -85,9 +85,10 @@ public class IntakeIOSparkMax implements IntakeIO {
   }
 
   public void setSetpoint(double setpoint) {
-    System.out.println("deploying intake mechanism halfway");
-    currentSetpoint = deploy_motor.getEncoder().getPosition();
-    targetSetpoint = setpoint;
+    System.out.println("deploying intake mechanism to setpoint " + setpoint);
+    // currentSetpoint = deploy_motor.getEncoder().getPosition();
+    // targetSetpoint = setpoint;
+    currentSetpoint = setpoint;
     manual = false;
   }
 
@@ -153,13 +154,12 @@ public class IntakeIOSparkMax implements IntakeIO {
                 ? IntakingState.REVERSE
                 : IntakingState.STOPPED;
     Logger.recordOutput("Intake/DeployMotor/Position", deploy_motor.getEncoder().getPosition());
-    Logger.recordOutput(
-        "Intake/DeployMotor/AbsolutePosition", deploy_motor.getAbsoluteEncoder().getPosition());
+    Logger.recordOutput("Intake/Deploy/Setpoint", currentSetpoint);
 
     intakeVoltageTuneable.get().ifPresent(this::setIntakeVoltage);
 
     if (!manual) {
-      if (currentSetpoint < targetSetpoint) {
+      /*if (currentSetpoint < targetSetpoint) {
 
         double deployInc =
             (currentSetpoint > targetSetpoint - IntakeConstants.deploySlowdownPointUp)
@@ -172,7 +172,7 @@ public class IntakeIOSparkMax implements IntakeIO {
                 ? IntakeConstants.deployIncPerStepSlow
                 : IntakeConstants.deployIncPerStepFast;
         currentSetpoint = Math.max(targetSetpoint, currentSetpoint - deployInc);
-      }
+      }*/
       deploy_motor.getClosedLoopController().setSetpoint(currentSetpoint, ControlType.kPosition);
     }
   }

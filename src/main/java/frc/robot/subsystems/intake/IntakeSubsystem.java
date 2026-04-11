@@ -18,8 +18,9 @@ public class IntakeSubsystem extends SubsystemBase {
     return Commands.runOnce(() -> intakeIO.deploy());
   }
 
-  public Command setSetpoint(double setpoint) {
-    return Commands.runOnce(() -> intakeIO.setSetpoint(setpoint));
+  public void setSetpoint(double setpoint) {
+    intakeIO.setSetpoint(setpoint);
+    // return Commands.runOnce(() -> intakeIO.setSetpoint(setpoint));
   }
 
   public Command retractCommand() {
