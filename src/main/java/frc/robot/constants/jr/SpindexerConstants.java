@@ -4,8 +4,10 @@ public class SpindexerConstants {
   public static final int SPINDEXER_MOTOR_CAN_ID = 30;
   public static final int AGITATOR_MOTOR_CAN_ID = 14;
   public static final int FEEDER_MOTOR_CAN_ID = 31;
+  public static final int ANTIJAM_MOTOR_CAN_ID = 41;
   public static final double SPINDEXER_MOTOR_VOLTAGE = 0.64 * 12;
   public static final double AGITATOR_MOTOR_VOLTAGE = 0.1 * 12;
+  public static final double ANTIJAM_VOLTAGE = 6.0; // needs further testing
   public static final double FEEDER_MOTOR_VOLTAGE = 0.95 * 12;
   public static final double agitatorGearRatio = 1 / 3.0;
   public static final double AGITATOR_RPM = 140.0;

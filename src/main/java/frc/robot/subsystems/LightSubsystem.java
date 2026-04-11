@@ -12,14 +12,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class LightSubsystem extends SubsystemBase {
   // IMPORTANT!
   // Modify the port number based on which PWM the LEDs are plugged into
-  private static final int kLedPort = 7;
+  private static final int kLedPort = 0;
 
   /**
    * Length of the LED strip.
    * This should be 10 for the briefcase bot.
    * This should be 76 for the Demoboard.
    */
-  private static final int kLedLength = 10;
+  private static final int kLedLength = 11;
 
   AddressableLED led = new AddressableLED(kLedPort);
 

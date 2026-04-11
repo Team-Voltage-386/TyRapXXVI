@@ -187,7 +187,7 @@ public class TurretIOSparkMax2 implements TurretIO {
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
     handleLimits();
     if (!manualMode) {
-      if (Math.abs(desiredAngle - yawEncoder.getPosition()) < (1.0 / 360.0)) {
+      if (Math.abs(desiredAngle - yawEncoder.getPosition()) < (0.5 / 360.0)) {
         yawMotor.setVoltage(0);
       } else {
         double pidVal = yawController.calculate(yawEncoder.getPosition(), desiredAngle);

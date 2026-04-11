@@ -77,9 +77,9 @@ public class HubActivity extends Command {
       }
     }
     if (hubIsActive) {
-      LightSubsystem.changeAllLEDColor(0, 255, 0);
+      LightSubsystem.changeAllLEDColor(0, 0, 225);
     } else {
-      LightSubsystem.changeAllLEDColor(255, 0, 0);
+      LightSubsystem.changeAllLEDColor(255, 255, 0);
     }
   }
 
