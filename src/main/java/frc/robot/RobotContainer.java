@@ -351,11 +351,12 @@ public class RobotContainer {
           .onFalse(
               spindexer
                   .spindexerOffCommand()
-                  .andThen(new WaitCommand(1.0))
+                  .andThen(spindexer.feederFalseCommand())
+                  .andThen(new WaitCommand(0.6))
                   .andThen(
                       spindexer
                           .feederOffCommand()
-                          .onlyIf(() -> kDriveController.getHID().getRightTriggerAxis() == 0)));
+                          .onlyIf(() -> kManipController.getHID().getLeftTriggerAxis() == 0)));
 
       kDriveController
           .back()
@@ -434,7 +435,7 @@ public class RobotContainer {
   }
 
   public double getShotTriggerValue() {
-    return kManipController.getHID().getRightTriggerAxis();
+    return Math.max(kManipController.getHID().getRightTriggerAxis(), kDriveController.getHID().getLeftTriggerAxis());
   }
 
   protected void registerAuto(AutoWrapper auto) {
@@ -747,7 +748,7 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
             new WaitForIntake(intake),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("StartCollectNeutralTopQtr"),
@@ -770,7 +771,7 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
             DriveCommands.buildFollowPath("Spacing"),
             new WaitForIntake(intake),
             new SequentialCommandGroup(
@@ -791,7 +792,7 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
             DriveCommands.buildFollowPath("Spacing"),
             new WaitCommand(1),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
@@ -804,7 +805,7 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
             new WaitForIntake(intake),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
@@ -835,7 +836,7 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), intake.deployCommand()),
+                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
             new WaitForIntake(intake),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
