@@ -433,7 +433,9 @@ public class RobotContainer {
   }
 
   public double getShotTriggerValue() {
-    return kManipController.getHID().getRightTriggerAxis();
+    return Math.max(
+        kManipController.getHID().getRightTriggerAxis(),
+        kDriveController.getHID().getLeftTriggerAxis());
   }
 
   protected void registerAuto(AutoWrapper auto) {
