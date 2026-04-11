@@ -752,6 +752,20 @@ public class RobotContainer {
                 .alongWith(spindexer.feederOffCommand()));
   }
 
+  public void disable() {
+    // Stop all motors when we disable the robot to prevent runaway robots
+    CommandScheduler.getInstance()
+        .schedule(
+            intake
+                .stopMotorCommand()
+                .alongWith(spindexer.spindexerOffCommand())
+                .alongWith(spindexer.feederOffCommand())
+                .alongWith(new InstantCommand(() -> flywheel.setFlywheelSpeed(0))));
+      this.getHubActivityCommand().cancel();
+      kDriveController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
+      kManipController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
+  }
+
   public Command buildLeftNeutralZoneAuto() {
     Command auto =
         new SequentialCommandGroup(
