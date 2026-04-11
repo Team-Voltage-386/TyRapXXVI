@@ -720,6 +720,10 @@ public class RobotContainer {
     }
   }
 
+  public IntakeSubsystem getIntake() {
+    return intake;
+  }
+
   public void runTeleopStart() {
     // CommandScheduler.getInstance()
     //     .schedule(
@@ -808,8 +812,9 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(2.5),
-            new JiggleIntake(intake).withTimeout(3.5),
+            new WaitCommand(2.0),
+            new JiggleIntake(intake).withTimeout(2.0),
+            new WaitCommand(0.5),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand())
@@ -838,8 +843,9 @@ public class RobotContainer {
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(2.5),
-            new JiggleIntake(intake).withTimeout(3.5),
+            new WaitCommand(2.0),
+            new JiggleIntake(intake).withTimeout(2.0),
+            new WaitCommand(0.5),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),
