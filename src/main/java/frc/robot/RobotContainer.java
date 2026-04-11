@@ -364,11 +364,16 @@ public class RobotContainer {
           .debounce(2.0)
           .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setHoodZero()));
 
+      kDriveController
+          .start()
+          .debounce(2.0)
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setYawZero()));
+
       // kDriveController.start().onTrue(turret.toggleAutoAimCommand());
       kManipController
           .back()
           .debounce(2.0)
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setYawZero()));
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).resyncTurret()));
 
       kDriveController.rightBumper().onTrue(intake.reverseCommand());
       kDriveController.rightBumper().onFalse(intake.stopMotorCommand());
