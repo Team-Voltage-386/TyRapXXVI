@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DisplayShiftTime;
 import frc.robot.util.LocalADStarAK;
 import java.util.Optional;
@@ -17,7 +18,6 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -138,7 +138,8 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
     robotContainer.getHubActivityCommand().schedule();
-    CommandScheduler.getInstance().schedule(new InstantCommand(() -> robotContainer.getIntake().testDeployVoltage(0)));
+    CommandScheduler.getInstance()
+        .schedule(new InstantCommand(() -> robotContainer.getIntake().testDeployVoltage(0)));
     CommandScheduler.getInstance()
         .schedule(new DisplayShiftTime(robotContainer.getIsAheadHubSup()));
     robotContainer.runTeleopStart();

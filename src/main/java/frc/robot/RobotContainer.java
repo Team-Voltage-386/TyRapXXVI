@@ -17,6 +17,7 @@ import frc.robot.commands.DeployIntake;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HubActivity;
 import frc.robot.commands.JiggleIntake;
+import frc.robot.commands.RetractIntake;
 import frc.robot.commands.WaitForIntake;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.IntakeConstants;
@@ -411,7 +412,7 @@ public class RobotContainer {
       kManipController
           .a()
           .onFalse(spindexer.feederOffCommand().alongWith(spindexer.spindexerOffCommand()));
-      kManipController.b().onTrue(intake.retractCommand());
+      kManipController.b().onTrue(new RetractIntake(intake));
       kManipController.x().onTrue(intake.reverseCommand());
       kManipController.x().onFalse(intake.stopMotorCommand());
       kManipController.y().onTrue(new DeployIntake(intake));
