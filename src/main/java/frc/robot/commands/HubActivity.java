@@ -48,6 +48,7 @@ public class HubActivity extends Command {
     timer.start();
     counter = 0;
     isAutoAhead = false;
+    hubIsActive = true;
     System.out.println("Hub Scheduled");
   }
 
@@ -62,14 +63,15 @@ public class HubActivity extends Command {
     if (secsToSwitch <= 0) {
       counter++;
       hubIsActive = !hubIsActive;
-      m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
       System.out.println("Hub is " + hubIsActive);
     }
     if (secsToSwitch < 3) {
       m_controller.getHID().setRumble(RumbleType.kBothRumble, 0.4);
+    } else {
+      m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
     }
 
-    if (hubIsActive ^ (secsToSwitch < 7 && ((10 / secsToSwitch) % 2 < 1))) {
+    if (hubIsActive ^ (secsToSwitch < 7 && ((65 / (secsToSwitch + 1.5)) % 2 < 1))) {
       LightSubsystem.changeAllLEDColor(0, 0, 255);
     } else {
       LightSubsystem.changeAllLEDColor(255, 255, 0);

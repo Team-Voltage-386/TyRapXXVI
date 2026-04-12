@@ -105,9 +105,9 @@ public class DisplayShiftTime extends Command {
       case INIT:
         if (DriverStation.isEnabled() && !DriverStation.isAutonomous()) {
           if (hubIsAheadSup.getAsBoolean()) {
-            this.thisGameState = GameStates.ALL_SHIFT1;
-          } else {
             thisGameState = GameStates.ALL;
+          } else {
+            this.thisGameState = GameStates.ALL_SHIFT1;
           }
         }
         break;
@@ -147,9 +147,9 @@ public class DisplayShiftTime extends Command {
         if (Timer.getMatchTime() <= thisGameState.getEndTime()) {
           okToShoot = !okToShoot;
           if (hubIsAheadSup.getAsBoolean()) {
-            thisGameState = GameStates.SHIFT4;
-          } else {
             thisGameState = GameStates.SHIFT4_ENDGAME;
+          } else {
+            thisGameState = GameStates.SHIFT4;
           }
         }
         break;

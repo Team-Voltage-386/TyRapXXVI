@@ -761,9 +761,9 @@ public class RobotContainer {
                 .alongWith(spindexer.spindexerOffCommand())
                 .alongWith(spindexer.feederOffCommand())
                 .alongWith(new InstantCommand(() -> flywheel.setFlywheelSpeed(0))));
-      this.getHubActivityCommand().cancel();
-      kDriveController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
-      kManipController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
+    this.getHubActivityCommand().cancel();
+    kDriveController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
+    kManipController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
   }
 
   public Command buildLeftNeutralZoneAuto() {

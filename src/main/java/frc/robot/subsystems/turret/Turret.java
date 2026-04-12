@@ -243,8 +243,7 @@ public class Turret extends SubsystemBase {
       }
 
     } else if (manualMode) {
-      // When in manual shooting mode, turn on the flywheel when trigger is partially sequeezed
-      // and set the hood to the max angle for close range shots
+      // When in manual shooting mode, set the hood to the max angle for close range shots
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
       flywheel.setFlywheelSpeed(TurretConstants.manualShotSpeedRpm);
       if (isShootingSupplier.get()) {
