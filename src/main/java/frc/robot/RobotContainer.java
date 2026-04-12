@@ -441,7 +441,9 @@ public class RobotContainer {
   }
 
   public double getShotTriggerValue() {
-    return Math.max(kManipController.getHID().getRightTriggerAxis(), kDriveController.getHID().getLeftTriggerAxis());
+    return Math.max(
+        kManipController.getHID().getRightTriggerAxis(),
+        kDriveController.getHID().getLeftTriggerAxis());
   }
 
   protected void registerAuto(AutoWrapper auto) {
@@ -750,6 +752,20 @@ public class RobotContainer {
                 .alongWith(spindexer.feederOffCommand()));
   }
 
+  public void disable() {
+    // Stop all motors when we disable the robot to prevent runaway robots
+    CommandScheduler.getInstance()
+        .schedule(
+            intake
+                .stopMotorCommand()
+                .alongWith(spindexer.spindexerOffCommand())
+                .alongWith(spindexer.feederOffCommand())
+                .alongWith(new InstantCommand(() -> flywheel.setFlywheelSpeed(0))));
+    this.getHubActivityCommand().cancel();
+    kDriveController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
+    kManipController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0);
+  }
+
   public Command buildLeftNeutralZoneAuto() {
     Command auto =
         new SequentialCommandGroup(
@@ -810,11 +826,12 @@ public class RobotContainer {
   public Command buildRightNeutralZoneTwoCollect() {
     Command auto =
         new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
+            new DeployIntake(intake),
             new WaitForIntake(intake),
-            intake.takeInCommand(),
-            DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
+            new ParallelCommandGroup(
+                intake.takeInCommand(),
+                DriveCommands.buildFollowPath("CollectNeutralBottomShoot"),
+                new WaitCommand(2.0).andThen(turret.enableAutoAimCommand(() -> getHubPose3d()))),
             new WaitCommand(0.2),
             spindexer
                 .spindexerOnCommand()
@@ -822,30 +839,31 @@ public class RobotContainer {
                 .alongWith(intake.stopMotorCommand()),
             new WaitCommand(2.0),
             new JiggleIntake(intake).withTimeout(2.0),
-            new WaitCommand(0.5),
+            new ParallelCommandGroup(new WaitCommand(0.5), new DeployIntake(intake)),
             spindexer
                 .spindexerOffCommand()
                 .alongWith(spindexer.feederOffCommand())
                 .alongWith(intake.takeInCommand()),
-            new WaitForIntake(intake),
             DriveCommands.buildFollowPath("RightSecondCollect"),
             spindexer
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(2),
-            new JiggleIntake(intake));
+            new WaitCommand(1),
+            new JiggleIntake(intake).withTimeout(1.2),
+            new DeployIntake(intake));
     return auto;
   }
 
   public Command buildLeftNeutralZoneTwoCollect() {
     Command auto =
         new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
+            new DeployIntake(intake),
             new WaitForIntake(intake),
-            intake.takeInCommand(),
-            DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
+            new ParallelCommandGroup(
+                intake.takeInCommand(),
+                DriveCommands.buildFollowPath("CollectNeutralTopShoot"),
+                new WaitCommand(2.0).andThen(turret.enableAutoAimCommand(() -> getHubPose3d()))),
             new WaitCommand(0.2),
             spindexer
                 .spindexerOnCommand()
@@ -853,18 +871,19 @@ public class RobotContainer {
                 .alongWith(intake.stopMotorCommand()),
             new WaitCommand(2.0),
             new JiggleIntake(intake).withTimeout(2.0),
-            new WaitCommand(0.5),
+            new ParallelCommandGroup(new WaitCommand(0.5), new DeployIntake(intake)),
             spindexer
                 .spindexerOffCommand()
-                .alongWith(spindexer.feederOffCommand().alongWith(intake.takeInCommand())),
-            new WaitForIntake(intake),
+                .alongWith(spindexer.feederOffCommand())
+                .alongWith(intake.takeInCommand()),
             DriveCommands.buildFollowPath("LeftSecondCollect"),
             spindexer
                 .spindexerOnCommand()
                 .alongWith(spindexer.feederOnCommand())
                 .alongWith(intake.stopMotorCommand()),
-            new WaitCommand(2),
-            new JiggleIntake(intake));
+            new WaitCommand(1),
+            new JiggleIntake(intake).withTimeout(1.2),
+            new DeployIntake(intake));
     return auto;
   }
 }

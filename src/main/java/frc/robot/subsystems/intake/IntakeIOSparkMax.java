@@ -159,20 +159,6 @@ public class IntakeIOSparkMax implements IntakeIO {
     intakeVoltageTuneable.get().ifPresent(this::setIntakeVoltage);
 
     if (!manual) {
-      /*if (currentSetpoint < targetSetpoint) {
-
-        double deployInc =
-            (currentSetpoint > targetSetpoint - IntakeConstants.deploySlowdownPointUp)
-                ? IntakeConstants.deployIncPerStepSlow
-                : IntakeConstants.deployIncPerStepFast;
-        currentSetpoint = Math.min(targetSetpoint, currentSetpoint + deployInc);
-      } else if (currentSetpoint > targetSetpoint) {
-        double deployInc =
-            (currentSetpoint < targetSetpoint + IntakeConstants.deploySlowdownPointDown)
-                ? IntakeConstants.deployIncPerStepSlow
-                : IntakeConstants.deployIncPerStepFast;
-        currentSetpoint = Math.max(targetSetpoint, currentSetpoint - deployInc);
-      }*/
       deploy_motor.getClosedLoopController().setSetpoint(currentSetpoint, ControlType.kPosition);
     }
   }
