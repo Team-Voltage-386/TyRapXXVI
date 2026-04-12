@@ -32,7 +32,6 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
   private double flywheelSetpoint;
 
   private SparkFlexConfig flywheelConfig;
-  private SparkFlexConfig flywheelConfigFollower;
 
   TuningUtil flywheelKp = new TuningUtil("/Tuning/flywheel/flywheelKp", 0.001);
   TuningUtil flywheelKd = new TuningUtil("/Tuning/flywheel/flywheelKd", 0.02);
