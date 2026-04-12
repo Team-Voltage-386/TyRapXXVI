@@ -33,9 +33,9 @@ public class TurretIOSim implements TurretIO, Simulatable {
 
   private final Supplier<Pose2d> dtPose;
   private final Supplier<ChassisSpeeds> speedSupplier;
-  private final double maxErrorAngleYaw = Math.toRadians(5); // In degrees, converted to radians
-  private final double maxErrorAnglePitch = Math.toRadians(5); // In degrees, converted to radians.
-  private final double maxErrorVelocity = 100; // In RPM
+  private final double maxErrorAngleYaw = Math.toRadians(2); // In degrees, converted to radians
+  private final double maxErrorAnglePitch = Math.toRadians(3); // In degrees, converted to radians.
+  private final double maxErrorVelocity = 50; // In RPM
   private final IntakeIOSim intakeIOSim;
   private final SpindexerSubsystem spindexerSubsystem;
   private final Flywheel flywheel;
@@ -83,7 +83,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
-    turretYaw = new Rotation2d(MathUtil.clamp(position.getRadians(), -Math.PI, Math.PI));
+    turretYaw = new Rotation2d(MathUtil.clamp(position.getRadians(), -2 * Math.PI, 2 * Math.PI));
   }
 
   /* Set the turret pitch to the specified position. */
@@ -104,7 +104,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
       calculatedVelocity =
           (flywheel.getFlywheelVelocity() - randomOffsetVelocity(true))
               * TurretConstants.turretRPMToMetersPerSecond
-              * 1.1;
+              * 0.58;
       Logger.recordOutput("Simulation/Shooter/calculatedVelocity", calculatedVelocity);
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
