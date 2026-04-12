@@ -54,7 +54,10 @@ public class IntakeIOSim implements IntakeIO {
     currentSetPoint = IntakeConstants.extendedAngle;
   }
 
-  public void setSetpoint(double setpoint) {}
+  public void setSetpoint(double setpoint) {
+    currentSetPoint =
+        Rotation2d.fromRotations(.25 - .25 * setpoint / IntakeConstants.EXTENDED_DEPLOY_POSITION);
+  }
 
   public void retract() {
     System.out.println("retracting intake mechanism");
@@ -98,17 +101,18 @@ public class IntakeIOSim implements IntakeIO {
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
     inputs.connected = true;
-    inputs.deployed = this.isDeployed;
-    inputs.intakingState = this.intakingState;
-    if (currentSetPoint == IntakeConstants.extendedAngle) {
-      if (intakeMechanism.getAngle() > IntakeConstants.extendedAngle.getDegrees()) {
-        intakeMechanism.setAngle(intakeMechanism.getAngle() - (IntakeConstants.speed / 50));
-      }
+    inputs.deployed =
+        Math.abs(currentSetPoint.minus(IntakeConstants.extendedAngle).getDegrees()) < 5.0;
+    if (inputs.deployed) {
+      this.intakeSimulation.startIntake();
     } else {
-      if (intakeMechanism.getAngle() < IntakeConstants.retractedAngle.getDegrees()) {
-        intakeMechanism.setAngle(intakeMechanism.getAngle() + (IntakeConstants.speed / 50));
-      }
+      this.intakeSimulation.stopIntake();
     }
+    inputs.intakingState = this.intakingState;
+    inputs.position =
+        IntakeConstants.EXTENDED_DEPLOY_POSITION
+            - 4 * currentSetPoint.getRotations() * IntakeConstants.EXTENDED_DEPLOY_POSITION;
+    intakeMechanism.setAngle(currentSetPoint);
     Logger.recordOutput("Intake/BallCount", this.intakeSimulation.getGamePiecesAmount());
     Logger.recordOutput("Intake/Mech", mech);
   }
