@@ -15,7 +15,6 @@ public class WaitForIntake extends Command {
   public WaitForIntake(IntakeSubsystem intakeSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intakeSubsystem = intakeSubsystem;
-    addRequirements(intakeSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -36,6 +35,7 @@ public class WaitForIntake extends Command {
     if (intakeSubsystem.isDeployed()) {
       return true;
     } else {
+      System.out.println("Waiting for intake pos=" + intakeSubsystem.getPosition());
       return false;
     }
   }
