@@ -4,16 +4,23 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.IntegerPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
-import org.littletonrobotics.junction.Logger;
+
+// import org.littletonrobotics.junction.Logger;
 
 /**
  * Will display whether the hub is active at a given time.
  */
-public class DisplayShiftTime extends Command {
+public class DisplayShiftTimeNoAdvKit extends Command {
   // Define the enum
   public enum GameStates {
     INIT(-1, -1, -1),
@@ -54,6 +61,15 @@ public class DisplayShiftTime extends Command {
     }
   }
 
+  private final NetworkTable table;
+  // Set up the widgets on the dashboard
+  private StringPublisher pub_CurrentShift;
+  private DoublePublisher pub_shiftTimeLeft;
+  private BooleanPublisher pub_hubIsAhead;
+  private BooleanPublisher pub_okToShoot;
+  private BooleanPublisher pub_warnLight;
+  private IntegerPublisher pub_thisMatchTimeLeft;
+
   private GameStates thisGameState = GameStates.INIT;
   private int shiftTimeLeft = 10;
   private final BooleanSupplier hubIsAheadSup;
@@ -61,18 +77,30 @@ public class DisplayShiftTime extends Command {
   private boolean warnLight = false;
   private boolean timerToggle = false;
   private final Timer warnTimer = new Timer();
+  private int thisMatchTimeLeft = -1;
 
   /**
    * Constructor
    *
    */
-  public DisplayShiftTime(BooleanSupplier hubIsAheadSup) {
+  public DisplayShiftTimeNoAdvKit(NetworkTableInstance nt, BooleanSupplier hubIsAheadSup) {
     this.hubIsAheadSup = hubIsAheadSup;
+    /*
     Logger.recordOutput("GameShift/CurrentShift", GameStates.INIT.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", GameStates.INIT.getShiftTime());
     Logger.recordOutput("GameShift/hubIsAhead", this.hubIsAheadSup.getAsBoolean());
     Logger.recordOutput("GameShift/okToShoot", okToShoot);
     Logger.recordOutput("GameShift/warnLight", warnLight);
+    */
+
+    table = nt.getTable(getName());
+
+    pub_CurrentShift = table.getStringTopic("GameShift/CurrentShift").publish();
+    pub_shiftTimeLeft = table.getDoubleTopic("GameShift/shiftTimeLeft").publish();
+    pub_hubIsAhead = table.getBooleanTopic("GameShift/hubIsAhead").publish();
+    pub_okToShoot = table.getBooleanTopic("GameShift/okToShoot").publish();
+    pub_warnLight = table.getBooleanTopic("GameShift/warnLight").publish();
+    pub_thisMatchTimeLeft = table.getIntegerTopic("GameShift/thisMatchTimeLeft").publish();
   }
 
   // Called when the command is initially scheduled.
@@ -194,12 +222,23 @@ public class DisplayShiftTime extends Command {
     // Calculate time left on the shift
     shiftTimeLeft = (int) Math.round(Timer.getMatchTime() - thisGameState.getEndTime());
 
+    thisMatchTimeLeft = (int) Math.round(Timer.getMatchTime());
+
     // Display items on dashboard
+    /*
     Logger.recordOutput("GameShift/CurrentShift", thisGameState.name());
     Logger.recordOutput("GameShift/shiftTimeLeft", shiftTimeLeft);
     Logger.recordOutput("GameShift/hubIsAhead", hubIsAheadSup.getAsBoolean());
     Logger.recordOutput("GameShift/okToShoot", okToShoot);
     Logger.recordOutput("GameShift/warnLight", warnLight);
+    */
+
+    pub_CurrentShift.set(thisGameState.name());
+    pub_shiftTimeLeft.set(shiftTimeLeft);
+    pub_hubIsAhead.set(hubIsAheadSup.getAsBoolean());
+    pub_okToShoot.set(okToShoot);
+    pub_warnLight.set(warnLight);
+    pub_thisMatchTimeLeft.set(thisMatchTimeLeft);
   }
 
   // Called once the command ends or is interrupted.

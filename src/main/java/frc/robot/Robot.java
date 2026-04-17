@@ -3,12 +3,13 @@ package frc.robot;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.revrobotics.util.StatusLogger;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.commands.DisplayShiftTime;
+import frc.robot.commands.DisplayShiftTimeNoAdvKit;
 import frc.robot.util.LocalADStarAK;
 import java.util.Optional;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -143,7 +144,9 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance()
         .schedule(new InstantCommand(() -> robotContainer.getIntake().testDeployVoltage(0)));
     CommandScheduler.getInstance()
-        .schedule(new DisplayShiftTime(robotContainer.getIsAheadHubSup()));
+        .schedule(
+            new DisplayShiftTimeNoAdvKit(
+                NetworkTableInstance.getDefault(), robotContainer.getIsAheadHubSup()));
     robotContainer.runTeleopStart();
   }
 
