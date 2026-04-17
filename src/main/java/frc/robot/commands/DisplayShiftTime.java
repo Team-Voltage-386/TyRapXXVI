@@ -104,11 +104,16 @@ public class DisplayShiftTime extends Command {
       // Initial state
       case INIT:
         if (DriverStation.isEnabled() && !DriverStation.isAutonomous()) {
-          if (hubIsAheadSup.getAsBoolean()) {
-            thisGameState = GameStates.ALL;
-          } else {
-            this.thisGameState = GameStates.ALL_SHIFT1;
-          }
+          if (DriverStation.getGameSpecificMessage().length() > 0) {
+            if (hubIsAheadSup.getAsBoolean()) {
+              thisGameState = GameStates.ALL;
+            } else {
+              this.thisGameState = GameStates.ALL_SHIFT1;
+            }
+        } else {
+          this.thisGameState = GameStates.INIT;
+        }
+
         }
         break;
       // ALL Shooting

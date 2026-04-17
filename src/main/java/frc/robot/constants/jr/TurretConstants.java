@@ -35,10 +35,10 @@ public class TurretConstants {
   public static final double turretMinAngleRot =
       -.875 + turretYawLimitMarginRot; // Maximum clockwise rotation in rotations
 
-  public static final double turretMaxRotationSpeedDegPerSec = 720.0;
+  public static final double turretMaxRotationSpeedDegPerSec = 360.0;
   public static final double turretMaxRotationSpeedRotPerSec =
       turretMaxRotationSpeedDegPerSec / 360.0;
-  public static final double turretMaxAccelDps2 = 1440.0;
+  public static final double turretMaxAccelDps2 = 720.0;
   public static final double turretMaxAccelRotPerSec2 = turretMaxAccelDps2 / 360.0;
   public static final double maxYawVoltage = 8.0;
 
