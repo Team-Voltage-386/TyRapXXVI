@@ -110,10 +110,9 @@ public class DisplayShiftTime extends Command {
             } else {
               this.thisGameState = GameStates.ALL_SHIFT1;
             }
-        } else {
-          this.thisGameState = GameStates.INIT;
-        }
-
+          } else {
+            this.thisGameState = GameStates.INIT;
+          }
         }
         break;
       // ALL Shooting
