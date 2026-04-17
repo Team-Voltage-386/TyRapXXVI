@@ -23,8 +23,8 @@ public class Scoring extends ShootingConstants {
     launchFlywheelSpeedMap.put(2.602, 2400.0);
     launchFlywheelSpeedMap.put(3.602, 2650.0);
     launchFlywheelSpeedMap.put(4.602, 2925.0 + 50);
-    launchFlywheelSpeedMap.put(4.83, 3042.0 + 50);
-    launchFlywheelSpeedMap.put(5.54, 3200.0 + 60);
+    launchFlywheelSpeedMap.put(4.83, 3042.0 + 60);
+    launchFlywheelSpeedMap.put(5.54, 3200.0 + 70);
     launchFlywheelSpeedMap.put(6.8, 3500.0);
 
     timeOfFlightMap.put(1.669, 0.88);
