@@ -181,7 +181,7 @@ public final class VisionConstants {
                     -0.279,
                     -0.363,
                     0.512,
-                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(260)))),
+                    new Rotation3d(0.0, Units.degreesToRadians(-15), Units.degreesToRadians(274)))),
           };
 
       cameraStdDevFactors = new double[] {1.0};
