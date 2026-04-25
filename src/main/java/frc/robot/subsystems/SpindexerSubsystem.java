@@ -29,7 +29,7 @@ public class SpindexerSubsystem extends SubsystemBase {
     spindexer_motor =
         new SparkFlex(SpindexerConstants.SPINDEXER_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkFlexConfig spindexerConfig = new SparkFlexConfig();
-    spindexerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30).voltageCompensation(12.0);
+    spindexerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(45).voltageCompensation(12.0);
     spindexerConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
     spindexerConfig
         .signals
