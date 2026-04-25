@@ -23,9 +23,57 @@
         "x": 0.9778054567022547,
         "y": 6.0
       },
-      "nextControl": null,
+      "nextControl": {
+        "x": 0.4778054567022547,
+        "y": 6.0
+      },
       "isLocked": false,
       "linkedName": "BlueDepot"
+    },
+    {
+      "anchor": {
+        "x": 1.4729638554216864,
+        "y": 5.943452211126962
+      },
+      "prevControl": {
+        "x": 0.9812168674698796,
+        "y": 5.9364216867469874
+      },
+      "nextControl": {
+        "x": 1.9647108433734932,
+        "y": 5.950482735506936
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.4729638554216864,
+        "y": 5.455602409638555
+      },
+      "prevControl": {
+        "x": 1.7218377235701745,
+        "y": 5.479304682795553
+      },
+      "nextControl": {
+        "x": 1.2240899872731992,
+        "y": 5.4319001364815565
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.7278054567022547,
+        "y": 5.455602409638555
+      },
+      "prevControl": {
+        "x": 0.992144578313253,
+        "y": 5.477457831325301
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
     }
   ],
   "rotationTargets": [],

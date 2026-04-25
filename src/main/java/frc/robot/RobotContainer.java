@@ -793,19 +793,20 @@ public class RobotContainer {
     Command auto =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                turret.enableAutoAimCommand(() -> getHubPose3d()), new DeployIntake(intake)),
-            DriveCommands.buildFollowPath("Spacing"),
-            new WaitForIntake(intake),
-            new SequentialCommandGroup(
-                    spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
-                    new WaitCommand(3),
-                    spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()))
-                .deadlineFor(new JiggleIntake(intake)),
+                turret.enableAutoAimCommand(() -> getHubPose3d()),
+                new DeployIntake(intake),
+                DriveCommands.buildFollowPath("Spacing")),
+            new WaitCommand(0.5),
+            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
+            new WaitCommand(1.5),
+            new JiggleIntake(intake).withTimeout(1.0),
+            new ParallelCommandGroup(new WaitCommand(0.5), new DeployIntake(intake)),
+            spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("DepotFromCenter"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
-            new WaitCommand(4),
+            new WaitCommand(9),
             intake.stopMotorCommand());
     return auto;
   }
