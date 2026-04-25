@@ -26,8 +26,9 @@ public final class Constants {
     REPLAY
   }
 
-  public static final Translation3d blueHubPose = new Translation3d(4.5974, 4.034536, 1.5748);
-  public static final Translation3d redHubPose = new Translation3d(11.938, 4.034536, 1.5748);
+  public static final Translation3d blueHubPose =
+      new Translation3d(4.5974 + 0.02, 4.034536, 1.5748);
+  public static final Translation3d redHubPose = new Translation3d(11.938 - 0.02, 4.034536, 1.5748);
   public static final Pose3d blueHubPose3d = new Pose3d(blueHubPose, Rotation3d.kZero);
   public static final Pose3d redHubPose3d = new Pose3d(redHubPose, Rotation3d.kZero);
 

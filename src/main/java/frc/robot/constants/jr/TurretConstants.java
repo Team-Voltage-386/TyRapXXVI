@@ -35,10 +35,10 @@ public class TurretConstants {
   public static final double turretMinAngleRot =
       -.875 + turretYawLimitMarginRot; // Maximum clockwise rotation in rotations
 
-  public static final double turretMaxRotationSpeedDegPerSec = 720.0;
+  public static final double turretMaxRotationSpeedDegPerSec = 360.0;
   public static final double turretMaxRotationSpeedRotPerSec =
       turretMaxRotationSpeedDegPerSec / 360.0;
-  public static final double turretMaxAccelDps2 = 1440.0;
+  public static final double turretMaxAccelDps2 = 720.0;
   public static final double turretMaxAccelRotPerSec2 = turretMaxAccelDps2 / 360.0;
   public static final double maxYawVoltage = 8.0;
 
@@ -65,7 +65,7 @@ public class TurretConstants {
   public static final int flywheelMasterCanId = 11;
   // public static final int flywheelSlaveCanId = 19;
   public static final double flywheelKs = 0.0123;
-  public static final double flywheelKv = 0.00182;
+  public static final double flywheelKv = 0.00198;
   public static final double flywheelKa = 0.006;
   public static final double manualShotSpeedRpm = 2270.0;
   public static final double manualTriggerOnThreshold = 0.15;

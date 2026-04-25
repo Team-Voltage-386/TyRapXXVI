@@ -45,7 +45,7 @@ public class FlywheelIOSparkFlex implements FlywheelIO {
 
   public FlywheelIOSparkFlex() {
     flywheelConfig = new SparkFlexConfig();
-    flywheelConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(12.0);
+    flywheelConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12.0);
     flywheelConfig.encoder.uvwAverageDepth(4).uvwMeasurementPeriod(16);
     flywheelConfig
         .closedLoop
