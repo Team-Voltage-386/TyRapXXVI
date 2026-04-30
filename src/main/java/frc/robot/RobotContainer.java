@@ -796,7 +796,7 @@ public class RobotContainer {
                 turret.enableAutoAimCommand(() -> getHubPose3d()),
                 new DeployIntake(intake),
                 DriveCommands.buildFollowPath("Spacing")),
-            new WaitCommand(0.5),
+            new WaitCommand(1.0),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             new WaitCommand(1.5),
             new JiggleIntake(intake).withTimeout(1.0),
@@ -806,7 +806,7 @@ public class RobotContainer {
             DriveCommands.buildFollowPath("DepotFromCenter"),
             spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
-            new WaitCommand(9),
+            new WaitCommand(9.5),
             intake.stopMotorCommand());
     return auto;
   }
