@@ -192,7 +192,7 @@ public class TurretIOSparkMax2 implements TurretIO {
     if (resync) {
       testTurretVoltage(2.5);
       if (limitSwitchTriggered == WhichLimit.LEFT) {
-        yawEncoder.setPosition(23.7 / 360.0);
+        yawEncoder.setPosition(20.5 / 360.0);
         resync = false;
         manualMode = false;
         desiredAngle = 0.0; // sets turret to zero position (facing intake)

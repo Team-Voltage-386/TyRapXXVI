@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.084686746987952,
-        "y": 7.564650602409639
+        "x": 0.47411904761904866,
+        "y": 6.788392857142858
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.33596925336229,
-        "y": 7.5787704627027095
+        "x": 1.7254015539933865,
+        "y": 6.802512717435929
       },
       "isLocked": false,
       "linkedName": "BlueTopShotFar"
@@ -159,7 +159,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 91.90915243299635
   },
   "useDefaultConstraints": false
 }

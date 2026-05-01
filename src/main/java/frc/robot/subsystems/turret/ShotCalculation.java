@@ -23,7 +23,7 @@ public class ShotCalculation {
   private double hoodAngle = Double.NaN;
   private double turretVelocity;
   private double hoodVelocity;
-  TuningUtil addRPM = new TuningUtil("/Tuning/turret/addRPM", 0.0);
+  TuningUtil addRPM = new TuningUtil("/Tuning/turret/addRPM", 40.0);
 
   public record LaunchingParameters(
       boolean isValid,

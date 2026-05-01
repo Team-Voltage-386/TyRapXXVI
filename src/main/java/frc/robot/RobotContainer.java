@@ -804,10 +804,13 @@ public class RobotContainer {
             spindexer.spindexerOffCommand().alongWith(spindexer.feederOffCommand()),
             intake.takeInCommand(),
             DriveCommands.buildFollowPath("DepotFromCenter"),
-            spindexer.spindexerOnCommand().alongWith(spindexer.feederOnCommand()),
             DriveCommands.buildFollowPath("DepotSlowCollect"),
-            new WaitCommand(9.5),
-            intake.stopMotorCommand());
+            spindexer
+                .spindexerOnCommand()
+                .alongWith(spindexer.feederOnCommand().alongWith(intake.stopMotorCommand())),
+            new WaitCommand(5.0),
+            new JiggleIntake(intake).withTimeout(2.0),
+            new DeployIntake(intake));
     return auto;
   }
 

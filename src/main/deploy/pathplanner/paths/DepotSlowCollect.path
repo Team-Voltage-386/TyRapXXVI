@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3318376068376068,
-        "y": 5.120299145299145
+        "x": 1.3059971509971513,
+        "y": 5.133219373219374
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.7633475783475785,
-        "y": 5.430384615384616
+        "x": 0.9183903133903137,
+        "y": 5.391623931623932
       },
       "isLocked": false,
       "linkedName": "DepotOffset"
     },
     {
       "anchor": {
-        "x": 0.6341452991452996,
-        "y": 5.9601139601139606
+        "x": 0.5065119047619058,
+        "y": 5.7842142857142855
       },
       "prevControl": {
-        "x": 0.7097775372794243,
-        "y": 5.569347396420984
+        "x": 0.545225807433521,
+        "y": 5.319647453654907
       },
       "nextControl": {
-        "x": 0.5566239316239321,
-        "y": 6.3606410256410255
+        "x": 0.48491666666666755,
+        "y": 6.043357142857142
       },
       "isLocked": false,
       "linkedName": "BlueDepot"
     },
     {
       "anchor": {
-        "x": 0.7891880341880344,
-        "y": 7.523461538461538
+        "x": 0.6036904761904771,
+        "y": 7.447047619047619
       },
       "prevControl": {
-        "x": 0.7116666666666667,
-        "y": 7.045413105413105
+        "x": 0.5132488807488818,
+        "y": 6.8527171347171345
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,25 +45,11 @@
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [
-    {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 0.41053342336259246,
-      "constraints": {
-        "maxVelocity": 0.65,
-        "maxAcceleration": 6.0,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    }
-  ],
+  "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.55,
+    "maxVelocity": 1.55,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -71,8 +57,8 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 84.55966796899448
+    "velocity": 2.0,
+    "rotation": 88.15238973400538
   },
   "reversed": false,
   "folder": null,
