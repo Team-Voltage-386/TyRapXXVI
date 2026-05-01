@@ -3,73 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5902421652421652,
-        "y": 6.166837606837607
+        "x": 1.3318376068376068,
+        "y": 5.120299145299145
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.340242165242163,
-        "y": 6.166837606837607
+        "x": 0.7633475783475785,
+        "y": 5.430384615384616
       },
       "isLocked": false,
       "linkedName": "DepotOffset"
     },
     {
       "anchor": {
-        "x": 0.5953846153846156,
-        "y": 6.205598290598291
+        "x": 0.6341452991452996,
+        "y": 5.9601139601139606
       },
       "prevControl": {
-        "x": 0.8453846153846156,
-        "y": 6.205598290598291
+        "x": 0.7097775372794243,
+        "y": 5.569347396420984
       },
       "nextControl": {
-        "x": 0.3453846153846156,
-        "y": 6.205598290598291
+        "x": 0.5566239316239321,
+        "y": 6.3606410256410255
       },
       "isLocked": false,
       "linkedName": "BlueDepot"
     },
     {
       "anchor": {
-        "x": 1.9778490028490028,
-        "y": 6.128076923076923
+        "x": 0.7891880341880344,
+        "y": 7.523461538461538
       },
       "prevControl": {
-        "x": 1.5173648945798663,
-        "y": 6.300758463677849
-      },
-      "nextControl": {
-        "x": 2.391296296296297,
-        "y": 5.973034188034188
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 1.4222792022792023,
-        "y": 5.52082621082621
-      },
-      "prevControl": {
-        "x": 2.210413105413105,
-        "y": 5.443304843304843
-      },
-      "nextControl": {
-        "x": 1.1734798495605325,
-        "y": 5.545298278306735
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 0.6599857549857553,
-        "y": 5.507905982905982
-      },
-      "prevControl": {
-        "x": 0.9243248765967536,
-        "y": 5.529761404592729
+        "x": 0.7116666666666667,
+        "y": 7.045413105413105
       },
       "nextControl": null,
       "isLocked": false,
@@ -77,11 +45,25 @@
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 0.41053342336259246,
+      "constraints": {
+        "maxVelocity": 0.65,
+        "maxAcceleration": 6.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.5,
+    "maxVelocity": 0.55,
     "maxAcceleration": 6.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -90,13 +72,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 84.55966796899448
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 153.4349488229221
   },
   "useDefaultConstraints": false
 }
