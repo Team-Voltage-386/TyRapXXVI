@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DisplayShiftTime;
 import frc.robot.util.LocalADStarAK;
@@ -117,7 +118,9 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    autonomousCommand = robotContainer.getAutonomousCommand();
+    // <<DEMO>> No Auto Commands
+    // <<DEMO>> autonomousCommand = robotContainer.getAutonomousCommand();
+    autonomousCommand = null;
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
