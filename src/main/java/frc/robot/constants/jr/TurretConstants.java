@@ -67,7 +67,11 @@ public class TurretConstants {
   public static final double flywheelKs = 0.0123;
   public static final double flywheelKv = 0.00198;
   public static final double flywheelKa = 0.006;
-  public static final double manualShotSpeedRpm = 2270.0;
+  // <<DEMO>> Commented this out
+  // public static final double manualShotSpeedRpm = 2270.0;
+  // <<DEMO>> Adjust the manual shot rpm as desired used in both manual and autoaim
+  public static final double manualShotSpeedRpm = 1350.0;
+
   public static final double manualTriggerOnThreshold = 0.15;
   public static final double flywheelRateLimit = 3300.0;
 

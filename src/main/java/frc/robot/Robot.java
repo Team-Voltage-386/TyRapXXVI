@@ -118,7 +118,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     // <<DEMO>> No Auto Commands
-    // <<DEMO>> autonomousCommand = robotContainer.getAutonomousCommand();
+    // autonomousCommand = robotContainer.getAutonomousCommand();
+    // <<DEMO>> Always return a null for autonomous
     autonomousCommand = null;
 
     // schedule the autonomous command (example)

@@ -141,7 +141,12 @@ public class Turret extends SubsystemBase {
     deltaYaw = getAngleDifference(desiredTurretYaw, inputs.turretYaw.getDegrees());
     io.setTurretYaw(limitTurretYaw(desiredTurretYaw));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
-    double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
+
+    // <<DEMO>> Commented this out
+    // double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
+    // <<DEMO>> Use the same manual shot rpm for autoaim
+    double shooterWheelRPM = TurretConstants.manualShotSpeedRpm;
+
     flywheel.setFlywheelSpeed(shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/currentTargetPose", targetPose);

@@ -410,11 +410,10 @@ public class RobotContainer {
       kManipController.rightBumper().onTrue(turret.adjustYaw(setDegrees::getValue));
       kManipController.leftBumper().onTrue(new InstantCommand(() -> turret.toggleManualFlywheel()));
 
-      /*  <<DEMO>> Disable auto aim toggle
+      // <<DEMO>> Disable auto aim toggle (comment start() button out)
       kManipController
           .start()
           .onTrue(turret.toggleAutoAimCommand()); // .alongWith(vis.toggleHubTags()));
-      */
 
       // Manipulator controller bindings
       kManipController.a().onTrue(spindexer.feederReverseCommand());
