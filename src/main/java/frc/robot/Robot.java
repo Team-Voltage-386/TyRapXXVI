@@ -27,6 +27,9 @@ import org.littletonrobotics.urcl.URCL;
  */
 public class Robot extends LoggedRobot {
 
+  /** Where bridge-driven simulation runs leave their replayable logs. Gitignored. */
+  private static final String BRIDGE_LOG_DIR = "logs/bridge";
+
   private Command autonomousCommand;
   private final RobotContainer robotContainer;
 
@@ -55,7 +58,13 @@ public class Robot extends LoggedRobot {
 
       case SIM:
         // Running a physics simulator, log to NT
-        // Logger.addDataReceiver(new WPILOGWriter());
+        // When driven by sparky-sim's bridge (gradlew simulateJava -Pbridge),
+        // also write a WPILOG. That is what lets a fuzz run that found a hang
+        // be replayed in AdvantageScope afterwards -- without it the run leaves
+        // nothing behind but a console tail.
+        if ("1".equals(System.getenv("SPARKY_BRIDGE"))) {
+          Logger.addDataReceiver(new WPILOGWriter(BRIDGE_LOG_DIR));
+        }
         Logger.addDataReceiver(new NT4Publisher());
         break;
 

@@ -161,6 +161,15 @@ wpi.sim.addGui().defaultEnabled = !useBridge
 wpi.sim.addDriverstation().defaultEnabled = false
 wpi.sim.addWebsocketsServer().defaultEnabled = useBridge
 
+// Under the bridge, also write a WPILOG. A fuzz run that finds a hang is only
+// worth the night it took if the hang can be handed to AdvantageScope
+// afterwards, and NT publishing alone leaves nothing behind. Off by default so
+// ordinary simulateJava does not quietly start filling logs/ with every run.
+//
+// An env var rather than a system property: simulateJava is GradleRIO's own
+// task type, not a JavaExec, so it has no systemProperty method.
+wpi.sim.envVar('SPARKY_BRIDGE', useBridge ? '1' : '0')
+
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
 // knows where to look for our Robot Class.
