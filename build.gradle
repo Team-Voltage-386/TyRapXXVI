@@ -144,8 +144,22 @@ test {
 }
 
 // Simulation configuration (e.g. environment variables).
-wpi.sim.addGui().defaultEnabled = true
-wpi.sim.addDriverstation()
+//
+// Normally: Sim GUI on, real DriverStation available.
+//
+// With -Pbridge: swap both out for the HALSim WebSocket server, so an external
+// process (sparky-sim's bridge) supplies DriverStation state and joystick input.
+// The GUI and ds_socket are turned off in that mode on purpose -- they are
+// competing sources of DriverStation data, and the GUI needs a display we do not
+// have on an unattended overnight run.
+//
+//   ./gradlew simulateJava -Pbridge
+//
+def useBridge = project.hasProperty('bridge')
+
+wpi.sim.addGui().defaultEnabled = !useBridge
+wpi.sim.addDriverstation().defaultEnabled = false
+wpi.sim.addWebsocketsServer().defaultEnabled = useBridge
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
