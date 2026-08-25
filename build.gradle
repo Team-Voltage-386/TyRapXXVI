@@ -155,9 +155,16 @@ test {
 //
 //   ./gradlew simulateJava -Pbridge
 //
+// -PbridgeGui additionally keeps the Sim GUI on, for watching a single failing
+// seed replay live. Useless overnight -- it needs a display -- but the fastest
+// way to see what a reported failure actually looks like.
+//
+//   ./gradlew simulateJava -Pbridge -PbridgeGui
+//
 def useBridge = project.hasProperty('bridge')
+def bridgeGui = project.hasProperty('bridgeGui')
 
-wpi.sim.addGui().defaultEnabled = !useBridge
+wpi.sim.addGui().defaultEnabled = !useBridge || bridgeGui
 wpi.sim.addDriverstation().defaultEnabled = false
 wpi.sim.addWebsocketsServer().defaultEnabled = useBridge
 
