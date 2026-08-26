@@ -290,6 +290,13 @@ public class SpindexerSubsystem extends SubsystemBase {
     Logger.recordOutput("Spindexer/Agitator/Velocity", agitator_motor.getEncoder().getVelocity());
     Logger.recordOutput("Spindexer/Agitator/Position", agitator_motor.getEncoder().getPosition());
     Logger.recordOutput("Spindexer/Agitator/Setpoint", agitatorSetpoint);
+
+    // Two things outside this subsystem branch on the feeder being on and
+    // neither could see it: DriveCommands.joystickDrive halves the whole
+    // drivetrain while it runs, and TurretIOSim only launches fuel while it
+    // runs. Both were readable only by inference before this line.
+    Logger.recordOutput("Spindexer/FeederOn", feederOn);
+    Logger.recordOutput("Spindexer/Reverse", reverse);
   }
 
   @Override

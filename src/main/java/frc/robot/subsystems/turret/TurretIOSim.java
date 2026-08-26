@@ -36,6 +36,24 @@ public class TurretIOSim implements TurretIO, Simulatable {
   private final double maxErrorAngleYaw = Math.toRadians(2); // In degrees, converted to radians
   private final double maxErrorAnglePitch = Math.toRadians(3); // In degrees, converted to radians.
   private final double maxErrorVelocity = 50; // In RPM
+
+  /**
+   * The launch speed is proportional to flywheel RPM, and is 16 m/s at 6000 RPM.
+   *
+   * <p>Derived from that statement rather than written as a literal, because the literal drifted
+   * from it: this multiplied by 0.58, which is 14% high, and 14% high on the speed puts the fuel
+   * over the HUB at every range in {@link Scoring}'s table -- 0.6 m above the goal at 1.6 m and
+   * 1.25 m above it at 5.5 m, against a goal radius of 0.597 m. The shot was unscoreable past
+   * about 4 m and marginal inside it.
+   *
+   * <p>The value it works out to, a little over half, is also what a single backed wheel does
+   * physically: the contact point matches the wheel's surface speed, so the ball's centre leaves
+   * at roughly half of it.
+   */
+  private static final double shotSpeedAt6000RpmMPS = 16.0;
+
+  private static final double flywheelSurfaceSpeedToShotSpeed =
+      shotSpeedAt6000RpmMPS / (6000.0 * TurretConstants.turretRPMToMetersPerSecond);
   private final IntakeIOSim intakeIOSim;
   private final SpindexerSubsystem spindexerSubsystem;
   private final Flywheel flywheel;
@@ -104,7 +122,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
       calculatedVelocity =
           (flywheel.getFlywheelVelocity() - randomOffsetVelocity(true))
               * TurretConstants.turretRPMToMetersPerSecond
-              * 0.58;
+              * flywheelSurfaceSpeedToShotSpeed;
       Logger.recordOutput("Simulation/Shooter/calculatedVelocity", calculatedVelocity);
       RebuiltFuelOnFly fuelOnFly =
           (RebuiltFuelOnFly)
@@ -128,9 +146,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
                           .plus(new Rotation2d(randomOffsetAngleYaw(true))),
                       // Initial height of the flying note
                       Meter.of(0.559),
-                      // The launch speed is proportional to the RPM; assumed to be 16 meters/second
-                      // at 6000
-                      // RPM
+                      // The launch speed, see flywheelSurfaceSpeedToShotSpeed
                       MetersPerSecond.of(calculatedVelocity),
                       // The angle at which the note is launched
                       turretPitch
