@@ -42,6 +42,16 @@ public class SimContainer {
 
   protected final SimulatedArena arena;
 
+  /**
+   * The other robots on the field, if anything outside asks for any.
+   *
+   * <p>Constructed unconditionally and not behind the bridge profile, because it does nothing at
+   * all until a roster is published: a plain simulation session is four idle NT subscriptions
+   * different from before. Exposed so that a caller can see how many robots actually got made,
+   * which is the only handshake the far side gets.
+   */
+  @Getter protected final BridgeRobots bridgeRobots;
+
   public SimContainer() {
     if (Constants.currentMode != Constants.Mode.SIM) {
       throw new IllegalStateException("SimContainer can only be instantiated in SIM mode");
@@ -53,6 +63,8 @@ public class SimContainer {
         new SwerveDriveSimulation(
             driveTrainSimulationConfig, new Pose2d(8.790, 0.815, Rotation2d.kZero));
     arena.addDriveTrainSimulation(driveSim);
+
+    bridgeRobots = new BridgeRobots(arena);
   }
 
   public void simulationInit(ResetOdo resetOdometry) {
@@ -65,6 +77,11 @@ public class SimContainer {
   }
 
   public void simulationPeriodic(VisionConsumer visionConsumer) {
+    // Before the step, not after: these are setpoints for the tick that is
+    // about to happen. Commanding afterwards means every extra robot acts on
+    // a world one tick stale, which is a lag nobody would think to look for.
+    bridgeRobots.periodic();
+
     arena.simulationPeriodic();
 
     Logger.recordOutput("FieldSimulation/RobotPosition", driveSim.getSimulatedDriveTrainPose());
