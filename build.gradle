@@ -164,6 +164,61 @@ test {
 def useBridge = project.hasProperty('bridge')
 def bridgeGui = project.hasProperty('bridgeGui')
 
+// -PbridgeCoverage: attach the JaCoCo agent, so sparky-sim can ask the running
+// robot which of its own code a fuzzing campaign actually entered.
+//
+//   ./gradlew simulateJava -Pbridge -PbridgeCoverage
+//
+// Two things about this are deliberate and neither is the obvious choice.
+//
+// It is not a `jacoco {}` block, and it never can be. That plugin writes its
+// exec data from a JVM shutdown hook, and the bridge ends every match with
+// `taskkill /F /T`, which runs no hooks. The hard kill is not carelessness --
+// `--no-daemon` above exists so the robot JVM is a killable descendant, and a
+// polite shutdown that misses leaves port 3300 held and breaks every later
+// match. So the agent runs as a `tcpserver` and sparky-sim asks it for a dump
+// over TCP while the JVM is still alive. See bridge/jacoco.py.
+//
+// It is opt-in rather than part of -Pbridge, because instrumentation is not
+// free and this robot is judged on timing: the same campaign also runs an
+// oracle that reports loop overruns, and a coverage agent that slows the loop
+// enough to cause one would have the fuzzer reporting its own instrument.
+// Measure before turning it on for a whole night.
+//
+// Port and includes come from the command line with defaults matching
+// bridge/jacoco.py, so that the filter deciding what gets instrumented and the
+// filter deciding what counts as "never run" are one setting rather than two
+// that can drift.
+def bridgeCoverage = project.hasProperty('bridgeCoverage')
+def coveragePort = project.findProperty('bridgeCoveragePort') ?: '6300'
+def coverageIncludes = project.findProperty('bridgeCoverageIncludes') ?: 'frc.robot.*'
+def coverageExcludes = project.findProperty('bridgeCoverageExcludes') ?: ''
+
+configurations {
+    jacocoAgentRuntime
+}
+
+dependencies {
+    // The ':runtime' classifier is the bare agent jar. The default artifact is
+    // a wrapper with jacocoagent.jar packed inside it as a resource, which
+    // would need unpacking before -javaagent could point at it.
+    jacocoAgentRuntime 'org.jacoco:org.jacoco.agent:0.8.15:runtime'
+}
+
+tasks.withType(edu.wpi.first.gradlerio.simulation.JavaSimulationTask).configureEach {
+    // `simulateJava` is a lifecycle task; the JVM that actually runs the robot
+    // is `simulateJavaRelease`, which is a JavaExec. Matching on type rather
+    // than name catches it without depending on GradleRIO registering it
+    // before this line is reached.
+    if (bridgeCoverage) {
+        doFirst {
+            jvmArgs "-javaagent:${configurations.jacocoAgentRuntime.singleFile}=" +
+                    "output=tcpserver,address=127.0.0.1,port=${coveragePort}," +
+                    "includes=${coverageIncludes},excludes=${coverageExcludes}"
+        }
+    }
+}
+
 wpi.sim.addGui().defaultEnabled = !useBridge || bridgeGui
 wpi.sim.addDriverstation().defaultEnabled = false
 wpi.sim.addWebsocketsServer().defaultEnabled = useBridge
