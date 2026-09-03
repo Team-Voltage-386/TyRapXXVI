@@ -6,8 +6,9 @@ public class Passing extends ShootingConstants {
 
   public Passing() {
 
-    minDistance = 2.0;
-    maxDistance = 10.0;
+    // Require a calibrated value from every shot table.
+    minDistance = 3.11;
+    maxDistance = 8.0;
     phaseDelay = 0.03;
 
     // max is 62 degrees

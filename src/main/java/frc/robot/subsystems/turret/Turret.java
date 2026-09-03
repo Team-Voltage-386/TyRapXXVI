@@ -30,6 +30,7 @@ public class Turret extends SubsystemBase {
 
   private boolean autoAimEnabled = false;
   private boolean manualMode = false;
+  private boolean shotIsValid = false;
   private double deltaYaw = 0.0;
   protected boolean isScoring = true;
 
@@ -120,17 +121,21 @@ public class Turret extends SubsystemBase {
 
   public void aimAtTarget(Pose3d targetPose, boolean isScoring) {
     shotCalculation.setTarget(targetPose.getTranslation().toTranslation2d(), isScoring);
-    Pose2d turretFieldPos = shotCalculation.getParameters().lookaheadPose();
+    ShotCalculation.LaunchingParameters parameters = shotCalculation.getParameters();
+    shotIsValid = parameters.isValid();
+    Pose2d turretFieldPos = parameters.lookaheadPose();
     Translation3d turretFieldTrans =
         new Translation3d(
             turretFieldPos.getTranslation().getX(), turretFieldPos.getTranslation().getY(), 0.336);
     Translation3d deltaPos = targetPose.getTranslation().minus(turretFieldTrans);
 
     double yaw = Math.atan2(deltaPos.getY(), deltaPos.getX());
-    calculatedPitch = new Rotation2d(shotCalculation.getParameters().hoodAngle());
+    calculatedPitch = new Rotation2d(parameters.hoodAngle());
 
-    if ((isShootingSupplier.get() && DriverStation.isAutonomousEnabled())
-        || (triggerSupplier.get() > 0.5 && DriverStation.isTeleopEnabled())) {
+    boolean isShotRequested =
+        (isShootingSupplier.get() && DriverStation.isAutonomousEnabled())
+            || (triggerSupplier.get() > 0.5 && DriverStation.isTeleopEnabled());
+    if (shotIsValid && isShotRequested) {
       io.setTurretPitch(calculatedPitch);
     } else {
       io.setTurretPitch(TurretConstants.turretMaxHoodRot);
@@ -141,9 +146,10 @@ public class Turret extends SubsystemBase {
     deltaYaw = getAngleDifference(desiredTurretYaw, inputs.turretYaw.getDegrees());
     io.setTurretYaw(limitTurretYaw(desiredTurretYaw));
     Logger.recordOutput("Shooter/Hood/CalculatedPitch", calculatedPitch);
-    double shooterWheelRPM = shotCalculation.getParameters().flywheelSpeed();
+    double shooterWheelRPM = shotIsValid ? parameters.flywheelSpeed() : 0.0;
     flywheel.setFlywheelSpeed(shooterWheelRPM);
     Logger.recordOutput("Shooter/Turret/ShooterWheelRPM", shooterWheelRPM);
+    Logger.recordOutput("Shooter/Turret/ShotIsValid", shotIsValid);
     Logger.recordOutput("Shooter/Turret/currentTargetPose", targetPose);
     shotCalculation.clearLaunchingParameters();
   }
@@ -231,13 +237,13 @@ public class Turret extends SubsystemBase {
     if (autoAimEnabled) {
       setTarget();
       aimAtTarget(currentTargetPose, isScoring);
-      if ((Math.abs(deltaYaw) < 5)) {
+      if (shotIsValid && Math.abs(deltaYaw) < 5) {
         if (isShootingSupplier.get())
           if (!spindexer.isSpindexerOn()) {
             spindexer.spindexerOn();
           }
         manipController.setRumble(RumbleType.kBothRumble, 0.0);
-      } else if (Math.abs(deltaYaw) > 5 && isShootingSupplier.get()) {
+      } else if (isShootingSupplier.get()) {
         spindexer.spindexerOff();
         manipController.setRumble(RumbleType.kBothRumble, 0.3);
       }

@@ -6,8 +6,9 @@ public class Scoring extends ShootingConstants {
 
   public Scoring() {
 
-    minDistance = 1.5;
-    maxDistance = 6.7;
+    // Require a calibrated value from every shot table.
+    minDistance = 1.669;
+    maxDistance = 5.54;
     phaseDelay = 0.03;
 
     // max is 62 degrees
