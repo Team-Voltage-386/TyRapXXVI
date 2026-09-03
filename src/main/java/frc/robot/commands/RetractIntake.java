@@ -18,7 +18,7 @@ public class RetractIntake extends Command {
   /** Creates a new RetractIntake. */
   public RetractIntake(IntakeSubsystem intakeSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
-    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(intakeSubsystem);
   }
 
   // Called when the command is initially scheduled.

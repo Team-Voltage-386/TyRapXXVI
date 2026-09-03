@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.DeployIntake;
+import frc.robot.commands.RetractIntake;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -27,7 +28,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command retractCommand() {
-    return Commands.runOnce(() -> intakeIO.retract());
+    return new RetractIntake(this);
   }
 
   public Command takeInCommand() {
