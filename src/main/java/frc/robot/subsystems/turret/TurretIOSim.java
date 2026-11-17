@@ -26,7 +26,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class TurretIOSim implements TurretIO, Simulatable {
 
-  private Rotation2d turretYaw = new Rotation2d();
+  private Rotation2d turretYaw = Rotation2d.fromDegrees(TurretConstants.turretStartupAngleDeg);
   private Rotation2d turretPitch = new Rotation2d();
 
   boolean flywheelShooting = false;
@@ -83,7 +83,7 @@ public class TurretIOSim implements TurretIO, Simulatable {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
-    turretYaw = new Rotation2d(MathUtil.clamp(position.getRadians(), -2 * Math.PI, 2 * Math.PI));
+    turretYaw = Rotation2d.fromDegrees(TurretYawLimits.limitDegrees(position.getDegrees()));
   }
 
   /* Set the turret pitch to the specified position. */

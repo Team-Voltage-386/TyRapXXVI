@@ -21,6 +21,7 @@ import frc.robot.commands.RetractIntake;
 import frc.robot.commands.WaitForIntake;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.IntakeConstants;
+import frc.robot.constants.jr.TurretConstants;
 import frc.robot.constants.jr.VisionConstants;
 import frc.robot.subsystems.LightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
@@ -74,7 +75,8 @@ public class RobotContainer {
   private ShotCalculation shotCalculation;
 
   TuningUtil runVolts = new TuningUtil("/Tuning/Turret/TestRunVolts", 2.5);
-  TuningUtil setDegrees = new TuningUtil("/Tuning/Turret/TestSetDegrees", 0.0);
+  TuningUtil setDegrees =
+      new TuningUtil("/Tuning/Turret/TestSetDegrees", TurretConstants.turretStartupAngleDeg);
 
   public SimContainer sim;
 
@@ -367,7 +369,8 @@ public class RobotContainer {
       kDriveController
           .start()
           .debounce(2.0)
-          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).setYawZero()));
+          // Physically place the turret at the marked +20-degree position before calibrating.
+          .onTrue(turret.runOnce(() -> ((TurretIOSparkMax2) turret.io).calibrateYawAtStartup()));
 
       // kDriveController.start().onTrue(turret.toggleAutoAimCommand());
       kManipController

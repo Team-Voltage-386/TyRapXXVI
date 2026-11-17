@@ -17,8 +17,17 @@ public class TurretConstants {
   public static final double turretCenterOffsetDeg = 0.0;
   public static final Rotation2d turretCenterOffsetRot =
       Rotation2d.fromDegrees(turretCenterOffsetDeg);
-  public static final double turretDeadZoneCenterDeg = 47.5 / 2.0;
-  public static final double turretDeadZoneWidthDeg = 47.5;
+  // Yaw remains measured from the intake. Place the turret at +20 degrees before startup.
+  public static final double turretStartupAngleDeg = 20.0;
+  public static final double turretMinAngleDeg = 20.0;
+  public static final double turretMaxAngleDeg = 270.0;
+  public static final double turretMinAngleRot = turretMinAngleDeg / 360.0;
+  public static final double turretMaxAngleRot = turretMaxAngleDeg / 360.0;
+  // The forbidden arc crosses zero: 270 -> 360 -> 20 degrees.
+  public static final double turretDeadZoneCenterDeg =
+      (turretMaxAngleDeg + turretMinAngleDeg + 360.0) / 2.0;
+  public static final double turretDeadZoneWidthDeg =
+      360.0 - (turretMaxAngleDeg - turretMinAngleDeg);
   public static final double turretDeadZoneHalfWidthDeg = turretDeadZoneWidthDeg / 2.0;
   public static final double turretDeadZoneStartDeg =
       turretDeadZoneCenterDeg - turretDeadZoneHalfWidthDeg;
@@ -28,12 +37,6 @@ public class TurretConstants {
       turretDeadZoneCenterDeg + turretDeadZoneHalfWidthDeg;
   public static final Rotation2d turretDeadZoneEndRot =
       Rotation2d.fromDegrees(turretDeadZoneEndDeg);
-  public static final double turretYawLimitMarginRot =
-      0.02; // Margin to prevent hitting the limit switche
-  public static final double turretMaxAngleRot =
-      0.075 - turretYawLimitMarginRot; // Maximum counter clockwise rotation in rotations
-  public static final double turretMinAngleRot =
-      -.875 + turretYawLimitMarginRot; // Maximum clockwise rotation in rotations
 
   public static final double turretMaxRotationSpeedDegPerSec = 360.0;
   public static final double turretMaxRotationSpeedRotPerSec =

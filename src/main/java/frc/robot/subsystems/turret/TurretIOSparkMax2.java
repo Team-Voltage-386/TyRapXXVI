@@ -4,6 +4,7 @@ import static frc.robot.constants.jr.TurretConstants.*;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.constants.jr.DriveConstants;
 import frc.robot.constants.jr.TurretConstants;
 import frc.robot.util.TuningUtil;
@@ -54,9 +56,10 @@ public class TurretIOSparkMax2 implements TurretIO {
   TuningUtil turretLeftLimit = new TuningUtil("/Tuning/turret/leftLimit", 0);
   protected boolean clockwiseLimitHit = false;
   protected boolean counterclockwiseLimitHit = false;
-  protected double desiredAngle = 0.0;
+  protected double desiredAngle = TurretConstants.turretStartupAngleDeg / 360.0;
   protected boolean manualMode = true;
-  protected boolean resync = false;
+  private double manualYawVolts = 0.0;
+  private boolean yawCalibrated = false;
 
   public enum WhichLimit {
     LEFT,
@@ -96,6 +99,12 @@ public class TurretIOSparkMax2 implements TurretIO {
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
     yawConfig.inverted(true);
+    yawConfig
+        .softLimit
+        .reverseSoftLimit(TurretConstants.turretMinAngleRot)
+        .reverseSoftLimitEnabled(true)
+        .forwardSoftLimit(TurretConstants.turretMaxAngleRot)
+        .forwardSoftLimitEnabled(true);
 
     tryUntilOk(
         5,
@@ -103,7 +112,7 @@ public class TurretIOSparkMax2 implements TurretIO {
             yawMotor.configure(
                 yawConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    setYawZero();
+    calibrateYawAtStartup();
 
     hoodConfig = new SparkMaxConfig();
     hoodConfig.encoder.uvwAverageDepth(4).positionConversionFactor(1).velocityConversionFactor(1);
@@ -188,19 +197,14 @@ public class TurretIOSparkMax2 implements TurretIO {
     double setpoint = yawMotor.getClosedLoopController().getSetpoint();
     double hoodsetpoint = hoodMotor.getClosedLoopController().getSetpoint();
     handleLimits();
-    // move turret to left limit switch, then set the encoder to the left limit switch position
-    if (resync) {
-      testTurretVoltage(2.5);
-      if (limitSwitchTriggered == WhichLimit.LEFT) {
-        yawEncoder.setPosition(20.5 / 360.0);
-        resync = false;
-        manualMode = false;
-        desiredAngle = 0.0; // sets turret to zero position (facing intake)
-      }
-    }
-    if (!manualMode && !resync) {
+    if (manualMode) {
+      // Recheck every cycle, including a manual command that remains active at an endpoint.
+      applyYawVoltage(manualYawVolts);
+    } else {
       if (Math.abs(desiredAngle - yawEncoder.getPosition()) < (0.5 / 360.0)) {
-        yawMotor.setVoltage(0);
+        applyYawVoltage(0);
+        yawController.reset(yawEncoder.getPosition());
+        lastYawSpeed = 0.0;
       } else {
         double pidVal = yawController.calculate(yawEncoder.getPosition(), desiredAngle);
         double feedforwardVal =
@@ -217,12 +221,6 @@ public class TurretIOSparkMax2 implements TurretIO {
           outVoltage -= TurretConstants.turretKs;
         }
 
-        if (limitSwitchTriggered == WhichLimit.RIGHT) {
-          MathUtil.clamp(outVoltage, 0, TurretConstants.maxYawVoltage);
-        }
-        if (limitSwitchTriggered == WhichLimit.LEFT) {
-          MathUtil.clamp(outVoltage, -TurretConstants.maxYawVoltage, 0);
-        }
         Logger.recordOutput("Shooter/Turret/pidVal", pidVal);
         Logger.recordOutput("Shooter/Turret/feedForwardVal", feedforwardVal);
         Logger.recordOutput("Shooter/Turret/outVoltage", outVoltage);
@@ -230,8 +228,8 @@ public class TurretIOSparkMax2 implements TurretIO {
             "Shooter/Turret/profiledSetpoint", yawController.getSetpoint().position);
         Logger.recordOutput(
             "Shooter/Turret/profiledVelSetpoint", yawController.getSetpoint().velocity);
-        yawMotor.setVoltage(outVoltage);
-        lastYawSpeed = yawController.getSetpoint().velocity / 60.0;
+        applyYawVoltage(outVoltage);
+        lastYawSpeed = yawController.getSetpoint().velocity;
       }
     }
 
@@ -250,23 +248,19 @@ public class TurretIOSparkMax2 implements TurretIO {
   /** Set the turret yaw to the specified position. */
   @Override
   public void setTurretYaw(Rotation2d position) {
+    if (manualMode) {
+      yawController.reset(yawEncoder.getPosition(), yawEncoder.getVelocity() / 60.0);
+      lastYawSpeed = yawEncoder.getVelocity() / 60.0;
+    }
     manualMode = false;
     Logger.recordOutput("/Shooter/Turret/DesiredAngleRobotCtr", position);
-    double wrappedPositionDeg = position.getDegrees();
-    if (position.getRotations() > TurretConstants.turretMaxAngleRot) {
-      wrappedPositionDeg = wrappedPositionDeg - 360.0;
-    } else if (position.getRotations() < TurretConstants.turretMinAngleRot) {
-      wrappedPositionDeg = wrappedPositionDeg + 360.0;
-    }
+    double wrappedPositionDeg = TurretYawLimits.limitDegrees(position.getDegrees());
     Logger.recordOutput("/Shooter/Turret/DesiredAngleWrapped", wrappedPositionDeg);
     Logger.recordOutput(
         "/Shooter/Turret/DesiredAngleWrappedRot",
         Rotation2d.fromDegrees(wrappedPositionDeg).getRotations());
-    desiredAngle =
-        MathUtil.clamp(
-            Rotation2d.fromDegrees(wrappedPositionDeg).getRotations(),
-            TurretConstants.turretMinAngleRot,
-            TurretConstants.turretMaxAngleRot);
+    // Keep this as an unwrapped scalar: 270 -> 20 travels through the permitted interval.
+    desiredAngle = wrappedPositionDeg / 360.0;
 
     Logger.recordOutput(
         "/Shooter/Turret/DesiredAngleTurretCtr", Rotation2d.fromRotations(desiredAngle));
@@ -275,38 +269,31 @@ public class TurretIOSparkMax2 implements TurretIO {
     .setSetpoint(desiredAngle, ControlType.kPosition, ClosedLoopSlot.kSlot0);*/
   }
 
-  public double zeroTo360(double angle) {
-    return (angle + 360.0) / 360.0;
-  }
-
-  public double minus180To180(double angleDeg) {
-    double angle360 = zeroTo360(angleDeg);
-    if (angle360 > 180) {
-      return angle360 - 360;
-    } else {
-      return angle360;
-    }
-  }
-
   public void testTurretVoltage(double volts) {
     manualMode = true;
-    if (limitSwitchTriggered == WhichLimit.RIGHT) {
-      System.out.println(
-          "Right limit switch triggered, cannot do volts in this direction any further");
-      yawMotor.setVoltage(MathUtil.clamp(volts, 0, TurretConstants.maxYawVoltage));
-    }
-    if (limitSwitchTriggered == WhichLimit.LEFT) {
-      System.out.println(
-          "Left limit switch triggered, cannot do volts in this direction any further");
-      yawMotor.setVoltage(MathUtil.clamp(volts, -TurretConstants.maxYawVoltage, 0));
-    }
-    if (limitSwitchTriggered == WhichLimit.NULL) {
-      yawMotor.setVoltage(volts);
-    }
+    manualYawVolts = volts;
+    applyYawVoltage(manualYawVolts);
+  }
+
+  private void applyYawVoltage(double volts) {
+    double limitedVolts =
+        yawCalibrated
+            ? TurretYawLimits.limitVoltage(
+                yawEncoder.getPosition(),
+                volts,
+                limitSwitchTriggered == WhichLimit.RIGHT,
+                limitSwitchTriggered == WhichLimit.LEFT)
+            : 0.0;
+    yawMotor.setVoltage(limitedVolts);
+    Logger.recordOutput("Shooter/Turret/limitedVoltage", limitedVolts);
   }
 
   public void resyncTurret() {
-    resync = true;
+    testTurretVoltage(0);
+    DriverStation.reportWarning(
+        "Automatic turret homing is disabled until the limit-switch angle is measured for the "
+            + "new chain. Place the turret at +20 degrees and use driver Start to calibrate.",
+        false);
   }
 
   public void testHoodVoltage(double volts) {
@@ -325,10 +312,26 @@ public class TurretIOSparkMax2 implements TurretIO {
     // No pitch control implemented
   }
 
-  public void setYawZero() {
-    System.out.println("turret encoder zeroed");
-    yawEncoder.setPosition(
-        Rotation2d.fromDegrees(TurretConstants.turretCenterOffsetDeg).getRotations());
+  /** Assign +20 degrees to the current position; the turret must be physically at its startup mark. */
+  public void calibrateYawAtStartup() {
+    testTurretVoltage(0);
+    yawCalibrated = false;
+    double startupRot = TurretConstants.turretStartupAngleDeg / 360.0;
+    tryUntilOk(
+        5,
+        () -> {
+          REVLibError error = yawEncoder.setPosition(startupRot);
+          yawCalibrated = error == REVLibError.kOk;
+          return error;
+        });
+    desiredAngle = startupRot;
+    yawController.reset(startupRot);
+    lastYawSpeed = 0.0;
+    limitSwitchTriggered = WhichLimit.NULL;
+    if (!yawCalibrated) {
+      DriverStation.reportError("Turret yaw calibration failed; yaw output is disabled.", false);
+    }
+    Logger.recordOutput("Shooter/Turret/yawCalibrated", yawCalibrated);
   }
 
   public void handleLimits() {
@@ -339,6 +342,14 @@ public class TurretIOSparkMax2 implements TurretIO {
       }
       if (yawEncoder.getVelocity() < 0 && limitSwitchTriggered == WhichLimit.NULL) {
         limitSwitchTriggered = WhichLimit.RIGHT;
+      }
+      if (limitSwitchTriggered == WhichLimit.NULL) {
+        // A switch may already be active at startup, with no velocity to identify the endpoint.
+        limitSwitchTriggered =
+            yawEncoder.getPosition()
+                    <= (TurretConstants.turretMinAngleRot + TurretConstants.turretMaxAngleRot) / 2.0
+                ? WhichLimit.RIGHT
+                : WhichLimit.LEFT;
       }
     } else {
       limitSwitchTriggered = WhichLimit.NULL;

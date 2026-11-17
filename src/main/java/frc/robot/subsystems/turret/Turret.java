@@ -211,20 +211,7 @@ public class Turret extends SubsystemBase {
   }
 
   protected Rotation2d limitTurretYaw(double desiredYawDeg) {
-    double desiredYaw360 = zeroTo360(desiredYawDeg);
-    // Check if the desired yaw is within the dead zone
-    if (Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneCenterDeg))
-        < (TurretConstants.turretDeadZoneHalfWidthDeg)) {
-      // If it is, snap to the nearest edge of the dead zone
-      if (Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneStartDeg))
-          < Math.abs(getAngleDifference(desiredYaw360, TurretConstants.turretDeadZoneEndDeg))) {
-        return TurretConstants.turretDeadZoneStartRot;
-      } else {
-        return TurretConstants.turretDeadZoneEndRot;
-      }
-    } else {
-      return Rotation2d.fromDegrees(desiredYaw360);
-    }
+    return Rotation2d.fromDegrees(TurretYawLimits.limitDegrees(desiredYawDeg));
   }
 
   public void toggleManualFlywheel() {
